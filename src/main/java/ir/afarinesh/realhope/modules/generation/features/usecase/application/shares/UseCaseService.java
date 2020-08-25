@@ -73,6 +73,14 @@ public class UseCaseService {
                 .orElseThrow(() -> new GetPlantException("The use case plant is not found for use case = " + useCase.getName()));
     }
 
+    public UseCaseData getFruitSeeds(UseCase useCase) throws GetPlantException {
+        return useCase.getUseCaseDataSet()
+                .stream()
+                .filter(useCaseData -> useCaseData.getUseCaseDataType().equals(UseCaseDataTypeEnum.FruitSeeds))
+                .findFirst()
+                .orElseThrow(() -> new GetPlantException("The use case plant is not found for use case = " + useCase.getName()));
+    }
+
     public String getDomainEntityMapArguments(DomainEntity domainEntity) {
         String t = StringUtility.space(4);
         String content = "";
@@ -90,7 +98,7 @@ public class UseCaseService {
     private String getMapPathByGetters(String mapPath, PrimitiveAttributeTypeEnum primitiveAttributeType) {
         String content = "entity.";
         String[] parts = mapPath.split("\\.");
-        if (primitiveAttributeType == PrimitiveAttributeTypeEnum.Date) {
+        if (primitiveAttributeType == PrimitiveAttributeTypeEnum.JavaDate) {
             content = "CalendarUtility.format(entity.";
         }
         for (int i = 0; i < parts.length; i++) {
@@ -101,7 +109,7 @@ public class UseCaseService {
         if (primitiveAttributeType == PrimitiveAttributeTypeEnum.Enum) {
             content += ".name()";
         }
-        if (primitiveAttributeType == PrimitiveAttributeTypeEnum.Date) {
+        if (primitiveAttributeType == PrimitiveAttributeTypeEnum.JavaDate) {
             content += ", locale)";
         }
         return content;

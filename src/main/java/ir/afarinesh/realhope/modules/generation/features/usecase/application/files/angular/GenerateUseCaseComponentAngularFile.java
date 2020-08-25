@@ -5,6 +5,8 @@ import ir.afarinesh.realhope.entities.feature.enums.UserInterfaceTypeEnum;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.exceptions.GenerateUseCaseComponentAngularFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.grid_list.GenerateUseCaseGridListComponentAngularFile;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.grid_list.exceptions.GenerateUseCaseGridListComponentAngularFileException;
+import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.update.GenerateUseCaseUpdateComponentAngularFile;
+import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.update.exceptions.GenerateUseCaseUpdateComponentAngularFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.view.GenerateUseCaseViewComponentAngularFile;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.view.exceptions.GenerateUseCaseViewComponentAngularFileException;
 import org.springframework.stereotype.Service;
@@ -14,11 +16,14 @@ public class GenerateUseCaseComponentAngularFile {
 
     final GenerateUseCaseGridListComponentAngularFile generateUseCaseGridListComponentAngularFile;
     final GenerateUseCaseViewComponentAngularFile generateUseCaseViewComponentAngularFile;
+    final GenerateUseCaseUpdateComponentAngularFile generateUseCaseUpdateComponentAngularFile;
 
     public GenerateUseCaseComponentAngularFile(GenerateUseCaseGridListComponentAngularFile generateUseCaseGridListComponentAngularFile,
-                                               GenerateUseCaseViewComponentAngularFile generateUseCaseViewComponentAngularFile) {
+                                               GenerateUseCaseViewComponentAngularFile generateUseCaseViewComponentAngularFile,
+                                               GenerateUseCaseUpdateComponentAngularFile generateUseCaseUpdateComponentAngularFile) {
         this.generateUseCaseGridListComponentAngularFile = generateUseCaseGridListComponentAngularFile;
         this.generateUseCaseViewComponentAngularFile = generateUseCaseViewComponentAngularFile;
+        this.generateUseCaseUpdateComponentAngularFile = generateUseCaseUpdateComponentAngularFile;
     }
 
     public void generate(UseCase useCase) throws GenerateUseCaseComponentAngularFileException {
@@ -39,5 +44,15 @@ public class GenerateUseCaseComponentAngularFile {
                 throw new GenerateUseCaseComponentAngularFileException(e.getMessage());
             }
         }
+        // Update Entity
+        if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.Update)) {
+            try {
+                this.generateUseCaseUpdateComponentAngularFile.generate(useCase);
+            } catch (GenerateUseCaseUpdateComponentAngularFileException e) {
+                throw new GenerateUseCaseComponentAngularFileException(e.getMessage());
+            }
+
+        }
+
     }
 }

@@ -24,6 +24,12 @@ public class UseCaseRelation {
     private String name; // has to be english and camel case
 
     @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
+    private String faTitle;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private UseCaseRelationContextEnum relationContext; // Backend, Frontend
 

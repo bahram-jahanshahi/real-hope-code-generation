@@ -57,4 +57,8 @@ public class UseCaseDataAttribute {
     @JoinColumn(nullable = false)
     @ManyToOne
     private UseCaseData useCaseData;
+
+    @JoinColumn(nullable = true)
+    @ManyToOne
+    private UseCaseDataAttribute fruitSeedsAttribute;
 }

@@ -4,10 +4,7 @@ import ir.afarinesh.realhope.entities.feature.DomainEntity;
 import ir.afarinesh.realhope.entities.feature.UseCase;
 import ir.afarinesh.realhope.entities.feature.UseCaseData;
 import ir.afarinesh.realhope.entities.feature.UseCaseDataAttribute;
-import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeCategoryEnum;
-import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeQuantityEnum;
-import ir.afarinesh.realhope.entities.feature.enums.UseCaseDataTypeEnum;
-import ir.afarinesh.realhope.entities.feature.enums.UserInterfaceTypeEnum;
+import ir.afarinesh.realhope.entities.feature.enums.*;
 import ir.afarinesh.realhope.entities.project.SoftwareFeature;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.java.exceptions.GenerateUseCaseInterfaceJavaFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCasePathService;
@@ -23,6 +20,8 @@ import java.util.Optional;
 @Service
 public class GenerateUseCaseInterfaceJavaFile {
 
+    String t = StringUtility.space(2);
+    String eol = "\n";
     final FileManagementService fileManagementService;
     final UseCasePathService useCasePathService;
     final DomainEntitySpringJpaRepository domainEntitySpringJpaRepository;
@@ -64,97 +63,101 @@ public class GenerateUseCaseInterfaceJavaFile {
                 + "application" + "."
                 + "ports" + "."
                 + "in;"
-                + "\n";
+                + eol;
         String imports = ""
-                + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".usecase.*;" + "\n"
-                + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".annotations.UseCase;" + "\n"
+                + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".domain.SelectEnum;" + eol
+                + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".domain.JavaDate;" + eol
+                + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".usecase.*;" + eol
+                + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".annotations.UseCase;" + eol
                 + this.getDomainEntitiesImports(useCase.getSoftwareFeature())
-                + "import lombok.*;" + "\n"
-                + "\n"
-                + "import java.util.List;" + "\n";
+                + "import lombok.*;" + eol
+                + eol
+                + "import java.util.Date;" + eol
+                + "import java.util.List;" + eol;
         String interfaceContent = ""
-                + "@UseCase" + "\n"
-                + "public interface " + useCase.getName() + "By" + useCase.getSoftwareRole().getName() + "UseCase" + " {" + "\n"
-                + "\n"
-                + "\t" + "UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException;" + "\n"
-                + "\n"
-                + "\t" + "UseCaseFruitSeeds<FruitSeeds> prepare(UseCaseSeedsCommand<SeedsCommands> seedsCommand) throws PrepareException;" + "\n"
-                + "\n"
+                + "@UseCase" + eol
+                + "public interface " + useCase.getName() + "By" + useCase.getSoftwareRole().getName() + "UseCase" + " {" + eol
+                + eol
+                + t + "UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException;" + eol
+                + eol
+                + t + "UseCaseFruitSeeds<FruitSeeds> prepare(UseCaseSeedsCommand<SeedsCommands> seedsCommand) throws PrepareException;" + eol
+                + eol
                 + this.getFruit(useCase)
-                + "\n"
+                + eol
                 + this.getPlant(useCase)
-                + "\n"
+                + eol
                 + this.getCultivateException()
-                + "\n"
+                + eol
                 + this.getFruitSeeds(useCase)
-                + "\n"
+                + eol
                 + this.getSeedsCommands(useCase)
-                + "\n"
+                + eol
                 + this.getPrepareException()
                 + "}";
         return packageTitle
-                + "\n"
+                + eol
                 + imports
-                + "\n"
+                + eol
                 + interfaceContent;
 
     }
 
     private String getPlant(UseCase useCase) {
         return ""
-                + "\t" + "@Data" + "\n"
-                + "\t" + "@NoArgsConstructor" + "\n"
-                + "\t" + "@AllArgsConstructor" + "\n"
-                + "\t" + "class Plant {" + "\n"
+                + t + "@Data" + eol
+                + t + "@NoArgsConstructor" + eol
+                + t + "@AllArgsConstructor" + eol
+                + t + "class Plant {" + eol
                 + this.getDataAttributes(useCase, UseCaseDataTypeEnum.Plant)
-                + "\t" + "}" + "\n";
+                + t + "}" + eol;
     }
 
     private String getFruit(UseCase useCase) {
         return ""
-                + "\t" + "@Data" + "\n"
-                + "\t" + "@NoArgsConstructor" + "\n"
-                + "\t" + "@AllArgsConstructor" + "\n"
-                + "\t" + "class Fruit {" + "\n"
+                + t + "@Data" + eol
+                + t + "@NoArgsConstructor" + eol
+                + t + "@AllArgsConstructor" + eol
+                + t + "class Fruit {" + eol
                 + this.getDataAttributes(useCase, UseCaseDataTypeEnum.Fruit)
-                + "\t" + "}" + "\n";
+                + t + "}" + eol;
     }
 
     private String getCultivateException() {
         return ""
-                + "\t" + "class CultivateException extends Exception {" + "\n"
-                + "\t" + "\t" + "public CultivateException(String message) {" + "\n"
-                + "\t" + "\t" + "\t" + "super(message);" + "\n"
-                + "\t" + "\t" + "}" + "\n"
-                + "\t" + "}" + "\n";
+                + t + "class CultivateException extends Exception {" + eol
+                + t + t + "public CultivateException(String message) {" + eol
+                + t + t + t + "super(message);" + eol
+                + t + t + "}" + eol
+                + t + "}" + eol;
     }
 
     private String getSeedsCommands(UseCase useCase) {
         return ""
-                + "\t" + "@Data" + "\n"
-                + "\t" + "@NoArgsConstructor" + "\n"
-                + "\t" + "@AllArgsConstructor" + "\n"
-                + "\t" + "class SeedsCommands {" + "\n"
-                + "\t" + "\t" + "boolean doSomething;" + "\n"
+                + t + "@Data" + eol
+                + t + "@NoArgsConstructor" + eol
+                + t + "@AllArgsConstructor" + eol
+                + t + "class SeedsCommands {" + eol
                 + this.getDataAttributes(useCase, UseCaseDataTypeEnum.SeedsCommand)
-                + "\t" + "}" + "\n";
+                + t + "}" + eol;
     }
 
     private String getFruitSeeds(UseCase useCase) {
         return ""
-                + "\t" + "@Data" + "\n"
-                + "\t" + "class FruitSeeds {" + "\n"
+                + t + "@NoArgsConstructor" + eol
+                + t + "@AllArgsConstructor" + eol
+                + t + "@Data" + eol
+                + t + "class FruitSeeds {" + eol
                 + this.getDataAttributes(useCase, UseCaseDataTypeEnum.FruitSeeds)
-                + "\t" + "}" + "\n";
+                + t + "}" + eol;
     }
 
     private String getPrepareException() {
         return ""
-                + "\t" + "class PrepareException extends Exception {" + "\n"
-                + "\t" + "\t" + "public PrepareException(String message) {" + "\n"
-                + "\t" + "\t" + "\t" + "super(message);" + "\n"
-                + "\t" + "\t" + "}" + "\n"
-                + "\t" + "}" + "\n";
+                + t + "class PrepareException extends Exception {" + eol
+                + t + t + "public PrepareException(String message) {" + eol
+                + t + t + t + "super(message);" + eol
+                + t + t + "}" + eol
+                + t + "}" + eol;
     }
 
     private String getDomainEntitiesImports(SoftwareFeature softwareFeature) {
@@ -163,7 +166,7 @@ public class GenerateUseCaseInterfaceJavaFile {
         for (DomainEntity domainEntity : domainEntities) {
             content += "import " + this.useCasePathService.getSpringBootFeaturePackageTitle(softwareFeature) + "."
                     + "domain."
-                    + domainEntity.getName()+";" + "\n";
+                    + domainEntity.getName()+";" + eol;
         }
         return content;
     }
@@ -188,7 +191,7 @@ public class GenerateUseCaseInterfaceJavaFile {
                     if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.DomainEntity)) {
                         attributeType = attribute.getDomainEntityAttributeType().getName();
                     }
-                    content += "\t" + "\t" + attributeType + " " + attributeName + ";" + "\n";
+                    content += t + t + attributeType + " " + attributeName + ";" + eol;
                 }
                 // List
                 if (attribute.getAttributeQuantity().equals(EntityAttributeQuantityEnum.List)) {
@@ -199,16 +202,31 @@ public class GenerateUseCaseInterfaceJavaFile {
                     if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.DomainEntity)) {
                         attributeType = attribute.getDomainEntityAttributeType().getName();
                     }
-                    content += "\t" + "\t" + "List<" + attributeType + ">" + " " + attributeName + ";" + "\n";
+                    if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
+                        if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Enum)) {
+                            attributeType = "SelectEnum";
+                        }
+                    }
+                    content += t + t + "List<" + attributeType + ">" + " " + attributeName + ";" + eol;
                 }
             }
             if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.GridList)
                     && useCaseDataType.equals(UseCaseDataTypeEnum.Plant)) {
-                content += "\t" + "\t" + "private PaginationCommand paginationCommand;" + "\n";
+                content += t + t + "private PaginationCommand paginationCommand;" + eol;
             }
             if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.GridList)
                     && useCaseDataType.equals(UseCaseDataTypeEnum.Fruit)) {
-                content += "\t" + "\t" + "private PagedResultFruit pagedResultFruit;" + "\n";
+                content += t + t + "private PagedResultFruit pagedResultFruit;" + eol;
+            }
+            if (useCaseDataType.equals(UseCaseDataTypeEnum.SeedsCommand)) {
+                if (useCaseDataAttributes.size() == 0) {
+                    content += t + t + "boolean doSomething;" + eol;
+                }
+            }
+            if (useCaseDataType.equals(UseCaseDataTypeEnum.FruitSeeds)) {
+                if (useCaseDataAttributes.size() == 0) {
+                    content += t + t + "boolean something;" + eol;
+                }
             }
             return content;
         }

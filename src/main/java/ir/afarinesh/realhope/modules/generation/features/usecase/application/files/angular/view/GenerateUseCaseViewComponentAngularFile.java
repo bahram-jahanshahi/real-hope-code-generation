@@ -3,12 +3,16 @@ package ir.afarinesh.realhope.modules.generation.features.usecase.application.fi
 import ir.afarinesh.realhope.entities.feature.DomainEntity;
 import ir.afarinesh.realhope.entities.feature.DomainEntityAttribute;
 import ir.afarinesh.realhope.entities.feature.UseCase;
+import ir.afarinesh.realhope.entities.feature.UseCaseRelation;
+import ir.afarinesh.realhope.entities.feature.enums.FrontendActionTypeEnum;
+import ir.afarinesh.realhope.entities.feature.enums.UserInterfaceTypeEnum;
 import ir.afarinesh.realhope.entities.project.SoftwareFeature;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.view.exceptions.GenerateUseCaseViewComponentAngularFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCasePathService;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCaseService;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.exceptions.GetViewDomainEntityException;
 import ir.afarinesh.realhope.shares.repositories.DomainEntitySpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.UseCaseRelationSpringJpaRepository;
 import ir.afarinesh.realhope.shares.services.FileManagementService;
 import ir.afarinesh.realhope.shares.services.exceptions.CreateFileException;
 import ir.afarinesh.realhope.shares.utilities.StringUtility;
@@ -18,19 +22,24 @@ import java.util.List;
 
 @Service
 public class GenerateUseCaseViewComponentAngularFile {
+    String t = StringUtility.space(2);
+    String eol = "\n";
     final FileManagementService fileManagementService;
     final UseCasePathService useCasePathService;
     final UseCaseService useCaseService;
     final DomainEntitySpringJpaRepository domainEntitySpringJpaRepository;
+    final UseCaseRelationSpringJpaRepository useCaseRelationSpringJpaRepository;
 
     public GenerateUseCaseViewComponentAngularFile(FileManagementService fileManagementService,
                                                    UseCasePathService useCasePathService,
                                                    UseCaseService useCaseService,
-                                                   DomainEntitySpringJpaRepository domainEntitySpringJpaRepository) {
+                                                   DomainEntitySpringJpaRepository domainEntitySpringJpaRepository,
+                                                   UseCaseRelationSpringJpaRepository useCaseRelationSpringJpaRepository) {
         this.fileManagementService = fileManagementService;
         this.useCasePathService = useCasePathService;
         this.useCaseService = useCaseService;
         this.domainEntitySpringJpaRepository = domainEntitySpringJpaRepository;
+        this.useCaseRelationSpringJpaRepository = useCaseRelationSpringJpaRepository;
     }
 
     public void generate(UseCase useCase) throws GenerateUseCaseViewComponentAngularFileException {
@@ -83,8 +92,6 @@ public class GenerateUseCaseViewComponentAngularFile {
     // component content
     protected String getComponentContent(UseCase useCase) throws GetViewDomainEntityException {
         String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
-        String t = StringUtility.space(2);
-        String eol = "\n";
         DomainEntity viewDomainEntity = this.useCaseService.getViewDomainEntity(useCase);
         // imports
         String imports = ""
@@ -100,7 +107,8 @@ public class GenerateUseCaseViewComponentAngularFile {
                 + "  " + useCaseTitle + "Service" + eol
                 + "} from '../../services/" + StringUtility.convertCamelToDash(useCaseTitle) + ".service';" + eol
                 + "import {UseCaseCommand} from '../../../../../../core/domain/use-case-command';" + eol
-                + this.getDomainEntitiesImports(useCase.getSoftwareFeature());
+                + this.getDomainEntitiesImports(useCase.getSoftwareFeature())
+                + this.getPopupImports(useCase);
         // component
         String componentContent = ""
                 + "@Component({" + eol
@@ -151,6 +159,8 @@ public class GenerateUseCaseViewComponentAngularFile {
                 + t + t + t + t + "this.dialogService.showQuickServerErrorDialog('Error: ' + error.message);" + eol
                 + t + t + t + "});" + eol
                 + t + "}" + eol
+                + eol
+                + getPopupMethods(useCase)
                 + "}" + eol
                 + eol;
         return imports + eol + componentContent;
@@ -159,12 +169,10 @@ public class GenerateUseCaseViewComponentAngularFile {
     // html content
     protected String getHtmlContent(UseCase useCase) throws GetViewDomainEntityException {
         String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
-        String t = StringUtility.space(2);
-        String eol = "\n";
         DomainEntity viewDomainEntity = this.useCaseService.getViewDomainEntity(useCase);
         String htmlContent = ""
                 + "<div mat-dialog-title>" + eol
-                + t + "{{ '" + useCaseTitle + ".Title' | translate }}" + eol
+                + t + "{{ '" + useCaseTitle + ".FormTitle' | translate }}" + eol
                 + "</div>" + eol
                 + "<mat-dialog-content>" + eol
                 + t + "<div *ngIf='!readyToView' style='height: 240px; display: flex; align-items: center; justify-content: center;'>" + eol
@@ -177,7 +185,13 @@ public class GenerateUseCaseViewComponentAngularFile {
                 + t + t + t + "</table>" + eol
                 + t + t + "</mat-tab>" + eol
                 + t + "</mat-tab-group>" + eol
-                + "</mat-dialog-content>" + eol;
+                + "</mat-dialog-content>" + eol
+                + "<mat-dialog-actions>" + eol
+                + t + "<button mat-flat-button (click)='close()'>" + eol
+                + t + t + "{{ '" + useCaseTitle + ".Cancel' | translate }}"
+                + t + "</button>" + eol
+                + getPopupButtons(useCase, t)
+                + "</mat-dialog-actions>" + eol;
 
         return htmlContent;
     }
@@ -214,6 +228,54 @@ public class GenerateUseCaseViewComponentAngularFile {
             content += "import {" + domainEntity.getName() + "}"
                     + " from "
                     + "'../../domain/" + StringUtility.convertCamelToDash(domainEntity.getName()) + "';" + e;
+        }
+        return content;
+    }
+
+    private String getPopupButtons(UseCase useCase, String offset) {
+        String content = "";
+        String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
+        List<UseCaseRelation> relations = this.useCaseRelationSpringJpaRepository.findAllBySource_Id(useCase.getId());
+        for (UseCaseRelation relation : relations) {
+            if (relation.getFrontendActionType().equals(FrontendActionTypeEnum.PopupForm)) {
+                content += ""
+                        + offset + "<button mat-flat-button (click)='" + StringUtility.firstLowerCase(relation.getName()) + "()'>" + eol
+                        + offset + t + "{{ '" + useCaseTitle + "." + relation.getName() + "' | translate }}" + eol
+                        + offset + "</button>" + eol;
+            }
+        }
+        return content;
+    }
+
+    private String getPopupMethods(UseCase useCase) {
+        String content = "";
+        String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
+        List<UseCaseRelation> relations = this.useCaseRelationSpringJpaRepository.findAllBySource_Id(useCase.getId());
+        for (UseCaseRelation relation : relations) {
+            if (relation.getFrontendActionType().equals(FrontendActionTypeEnum.PopupForm)) {
+                String destinationUseCaseTitle = relation.getDestination().getName() + "By" + relation.getDestination().getSoftwareRole().getName();
+                content = ""
+                        + t + StringUtility.firstLowerCase(relation.getName()) + "(): void {" + eol
+                        + t + t + "this.dialogService" + eol
+                        + t + t + t + ".quickPopupDialog(" + destinationUseCaseTitle + "Component, this.entityId)" + eol
+                        + t + t + t + ".afterClosed()" + eol
+                        + t + t + t + ".subscribe(value => this.cultivate());" + eol
+                        + t + "}" + eol
+                        + eol;
+            }
+        }
+        return content;
+    }
+
+    private String getPopupImports(UseCase useCase) {
+        String content = "";
+        List<UseCaseRelation> relations = this.useCaseRelationSpringJpaRepository.findAllBySource_Id(useCase.getId());
+        for (UseCaseRelation relation : relations) {
+            if (relation.getFrontendActionType().equals(FrontendActionTypeEnum.PopupForm)) {
+                String destinationUseCaseTitle = relation.getDestination().getName() + "By" + relation.getDestination().getSoftwareRole().getName();
+                String destinationUseCaseTitleDashed = StringUtility.convertCamelToDash(destinationUseCaseTitle);
+                content = "import {" + destinationUseCaseTitle + "Component} from '../" + destinationUseCaseTitleDashed + "/" + destinationUseCaseTitleDashed + ".component';" + eol;
+            }
         }
         return content;
     }

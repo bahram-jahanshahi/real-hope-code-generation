@@ -4,10 +4,7 @@ import ir.afarinesh.realhope.entities.feature.DomainEntity;
 import ir.afarinesh.realhope.entities.feature.UseCase;
 import ir.afarinesh.realhope.entities.feature.UseCaseData;
 import ir.afarinesh.realhope.entities.feature.UseCaseDataAttribute;
-import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeCategoryEnum;
-import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeQuantityEnum;
-import ir.afarinesh.realhope.entities.feature.enums.UseCaseDataTypeEnum;
-import ir.afarinesh.realhope.entities.feature.enums.UserInterfaceTypeEnum;
+import ir.afarinesh.realhope.entities.feature.enums.*;
 import ir.afarinesh.realhope.entities.project.SoftwareFeature;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.exceptions.GenerateUseCaseServiceAngularFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCasePathService;
@@ -71,6 +68,8 @@ public class GenerateUseCaseServiceAngularFile {
                 + "import {UseCaseSeedsCommand} from '../../../../../core/domain/use-case-seeds-command';" + "\n"
                 + "import {UseCaseFruitSeeds} from '../../../../../core/domain/use-case-fruit-seeds';" + "\n"
                 + "import {PaginationCommand} from '../../../../../core/domain/pagination-command';" + "\n"
+                + "import {JavaDate} from '../../../../../core/domain/java-date';" + "\n"
+                + "import {SelectEnum} from '../../../../../core/domain/select-enum';" + "\n"
                 + "\n"
                 + getDomainEntitiesImports(useCase.getSoftwareFeature());
         String serviceContent = ""
@@ -168,10 +167,15 @@ public class GenerateUseCaseServiceAngularFile {
                     if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.DomainEntity)) {
                         attributeType = attribute.getDomainEntityAttributeType().getName();
                     }
+                    if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
+                        if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Enum)) {
+                            attributeType = "SelectEnum";
+                        }
+                    }
                     content += space(2) + attributeName + ": " + "Array<" + attributeType + ">" + ";" + "\n";
                 }
             }
-            if (useCaseDataType.equals(UseCaseDataTypeEnum.Plant)) {
+            if (useCaseDataType.equals(UseCaseDataTypeEnum.Plant) || useCaseDataType.equals(UseCaseDataTypeEnum.SeedsCommand)) {
                 if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.GridList)) {
                     content += StringUtility.space(2) + "paginationCommand: PaginationCommand;" + "\n";
                 }
@@ -185,7 +189,10 @@ public class GenerateUseCaseServiceAngularFile {
                     content += (i < useCaseDataAttributes.size() - 1) ? ", " : "";
                 }
                 if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.GridList)) {
-                    content += ", paginationCommand: PaginationCommand) {" + "\n";
+                    if (useCaseDataAttributes.size() > 0) {
+                        content += ", ";
+                    }
+                    content += "paginationCommand: PaginationCommand) {" + "\n";
                 } else {
                     content += StringUtility.space(2) + ") {" + "\n";
                 }

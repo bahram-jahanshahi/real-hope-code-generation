@@ -1,12 +1,12 @@
 package ir.afarinesh.realhope.entities.feature.enums;
 
 public enum PrimitiveAttributeTypeEnum {
-    String, Integer, Long, Boolean, Date, Enum;
+    String, Integer, Long, Boolean, JavaDate, Enum;
 
     public String angular() {
         switch (this) {
-            case Date: {
-                return "Date";
+            case JavaDate: {
+                return "JavaDate";
             }
             case Long:
             case Integer: {

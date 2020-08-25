@@ -214,7 +214,7 @@ public class GenerateUseCaseGridListComponentAngularFile {
                 + "<mat-card [ngStyle]='!isWebMedium ? {padding: 4} : {}'>" + "\n"
                 + StringUtility.space(2) + "<mat-card-header *ngIf='isWebMedium'>" + "\n"
                 + StringUtility.space(4) + "<mat-card-title>" + "\n"
-                + StringUtility.space(6) + "{{'" + useCaseTitle + ".Title' | translate}}" + "\n"
+                + StringUtility.space(6) + "{{'" + useCaseTitle + ".FormTitle' | translate}}" + "\n"
                 + StringUtility.space(4) + "</mat-card-title>" + "\n"
                 + StringUtility.space(2) + "</mat-card-header>" + "\n"
                 + StringUtility.space(2) + "<mat-divider *ngIf='isWebMedium'></mat-divider>" + "\n"
