@@ -112,7 +112,9 @@ public class GenerateUseCaseUpdateComponentAngularFile {
                 + t + useCaseTitle + "FruitSeeds," + eol
                 + t + useCaseTitle + "Service" + eol
                 + "} from '../../services/" + StringUtility.convertCamelToDash(useCaseTitle) + ".service';" + eol
-                + "import {SelectEnum} from '../../../../../../core/domain/select-enum';" + eol;
+                + "import {SelectEnum} from '../../../../../../core/domain/select-enum';" + eol
+                + "import {SelectEntity} from '../../../../../../core/domain/select-entity';" + eol;
+
         String declarations = ""
                 + "@Component({" + eol
                 + t + "selector: 'app-" + StringUtility.convertCamelToDash(useCaseTitle) + "'," + eol
@@ -126,7 +128,7 @@ public class GenerateUseCaseUpdateComponentAngularFile {
                 + t + "loading = false;" + eol
                 + t + "reactiveForm: FormGroup;" + eol
                 + eol
-                + this.getSelectEnumsVariables(useCase)
+                + this.getSelectVariables(useCase)
                 + eol
                 + t + "constructor(private useCase: " + useCaseTitle + "Service," + eol
                 + t + t + t + t + t + t + t + "private dialogService: UtilityDialogService," + eol
@@ -203,27 +205,43 @@ public class GenerateUseCaseUpdateComponentAngularFile {
         UseCaseData plant = useCaseService.getPlant(useCase);
         List<UseCaseDataAttribute> attributesOfPlant = plant.getUseCaseDataAttributes();
         for (UseCaseDataAttribute attribute : attributesOfPlant) {
-            if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate)) {
-                content += offset + t + "const " + StringUtility.firstLowerCase(attribute.getName()) + "FruitSeeds = "
-                        + "this.dateService.getMomentOfJavaDate(fruitSeeds." + StringUtility.firstLowerCase(attribute.getName()) + ");" + eol;
-            } else {
-                content += offset + t + "const " + StringUtility.firstLowerCase(attribute.getName()) + "FruitSeeds = fruitSeeds." + StringUtility.firstLowerCase(attribute.getName()) + ";" + eol;
-            }
-        }
-        UseCaseData fruitSeeds = useCaseService.getFruitSeeds(useCase);
-        List<UseCaseDataAttribute> attributesOfFruitSeeds = fruitSeeds.getUseCaseDataAttributes();
-        for (UseCaseDataAttribute attribute : attributesOfFruitSeeds) {
-            if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
-                if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Enum)) {
-                    content += t + t + "this." + StringUtility.firstLowerCase(attribute.getName()) + " = fruitSeeds." + StringUtility.firstLowerCase(attribute.getName()) + ";" + eol;
+            if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.Primitive)) {
+                if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate)) {
+                    content += offset + t + "const " + StringUtility.firstLowerCase(attribute.getName()) + "FruitSeeds = "
+                            + "this.dateService.getMomentOfJavaDate("
+                            + "fruitSeeds." + StringUtility.firstLowerCase(attribute.getFruitSeedsAttribute().getName())
+                            + ");" + eol;
+                } else {
+                    content += offset + t + "const " + StringUtility.firstLowerCase(attribute.getName()) + "FruitSeeds ="
+                            + " fruitSeeds." + StringUtility.firstLowerCase(attribute.getFruitSeedsAttribute().getName()) + ";" + eol;
                 }
+            }
+            if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEnum)) {
+                content += t + t + "const " + StringUtility.firstLowerCase(attribute.getName()) + "EnumFruitSeeds = "
+                        + "fruitSeeds." + StringUtility.firstLowerCase(attribute.getFruitSeedsAttribute().getName()) + "Enum;" + eol;
+                content += t + t + "this." + StringUtility.firstLowerCase(attribute.getName()) + "EnumArray = "
+                        + "fruitSeeds." + StringUtility.firstLowerCase(attribute.getFruitSeedsAttribute().getName()) + "EnumArray;" + eol;
+            }
+            if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
+                content += t + t + "const " + StringUtility.firstLowerCase(attribute.getName()) + "FruitSeeds = "
+                        + "fruitSeeds." + StringUtility.firstLowerCase(attribute.getFruitSeedsAttribute().getName()) + ";" + eol;
+                content += t + t + "this." + StringUtility.firstLowerCase(attribute.getName()) + "Array = "
+                        + "fruitSeeds." + StringUtility.firstLowerCase(attribute.getFruitSeedsAttribute().getName()) + "Array;" + eol;
             }
         }
 
         content += offset + t + "this.reactiveForm = new FormGroup({" + eol;
         for (int i = 0; i < attributesOfPlant.size(); i++) {
             UseCaseDataAttribute attribute = attributesOfPlant.get(i);
-            content += offset + t + t + StringUtility.firstLowerCase(attribute.getName()) +": new FormControl(" + StringUtility.firstLowerCase(attribute.getName()) + "FruitSeeds" + ")";
+            if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.Primitive)) {
+                content += offset + t + t + StringUtility.firstLowerCase(attribute.getName()) + ": new FormControl(" + StringUtility.firstLowerCase(attribute.getName()) + "FruitSeeds" + ")";
+            }
+            if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEnum)) {
+                content += offset + t + t + StringUtility.firstLowerCase(attribute.getName()) + "Enum: new FormControl(" + StringUtility.firstLowerCase(attribute.getName()) + "EnumFruitSeeds.value" + ")";
+            }
+            if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
+                content += offset + t + t + StringUtility.firstLowerCase(attribute.getName()) + ": new FormControl(" + StringUtility.firstLowerCase(attribute.getName()) + "FruitSeeds.value" + ")";
+            }
             content += (i < attributesOfPlant.size() - 1) ? "," : "";
             content += eol;
         }
@@ -231,15 +249,16 @@ public class GenerateUseCaseUpdateComponentAngularFile {
         return content;
     }
 
-    public String getSelectEnumsVariables(UseCase useCase) throws GetPlantException {
+    public String getSelectVariables(UseCase useCase) throws GetPlantException {
         String content = "";
         UseCaseData fruitSeeds = useCaseService.getFruitSeeds(useCase);
         List<UseCaseDataAttribute> attributes = fruitSeeds.getUseCaseDataAttributes();
         for (UseCaseDataAttribute attribute : attributes) {
+            if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEnum)) {
+                content += t + StringUtility.firstLowerCase(attribute.getName()) + "EnumArray: Array<SelectEnum>;" + eol;
+            }
             if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
-                if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Enum)) {
-                    content += t + StringUtility.firstLowerCase(attribute.getName()) + ": Array<SelectEnum>;" + eol;
-                }
+                content += t + StringUtility.firstLowerCase(attribute.getName()) + "Array: Array<SelectEntity>;" + eol;
             }
         }
         return content;

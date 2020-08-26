@@ -65,6 +65,7 @@ public class GenerateUseCaseInterfaceJavaFile {
                 + "in;"
                 + eol;
         String imports = ""
+                + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".domain.SelectEntity;"
                 + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".domain.SelectEnum;" + eol
                 + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".domain.JavaDate;" + eol
                 + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".usecase.*;" + eol
@@ -187,11 +188,20 @@ public class GenerateUseCaseInterfaceJavaFile {
                     String attributeType = "";
                     if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.Primitive)) {
                         attributeType = attribute.getPrimitiveAttributeType().name();
+                        content += t + t + attributeType + " " + attributeName + ";" + eol;
                     }
                     if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.DomainEntity)) {
                         attributeType = attribute.getDomainEntityAttributeType().getName();
+                        content += t + t + attributeType + " " + attributeName + ";" + eol;
                     }
-                    content += t + t + attributeType + " " + attributeName + ";" + eol;
+                    if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEnum)) {
+                        content += t + t + "SelectEnum" + " " + attributeName + "Enum;" + eol;
+                        content += t + t + "List<SelectEnum>" + " " + attributeName + "EnumArray;" + eol;
+                    }
+                    if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
+                        content += t + t + "SelectEntity" + " " + attributeName + ";" + eol;
+                        content += t + t + "List<SelectEntity>" + " " + attributeName + "Array;" + eol;
+                    }
                 }
                 // List
                 if (attribute.getAttributeQuantity().equals(EntityAttributeQuantityEnum.List)) {
@@ -201,11 +211,6 @@ public class GenerateUseCaseInterfaceJavaFile {
                     }
                     if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.DomainEntity)) {
                         attributeType = attribute.getDomainEntityAttributeType().getName();
-                    }
-                    if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
-                        if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Enum)) {
-                            attributeType = "SelectEnum";
-                        }
                     }
                     content += t + t + "List<" + attributeType + ">" + " " + attributeName + ";" + eol;
                 }

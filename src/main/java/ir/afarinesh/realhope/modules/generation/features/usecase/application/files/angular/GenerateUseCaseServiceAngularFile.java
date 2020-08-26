@@ -19,6 +19,8 @@ import java.util.Optional;
 
 @Service
 public class GenerateUseCaseServiceAngularFile {
+    String t = StringUtility.space(2);
+    String eol = "\n";
     final FileManagementService fileManagementService;
     final UseCasePathService useCasePathService;
     final DomainEntitySpringJpaRepository domainEntitySpringJpaRepository;
@@ -57,71 +59,72 @@ public class GenerateUseCaseServiceAngularFile {
     public String getContent(UseCase useCase) {
         String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
         String imports = ""
-                + "import {Injectable} from '@angular/core';" + "\n"
-                + "import {Observable} from 'rxjs';" + "\n"
-                + "import {HttpClient} from '@angular/common/http';" + "\n"
-                + "import {SecurityService} from '../../../../../core/services/security.service';" + "\n"
-                + "import {environment} from '../../../../../../environments/environment';" + "\n"
-                + "import {UseCaseCommand} from '../../../../../core/domain/use-case-command';" + "\n"
-                + "import {PagedResultFruit} from '../../../../../core/domain/paged-result-fruit';" + "\n"
-                + "import {UseCaseFruit} from '../../../../../core/domain/use-case-fruit';" + "\n"
-                + "import {UseCaseSeedsCommand} from '../../../../../core/domain/use-case-seeds-command';" + "\n"
-                + "import {UseCaseFruitSeeds} from '../../../../../core/domain/use-case-fruit-seeds';" + "\n"
-                + "import {PaginationCommand} from '../../../../../core/domain/pagination-command';" + "\n"
-                + "import {JavaDate} from '../../../../../core/domain/java-date';" + "\n"
-                + "import {SelectEnum} from '../../../../../core/domain/select-enum';" + "\n"
-                + "\n"
+                + "import {Injectable} from '@angular/core';" + eol
+                + "import {Observable} from 'rxjs';" + eol
+                + "import {HttpClient} from '@angular/common/http';" + eol
+                + "import {SecurityService} from '../../../../../core/services/security.service';" + eol
+                + "import {environment} from '../../../../../../environments/environment';" + eol
+                + "import {UseCaseCommand} from '../../../../../core/domain/use-case-command';" + eol
+                + "import {PagedResultFruit} from '../../../../../core/domain/paged-result-fruit';" + eol
+                + "import {UseCaseFruit} from '../../../../../core/domain/use-case-fruit';" + eol
+                + "import {UseCaseSeedsCommand} from '../../../../../core/domain/use-case-seeds-command';" + eol
+                + "import {UseCaseFruitSeeds} from '../../../../../core/domain/use-case-fruit-seeds';" + eol
+                + "import {PaginationCommand} from '../../../../../core/domain/pagination-command';" + eol
+                + "import {JavaDate} from '../../../../../core/domain/java-date';" + eol
+                + "import {SelectEnum} from '../../../../../core/domain/select-enum';" + eol
+                + "import {SelectEntity} from '../../../../../core/domain/select-entity';" + eol
+                + eol
                 + getDomainEntitiesImports(useCase.getSoftwareFeature());
         String serviceContent = ""
-                + "@Injectable({" + "\n"
-                + space(2) + "providedIn: 'root'" + "\n"
-                + "})" + "\n"
-                + "export class " + useCaseTitle + "Service {" + "\n"
-                + space(2) + "baseUrl = environment.baseUrl + '" + this.getUrl(useCase) + "';" + "\n"
-                + "\n"
-                + space(2) + "constructor(private httpClient: HttpClient, private securityService: SecurityService) {" + "\n"
-                + space(2) + "}" + "\n"
-                + "\n"
-                + space(2) + "cultivate(plant: UseCaseCommand<" + useCaseTitle + "Plant>):" + "\n"
-                + space(4) + "Observable<UseCaseFruit<" + useCaseTitle + "Fruit>> {" + "\n"
-                + space(4) + "const url = this.baseUrl + '/cultivate';" + "\n"
-                + space(4) + "return this.httpClient" + "\n"
-                + space(6) + ".post<UseCaseFruit<" + useCaseTitle + "Fruit>>(" + "\n"
-                + space(8) + "url," + "\n"
-                + space(8) + "plant," + "\n"
-                + space(8) + "this.securityService.getSecuredJsonHttpOptions()" + "\n"
-                + space(6) + ");" + "\n"
-                + space(2) + "}" + "\n"
-                + "\n"
-                + space(2) + "prepare(seedsCommand: UseCaseSeedsCommand<" + useCaseTitle + "SeedsCommand>):" + "\n"
-                + space(4) + "Observable<UseCaseFruitSeeds<" + useCaseTitle + "FruitSeeds>> {" + "\n"
-                + space(4) + "const url = this.baseUrl + '/prepare';" + "\n"
-                + space(4) + "return this.httpClient" + "\n"
-                + space(6) + ".post<UseCaseFruitSeeds<" + useCaseTitle + "FruitSeeds>>(" + "\n"
-                + space(8) + "url," + "\n"
-                + space(8) + "seedsCommand," + "\n"
-                + space(8) + "this.securityService.getSecuredJsonHttpOptions()" + "\n"
-                + space(6) + ");" + "\n"
-                + space(2) + "}" + "\n"
-                + "}" + "\n"
-                + "\n"
-                + "export class " + useCaseTitle + "Fruit {" + "\n"
+                + "@Injectable({" + eol
+                + t + "providedIn: 'root'" + eol
+                + "})" + eol
+                + "export class " + useCaseTitle + "Service {" + eol
+                + t + "baseUrl = environment.baseUrl + '" + this.getUrl(useCase) + "';" + eol
+                + eol
+                + t + "constructor(private httpClient: HttpClient, private securityService: SecurityService) {" + eol
+                + t + "}" + eol
+                + eol
+                + t + "cultivate(plant: UseCaseCommand<" + useCaseTitle + "Plant>):" + eol
+                + t + t + "Observable<UseCaseFruit<" + useCaseTitle + "Fruit>> {" + eol
+                + t + t + "const url = this.baseUrl + '/cultivate';" + eol
+                + t + t + "return this.httpClient" + eol
+                + t + t + t + ".post<UseCaseFruit<" + useCaseTitle + "Fruit>>(" + eol
+                + t + t + t + t + "url," + eol
+                + t + t + t + t + "plant," + eol
+                + t + t + t + t + "this.securityService.getSecuredJsonHttpOptions()" + eol
+                + t + t + t + ");" + eol
+                + t + "}" + eol
+                + eol
+                + t + "prepare(seedsCommand: UseCaseSeedsCommand<" + useCaseTitle + "SeedsCommand>):" + eol
+                + t + t + "Observable<UseCaseFruitSeeds<" + useCaseTitle + "FruitSeeds>> {" + eol
+                + t + t + "const url = this.baseUrl + '/prepare';" + eol
+                + t + t + "return this.httpClient" + eol
+                + t + t + t + ".post<UseCaseFruitSeeds<" + useCaseTitle + "FruitSeeds>>(" + eol
+                + t + t + t + t + "url," + eol
+                + t + t + t + t + "seedsCommand," + eol
+                + t + t + t + t + "this.securityService.getSecuredJsonHttpOptions()" + eol
+                + t + t + t + ");" + eol
+                + t + "}" + eol
+                + "}" + eol
+                + eol
+                + "export class " + useCaseTitle + "Fruit {" + eol
                 + this.getDataAttributes(useCase, UseCaseDataTypeEnum.Fruit)
-                + "}" + "\n"
-                + "\n"
-                + "export class " + useCaseTitle + "Plant {" + "\n"
+                + "}" + eol
+                + eol
+                + "export class " + useCaseTitle + "Plant {" + eol
                 + this.getDataAttributes(useCase, UseCaseDataTypeEnum.Plant)
-                + "}" + "\n"
-                + "\n"
-                + "export class " + useCaseTitle + "FruitSeeds {" + "\n"
+                + "}" + eol
+                + eol
+                + "export class " + useCaseTitle + "FruitSeeds {" + eol
                 + this.getDataAttributes(useCase, UseCaseDataTypeEnum.FruitSeeds)
-                + "}" + "\n"
-                + "\n"
-                + "export class " + useCaseTitle + "SeedsCommand {" + "\n"
+                + "}" + eol
+                + eol
+                + "export class " + useCaseTitle + "SeedsCommand {" + eol
                 + this.getDataAttributes(useCase, UseCaseDataTypeEnum.SeedsCommand)
-                + "}" + "\n";
+                + "}" + eol;
         return imports
-                + "\n"
+                + eol
                 + serviceContent;
     }
 
@@ -131,7 +134,7 @@ public class GenerateUseCaseServiceAngularFile {
         for (DomainEntity domainEntity : domainEntities) {
             content += "import {" + domainEntity.getName() + "}"
                     + " from "
-                    + "'../domain/" + StringUtility.convertCamelToDash(domainEntity.getName()) + "';" + "\n";
+                    + "'../domain/" + StringUtility.convertCamelToDash(domainEntity.getName()) + "';" + eol;
         }
         return content;
     }
@@ -152,35 +155,44 @@ public class GenerateUseCaseServiceAngularFile {
                     String attributeType = "";
                     if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.Primitive)) {
                         attributeType = attribute.getPrimitiveAttributeType().angular();
+                        content += t + attributeName + ": " + attributeType + ";" + eol;
                     }
                     if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.DomainEntity)) {
                         attributeType = attribute.getDomainEntityAttributeType().getName();
+                        content += t + attributeName + ": " + attributeType + ";" + eol;
                     }
-                    content += space(2) + attributeName + ": " + attributeType + ";" + "\n";
+                    if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEnum)) {
+                        content += t + attributeName + "Enum: SelectEnum;" + eol;
+                        if (useCaseDataType.equals(UseCaseDataTypeEnum.FruitSeeds)) {
+                            content += t + attributeName + "EnumArray: Array<SelectEnum>;" + eol;
+                        }
+                    }
+                    if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
+                        content += t + attributeName + ": SelectEntity;" + eol;
+                        if (useCaseDataType.equals(UseCaseDataTypeEnum.FruitSeeds)) {
+                            content += t + attributeName + "Array: Array<SelectEnum>;" + eol;
+                        }
+                    }
                 }
                 // List
                 if (attribute.getAttributeQuantity().equals(EntityAttributeQuantityEnum.List)) {
                     String attributeType = "";
                     if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.Primitive)) {
                         attributeType = attribute.getPrimitiveAttributeType().angular();
+                        content += t + attributeName + ": " + "Array<" + attributeType + ">" + ";" + eol;
                     }
                     if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.DomainEntity)) {
                         attributeType = attribute.getDomainEntityAttributeType().getName();
+                        content += t + attributeName + ": " + "Array<" + attributeType + ">" + ";" + eol;
                     }
-                    if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
-                        if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Enum)) {
-                            attributeType = "SelectEnum";
-                        }
-                    }
-                    content += space(2) + attributeName + ": " + "Array<" + attributeType + ">" + ";" + "\n";
                 }
             }
             if (useCaseDataType.equals(UseCaseDataTypeEnum.Plant) || useCaseDataType.equals(UseCaseDataTypeEnum.SeedsCommand)) {
                 if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.GridList)) {
-                    content += StringUtility.space(2) + "paginationCommand: PaginationCommand;" + "\n";
+                    content += t + "paginationCommand: PaginationCommand;" + eol;
                 }
-                content += "\n";
-                content += StringUtility.space(2) + "constructor(";
+                content += eol;
+                content += t + "constructor(";
                 for (int i = 0; i < useCaseDataAttributes.size(); i++) {
                     UseCaseDataAttribute attribute = useCaseDataAttributes.get(i);
                     String attributeType = attribute.getPrimitiveAttributeType().angular();
@@ -192,23 +204,30 @@ public class GenerateUseCaseServiceAngularFile {
                     if (useCaseDataAttributes.size() > 0) {
                         content += ", ";
                     }
-                    content += "paginationCommand: PaginationCommand) {" + "\n";
+                    content += "paginationCommand: PaginationCommand) {" + eol;
                 } else {
-                    content += StringUtility.space(2) + ") {" + "\n";
+                    content += t + ") {" + eol;
                 }
                 for (UseCaseDataAttribute attribute : useCaseDataAttributes) {
-                    String attributeType = attribute.getPrimitiveAttributeType().angular();
                     String attributeName = StringUtility.firstLowerCase(attribute.getName());
-                    content += StringUtility.space(4) + "this." + attributeName + " = " + attributeName +";" + "\n";
+                    if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.Primitive)) {
+                        content += t + t + "this." + attributeName + " = " + attributeName + ";" + eol;
+                    }
+                    if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEnum)) {
+                        content += t + t + "this." + attributeName + "Enum = " + attributeName + ";" + eol;
+                    }
+                    if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
+                        content += t + t + "this." + attributeName + " = " + attributeName + ";" + eol;
+                    }
                 }
                 if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.GridList)) {
-                    content += StringUtility.space(4) + "this.paginationCommand = paginationCommand;" + "\n";
+                    content += t + t + "this.paginationCommand = paginationCommand;" + eol;
                 }
-                content += StringUtility.space(2) + "}" + "\n";
+                content += t + "}" + eol;
             }
             if (useCaseDataType.equals(UseCaseDataTypeEnum.Fruit)
                     && useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.GridList)) {
-                content += StringUtility.space(2) + "pagedResultFruit: PagedResultFruit;" + "\n";
+                content += t + "pagedResultFruit: PagedResultFruit;" + eol;
             }
             return content;
         }
