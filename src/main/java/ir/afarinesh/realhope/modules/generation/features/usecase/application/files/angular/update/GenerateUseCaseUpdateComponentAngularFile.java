@@ -148,10 +148,19 @@ public class GenerateUseCaseUpdateComponentAngularFile {
                 + t + t + "this.readyToUpdate = true;" + eol
                 + t + "}" + eol
                 + eol
-                + t + "private submit(): void {" + eol
+                + t + "public submit(): void {" + eol
+                + t + t + "this.dialogService" + eol
+                + t + t + t + ".showQuickConfirmationDialog()" + eol
+                + t + t + t + ".afterClosed()" + eol
+                + t + t + t + ".subscribe(value => {" + eol
+                + t + t + t + t + "if (value === 'Yes') {" + eol
+                + t + t + t + t + t + "this.cultivate();" + eol
+                + t + t + t + t + "}" + eol
+                + t + t + t + "});" + eol
                 + t + "}" + eol
                 + eol
                 + t + "private cultivate(): void {" + eol
+                + getCultivateInputVariables(useCase, t + t)
                 + t + "}" + eol
                 + eol
                 + t + "private prepare(): void {" + eol
@@ -169,6 +178,10 @@ public class GenerateUseCaseUpdateComponentAngularFile {
                 + t + t + t + "}, error => {" + eol
                 + t + t + t + t + "this.dialogService.showQuickServerErrorDialog(error.message);" + eol
                 + t + t + t + "});" + eol
+                + t + "}" + eol
+                + eol
+                + t + "public close(): void {" + eol
+                + t + t + "this.dialogRef.close();" + eol
                 + t + "}" + eol
                 + eol
                 + "}" + eol;
@@ -189,8 +202,13 @@ public class GenerateUseCaseUpdateComponentAngularFile {
                 + t + "</div>"
                 + t + "<form [formGroup]='reactiveForm' *ngIf='readyToUpdate'>"
                 + this.useCaseAngularFormService.getFormFields(useCase, t + t)
-                + t + "</form>"
-                + "</mat-dialog-content>" + eol;
+                + t + "</form>" + eol
+                + "</mat-dialog-content>" + eol
+                + "<mat-dialog-actions>" + eol
+                + t + "<button mat-raised-button color='primary' (click)='submit()'>" + eol
+                + t + t + "{{'UpdateContractBySalesChannelDepartment.Submit' | translate}}" + eol
+                + t + "</button>" + eol
+                + "</mat-dialog-actions>";
         String action = "";
         return header + content + action;
     }
@@ -246,6 +264,57 @@ public class GenerateUseCaseUpdateComponentAngularFile {
             content += eol;
         }
         content += offset + t + "});" + eol;
+        return content;
+    }
+
+    public String getCultivateInputVariables(UseCase useCase, String offset) throws GetPlantException {
+        String content = "";
+        String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
+        UseCaseData plant = useCaseService.getPlant(useCase);
+        List<UseCaseDataAttribute> attributesOfPlant = plant.getUseCaseDataAttributes();
+        for (UseCaseDataAttribute attribute : attributesOfPlant) {
+            if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.Primitive)) {
+                if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate)) {
+                    content += offset + "const " + StringUtility.firstLowerCase(attribute.getName()) + "Input = "
+                            + "this.dateService.getJavaDateOfMoment(this.reactiveForm.get('" + StringUtility.firstLowerCase(attribute.getName()) + "').value);" + eol;
+
+                } else {
+                    content += offset + "const " + StringUtility.firstLowerCase(attribute.getName()) + "Input ="
+                            + " this.reactiveForm.get('" + StringUtility.firstLowerCase(attribute.getName()) + "').value;" + eol;
+                }
+            }
+            if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEnum)) {
+                content += offset + "const " + StringUtility.firstLowerCase(attribute.getName()) + "Input = new SelectEnum(null,"
+                        + " this.reactiveForm.get('" + StringUtility.firstLowerCase(attribute.getName()) + "Enum').value);" + eol;
+            }
+            if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
+                content += offset + "const " + StringUtility.firstLowerCase(attribute.getName()) + "Input = new SelectEntity(null,"
+                        + " this.reactiveForm.get('" + StringUtility.firstLowerCase(attribute.getName()) + "').value);" + eol;
+            }
+        }
+        content += ""
+                + offset + "this.useCase" + eol
+                + offset + t + ".cultivate(new UseCaseCommand<" + useCaseTitle + "Plant>(" + eol
+                + offset + t + t + "new " + useCaseTitle + "Plant(" + eol;
+        for (int i = 0; i < attributesOfPlant.size(); i++) {
+            UseCaseDataAttribute attribute = attributesOfPlant.get(i);
+            content += offset + t + t + t + StringUtility.firstLowerCase(attribute.getName()) + "Input";
+            content += (i < attributesOfPlant.size() - 1) ? "," : "";
+            content += eol;
+        }
+        content += ""
+                + offset + t + t + ")," + eol
+                + offset + t + t + "this.localeService.getLocale().getValue()" + eol
+                + offset + t + "))" + eol
+                + offset + t + ".subscribe(fruit => {" + eol
+                + offset + t + t + "if (fruit.isSuccessful) {" + eol
+                + offset + t + t + t + "this.close();" + eol
+                + offset + t + t + "} else {" + eol
+                + offset + t + t + t + "this.dialogService.showErrorDialog(new ErrorDialogData('', Array.of(fruit.message)));" + eol
+                + offset + t + t + "}" + eol
+                + offset + t + "}, error => {" + eol
+                + offset + t + t + "this.dialogService.showQuickServerErrorDialog(error.message);" + eol
+                + offset + t + "});" + eol;
         return content;
     }
 

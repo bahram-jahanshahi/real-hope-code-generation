@@ -170,7 +170,7 @@ public class GenerateUseCaseServiceAngularFile {
                     if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
                         content += t + attributeName + ": SelectEntity;" + eol;
                         if (useCaseDataType.equals(UseCaseDataTypeEnum.FruitSeeds)) {
-                            content += t + attributeName + "Array: Array<SelectEnum>;" + eol;
+                            content += t + attributeName + "Array: Array<SelectEntity>;" + eol;
                         }
                     }
                 }

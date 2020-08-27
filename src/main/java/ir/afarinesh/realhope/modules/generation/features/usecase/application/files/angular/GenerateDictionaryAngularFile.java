@@ -139,6 +139,7 @@ public class GenerateDictionaryAngularFile {
         if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.Update)) {
             content += ",\"BooleanYes\": \"بلی\"" + eol;
             content += ",\"BooleanNo\": \"خیر\"" + eol;
+            content += ",\"Submit\": \"" + useCase.getFaTitle() + "\"" + eol;
             try {
                 UseCaseData plant = this.useCaseService.getPlant(useCase);
                 List<UseCaseDataAttribute> attributes = plant.getUseCaseDataAttributes();
