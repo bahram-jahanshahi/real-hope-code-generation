@@ -1,5 +1,6 @@
 package ir.afarinesh.realhope.entities.feature;
 
+import ir.afarinesh.realhope.entities.data_model.DataEntity;
 import ir.afarinesh.realhope.entities.feature.enums.PrimitiveAttributeTypeEnum;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeCategoryEnum;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeQuantityEnum;
@@ -59,6 +60,10 @@ public class UseCaseDataAttribute {
     @JoinColumn(nullable = true)
     @ManyToOne
     private DomainEntity domainEntityAttributeType; // if attribute type is a domain entity
+
+    @JoinColumn(nullable = true)
+    @ManyToOne
+    private DataEntity dataEntityAttributeType; // if attribute type is a select entity
 
     @JoinColumn(nullable = false)
     @ManyToOne

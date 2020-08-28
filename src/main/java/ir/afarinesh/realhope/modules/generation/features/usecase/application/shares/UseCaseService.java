@@ -96,10 +96,10 @@ public class UseCaseService {
     }
 
     private String getMapPathByGetters(String mapPath, PrimitiveAttributeTypeEnum primitiveAttributeType) {
-        String content = "entity.";
+        String content = "";
         String[] parts = mapPath.split("\\.");
         if (primitiveAttributeType == PrimitiveAttributeTypeEnum.JavaDate) {
-            content = "CalendarUtility.format(entity.";
+            content = "CalendarUtility.format(";
         }
         content += "entity." + getSequenceOfGetters(mapPath);
         if (primitiveAttributeType == PrimitiveAttributeTypeEnum.Enum) {
