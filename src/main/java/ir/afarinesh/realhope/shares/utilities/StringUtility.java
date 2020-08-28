@@ -39,4 +39,8 @@ public class StringUtility {
     public static String space(int count) {
         return " ".repeat(Math.max(0, count));
     }
+
+    public static String endOfLine() {
+        return "\n";
+    }
 }

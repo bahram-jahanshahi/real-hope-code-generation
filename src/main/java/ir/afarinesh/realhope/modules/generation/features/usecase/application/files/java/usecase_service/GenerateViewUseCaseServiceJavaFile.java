@@ -5,7 +5,6 @@ import ir.afarinesh.realhope.entities.feature.UseCase;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.java.usecase_service.exceptions.GenerateViewUseCaseServiceJavaFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCasePathService;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCaseService;
-import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.exceptions.GetGridListFruitDomainEntityException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.exceptions.GetViewDomainEntityException;
 import ir.afarinesh.realhope.shares.repositories.DomainEntitySpringJpaRepository;
 import ir.afarinesh.realhope.shares.services.FileManagementService;
@@ -15,7 +14,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GenerateViewUseCaseServiceJavaFile {
-
+    String t = StringUtility.space(4);
+    String eol = StringUtility.endOfLine();
     final FileManagementService fileManagementService;
     final UseCasePathService useCasePathService;
     final UseCaseService useCaseService;
@@ -58,13 +58,10 @@ public class GenerateViewUseCaseServiceJavaFile {
         String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
         String entitySpringJpaRepository = useCase.getDataEntity().getName() + "SpringJpaRepository";
         DomainEntity viewDomainEntity = useCaseService.getViewDomainEntity(useCase);
-        String t = StringUtility.space(4);
-        String eol = "\n";
         // package title
         String packageTitle = "package "
                 + this.useCasePathService.getSpringBootFeaturePackageTitle(useCase.getSoftwareFeature()) + "."
-                + "application;"
-                + eol;
+                + "application;" + eol;
         // imports
         String imports = ""
                 + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".annotations.FeatureApplication;" + eol
@@ -91,7 +88,7 @@ public class GenerateViewUseCaseServiceJavaFile {
                 + t + "@Override" + eol
                 + t + "public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {" + eol
                 + t + t + useCase.getDataEntity().getName() + " entity =" + eol
-                + t + t + t + t + "this." + StringUtility.firstLowerCase(useCase.getDataEntity().getName()) + "SpringJpaRepository.findById(plant.getPlant().getId())"
+                + t + t + t + t + "this." + StringUtility.firstLowerCase(useCase.getDataEntity().getName()) + "SpringJpaRepository.findById(plant.getPlant().getId())" + eol
                 + t + t + t + t + ".orElseThrow(() -> new CultivateException(\"Cannot find by id = \" + plant.getPlant().getId()));"
                 + eol
                 + t + t + "return new UseCaseFruit<>(" + eol
@@ -115,11 +112,12 @@ public class GenerateViewUseCaseServiceJavaFile {
                 + t + t + ");" + "\n"
                 + t + "}" + "\n"
                 + "}";
-
         return packageTitle
                 + eol
                 + imports
                 + eol
                 + serviceContent;
     }
+
+
 }

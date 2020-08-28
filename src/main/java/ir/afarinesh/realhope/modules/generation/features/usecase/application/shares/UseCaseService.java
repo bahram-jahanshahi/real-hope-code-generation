@@ -101,11 +101,7 @@ public class UseCaseService {
         if (primitiveAttributeType == PrimitiveAttributeTypeEnum.JavaDate) {
             content = "CalendarUtility.format(entity.";
         }
-        for (int i = 0; i < parts.length; i++) {
-            String part = parts[i];
-            content += "get" + part + "()";
-            content += (i < parts.length - 1) ? "." : "";
-        }
+        content += "entity." + getSequenceOfGetters(mapPath);
         if (primitiveAttributeType == PrimitiveAttributeTypeEnum.Enum) {
             content += ".name()";
         }
@@ -113,5 +109,23 @@ public class UseCaseService {
             content += ", locale)";
         }
         return content;
+    }
+
+    public String getSequenceOfGetters(String mapPath) {
+        if (mapPath == null) {
+            return null;
+        }
+        String content = "";
+        String[] parts = mapPath.split("\\.");
+        for (int i = 0; i < parts.length; i++) {
+            String part = parts[i];
+            content += "get" + part + "()";
+            content += (i < parts.length - 1) ? "." : "";
+        }
+        return content;
+    }
+
+    public String getUseCaseTitle(UseCase useCase){
+        return useCase.getName() + "By" + useCase.getSoftwareRole().getName();
     }
 }

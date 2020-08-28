@@ -44,11 +44,17 @@ public class UseCaseDataAttribute {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private EntityAttributeCategoryEnum attributeCategory; // Primitive, DomainEntity
+    private EntityAttributeCategoryEnum attributeCategory; //Primitive, DomainEntity, SelectEntity, SelectEnum;
 
     @Column(nullable = true)
     @Enumerated(EnumType.STRING)
     private PrimitiveAttributeTypeEnum primitiveAttributeType; // if attribute type is primitive
+
+    @Column(nullable = true)
+    private String setterOfUpdatePath;
+
+    @Column(nullable = true)
+    private String getterOfUpdatePath;
 
     @JoinColumn(nullable = true)
     @ManyToOne
@@ -61,4 +67,21 @@ public class UseCaseDataAttribute {
     @JoinColumn(nullable = true)
     @ManyToOne
     private UseCaseDataAttribute fruitSeedsAttribute;
+
+    // Utilities
+    public boolean isPrimitive() {
+        return attributeCategory.equals(EntityAttributeCategoryEnum.Primitive);
+    }
+
+    public boolean isDomainEntity() {
+        return attributeCategory.equals(EntityAttributeCategoryEnum.DomainEntity);
+    }
+
+    public boolean isSelectEntity() {
+        return attributeCategory.equals(EntityAttributeCategoryEnum.SelectEntity);
+    }
+
+    public boolean isSelectEnum() {
+        return attributeCategory.equals(EntityAttributeCategoryEnum.SelectEnum);
+    }
 }
