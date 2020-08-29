@@ -223,6 +223,16 @@ public class GenerateUseCaseInterfaceJavaFile {
                     && useCaseDataType.equals(UseCaseDataTypeEnum.Fruit)) {
                 content += t + t + "private PagedResultFruit pagedResultFruit;" + eol;
             }
+            if (useCaseDataType.equals(UseCaseDataTypeEnum.Plant)) {
+                if (useCaseDataAttributes.size() == 0) {
+                    content += t + t + "boolean doSomething;" + eol;
+                }
+            }
+            if (useCaseDataType.equals(UseCaseDataTypeEnum.Fruit)) {
+                if (useCaseDataAttributes.size() == 0) {
+                    content += t + t + "boolean something;" + eol;
+                }
+            }
             if (useCaseDataType.equals(UseCaseDataTypeEnum.SeedsCommand)) {
                 if (useCaseDataAttributes.size() == 0) {
                     content += t + t + "boolean doSomething;" + eol;

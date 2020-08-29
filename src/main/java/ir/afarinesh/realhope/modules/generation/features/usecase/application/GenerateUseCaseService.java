@@ -11,6 +11,7 @@ import ir.afarinesh.realhope.modules.generation.features.usecase.application.fil
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.GenerateUseCaseComponentAngularFile;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.GenerateUseCaseServiceAngularFile;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.exceptions.GenerateDictionaryAngularFileException;
+import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.exceptions.GenerateFeatureDomainAngularFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.exceptions.GenerateUseCaseComponentAngularFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.exceptions.GenerateUseCaseServiceAngularFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.java.GenerateFeatureDomainJavaFile;
@@ -25,6 +26,8 @@ import ir.afarinesh.realhope.modules.generation.features.usecase.application.por
 import ir.afarinesh.realhope.shares.repositories.DomainEntitySpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.UseCaseSpringJpaRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class GenerateUseCaseService implements GenerateUseCase {
@@ -63,28 +66,38 @@ public class GenerateUseCaseService implements GenerateUseCase {
 
     @Override
     public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {
-        UseCase useCase = useCaseSpringJpaRepository.findById(plant.getPlant().getUseCaseId()).orElseThrow();
-        DomainEntity domainEntity = domainEntitySpringJpaRepository.findById(1L).get();
-        try {
-            // generate use case interface java
-            this.generateUseCaseInterfaceJavaFile.generate(useCase);
-            // generate rest controller java
-            this.generateUseCaseRestControllerJavaFile.generate(useCase);
-            // generate domain entity java
-            this.generateFeatureDomainJavaFile.generate(domainEntity);
-            // generate use case service java
-            this.generateUseCaseServiceJavaFile.generate(useCase);
-            // generate use case angular cli service
-            this.generateUseCaseServiceAngularFile.generate(useCase);
-            // generate domain entity for angular cli
-            this.generateFeatureDomainAngularFile.generate(domainEntity);
-            // generate component for angular cli
-            this.generateUseCaseComponentAngularFile.generate(useCase);
-            // generate dictionary for angular cli
-            this.generateDictionaryAngularFile.generate();
-        } catch (GenerateUseCaseInterfaceJavaFileException | GenerateUseCaseRestControllerJavaFileException | GenerateFeatureDomainJavaFileException | GenerateUseCaseServiceAngularFileException | GenerateUseCaseComponentAngularFileException | GenerateUseCaseServiceJavaFileException | GenerateDictionaryAngularFileException e) {
-            throw new CultivateException(e.getMessage());
+        List<UseCase> useCaseList = useCaseSpringJpaRepository.findAll();
+        List<DomainEntity> domainEntityList = domainEntitySpringJpaRepository.findAll();
+        for (UseCase useCase : useCaseList) {
+            try {
+                // generate use case interface java
+                this.generateUseCaseInterfaceJavaFile.generate(useCase);
+                // generate rest controller java
+                this.generateUseCaseRestControllerJavaFile.generate(useCase);
+                // generate use case service java
+                this.generateUseCaseServiceJavaFile.generate(useCase);
+                // generate use case angular cli service
+                this.generateUseCaseServiceAngularFile.generate(useCase);
+                // generate component for angular cli
+                this.generateUseCaseComponentAngularFile.generate(useCase);
+                // generate dictionary for angular cli
+                this.generateDictionaryAngularFile.generate();
+            } catch (GenerateUseCaseInterfaceJavaFileException | GenerateUseCaseRestControllerJavaFileException | GenerateUseCaseServiceAngularFileException | GenerateUseCaseComponentAngularFileException | GenerateUseCaseServiceJavaFileException | GenerateDictionaryAngularFileException e) {
+                throw new CultivateException(e.getMessage());
+            }
         }
+
+        for (DomainEntity domainEntity : domainEntityList) {
+            try {
+                // generate domain entity java
+                this.generateFeatureDomainJavaFile.generate(domainEntity);
+                // generate domain entity for angular cli
+                this.generateFeatureDomainAngularFile.generate(domainEntity);
+            } catch (GenerateFeatureDomainJavaFileException | GenerateFeatureDomainAngularFileException e) {
+                e.printStackTrace();
+            }
+        }
+
         return new UseCaseFruit<>(
                 new Fruit(true),
                 true,

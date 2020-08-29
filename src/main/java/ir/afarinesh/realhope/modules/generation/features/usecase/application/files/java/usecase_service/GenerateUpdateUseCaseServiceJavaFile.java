@@ -196,10 +196,7 @@ public class GenerateUpdateUseCaseServiceJavaFile {
                 if (isEnumList) {
                     content += "entity." + sequenceOfGetters + ".getSelectEnumList(seedsCommand.getLocale())";
                 } else {
-                    content += "new SelectEnum("
-                            + "entity." + sequenceOfGetters + ".title(seedsCommand.getLocale()), "
-                            + "entity." + sequenceOfGetters + ".name()"
-                            + ")";
+                    content += "entity." + sequenceOfGetters + ".getSelectEnum(seedsCommand.getLocale())";
                 }
             }
 
@@ -225,7 +222,7 @@ public class GenerateUpdateUseCaseServiceJavaFile {
         dataEntities.add(useCase.getDataEntity());
         List<UseCaseDataAttribute> attributes = this.useCaseService.getFruitSeeds(useCase).getUseCaseDataAttributes();
         for (UseCaseDataAttribute attribute : attributes) {
-            if (attribute.isSelectEntity()) {
+            if (attribute.isSelectEntity() && attribute.getDataEntityAttributeType() != null) {
                 dataEntities.add(attribute.getDataEntityAttributeType());
             }
         }
@@ -242,7 +239,7 @@ public class GenerateUpdateUseCaseServiceJavaFile {
         dataEntities.add(useCase.getDataEntity());
         List<UseCaseDataAttribute> attributes = this.useCaseService.getFruitSeeds(useCase).getUseCaseDataAttributes();
         for (UseCaseDataAttribute attribute : attributes) {
-            if (attribute.isSelectEntity()) {
+            if (attribute.isSelectEntity() && attribute.getDataEntityAttributeType() != null) {
                 dataEntities.add(attribute.getDataEntityAttributeType());
             }
         }
@@ -267,7 +264,7 @@ public class GenerateUpdateUseCaseServiceJavaFile {
         dataEntities.add(useCase.getDataEntity());
         List<UseCaseDataAttribute> attributes = this.useCaseService.getFruitSeeds(useCase).getUseCaseDataAttributes();
         for (UseCaseDataAttribute attribute : attributes) {
-            if (attribute.isSelectEntity()) {
+            if (attribute.isSelectEntity() && attribute.getDataEntityAttributeType() != null) {
                 dataEntities.add(attribute.getDataEntityAttributeType());
             }
         }

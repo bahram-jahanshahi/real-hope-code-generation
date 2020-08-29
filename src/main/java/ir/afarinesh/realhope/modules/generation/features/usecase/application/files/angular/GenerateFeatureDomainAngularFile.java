@@ -3,6 +3,7 @@ package ir.afarinesh.realhope.modules.generation.features.usecase.application.fi
 import ir.afarinesh.realhope.entities.feature.DomainEntity;
 import ir.afarinesh.realhope.entities.feature.DomainEntityAttribute;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeQuantityEnum;
+import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.exceptions.GenerateFeatureDomainAngularFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.java.exceptions.GenerateFeatureDomainJavaFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCasePathService;
 import ir.afarinesh.realhope.shares.services.FileManagementService;
@@ -23,7 +24,7 @@ public class GenerateFeatureDomainAngularFile {
         this.useCasePathService = useCasePathService;
     }
 
-    public void generate(DomainEntity domainEntity) throws GenerateFeatureDomainJavaFileException {
+    public void generate(DomainEntity domainEntity) throws GenerateFeatureDomainAngularFileException {
         try {
             fileManagementService
                     .createFile(
@@ -32,7 +33,7 @@ public class GenerateFeatureDomainAngularFile {
                             this.getContent(domainEntity)
                     );
         } catch (CreateFileException e) {
-            throw new GenerateFeatureDomainJavaFileException(e.getMessage());
+            throw new GenerateFeatureDomainAngularFileException(e.getMessage());
         }
     }
 
