@@ -94,7 +94,8 @@ public class GenerateUpdateUseCaseServiceJavaFile {
                 + t + "public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {" + eol
                 + t + t + useCase.getDataEntity().getName() + " entity =" + eol
                 + t + t + t + t + "this." + StringUtility.firstLowerCase(useCase.getDataEntity().getName()) + "SpringJpaRepository.findById(plant.getPlant().getId())" + eol
-                + t + t + t + t + ".orElseThrow(() -> new CultivateException(\"Cannot find by id = \" + plant.getPlant().getId()));"
+                + t + t + t + t + t + ".orElseThrow(() -> new CultivateException(\"Cannot find by id = \" + plant.getPlant().getId()));" + eol
+                + t + t + t + t + "// ... "
                 + eol
                 + t + t + "return new UseCaseFruit<>(" + eol
                 + t + t + t + "new Fruit(" + eol

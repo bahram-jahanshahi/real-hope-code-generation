@@ -25,12 +25,14 @@ import ir.afarinesh.realhope.modules.generation.features.usecase.application.fil
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.ports.in.GenerateUseCase;
 import ir.afarinesh.realhope.shares.repositories.DomainEntitySpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.UseCaseSpringJpaRepository;
+import ir.afarinesh.realhope.shares.services.CodeGenerationConfigService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class GenerateUseCaseService implements GenerateUseCase {
+    final CodeGenerationConfigService codeGenerationConfigService;
     final UseCaseSpringJpaRepository useCaseSpringJpaRepository;
     final DomainEntitySpringJpaRepository domainEntitySpringJpaRepository;
     final GenerateUseCaseInterfaceJavaFile generateUseCaseInterfaceJavaFile;
@@ -42,7 +44,8 @@ public class GenerateUseCaseService implements GenerateUseCase {
     final GenerateUseCaseServiceJavaFile generateUseCaseServiceJavaFile;
     final GenerateDictionaryAngularFile generateDictionaryAngularFile;
 
-    public GenerateUseCaseService(UseCaseSpringJpaRepository useCaseSpringJpaRepository,
+    public GenerateUseCaseService(CodeGenerationConfigService codeGenerationConfigService,
+                                  UseCaseSpringJpaRepository useCaseSpringJpaRepository,
                                   DomainEntitySpringJpaRepository domainEntitySpringJpaRepository,
                                   GenerateUseCaseInterfaceJavaFile generateUseCaseInterfaceJavaFile,
                                   GenerateUseCaseRestControllerJavaFile generateUseCaseRestControllerJavaFile,
@@ -52,6 +55,7 @@ public class GenerateUseCaseService implements GenerateUseCase {
                                   GenerateUseCaseComponentAngularFile generateUseCaseComponentAngularFile,
                                   GenerateUseCaseServiceJavaFile generateUseCaseServiceJavaFile,
                                   GenerateDictionaryAngularFile generateDictionaryAngularFile) {
+        this.codeGenerationConfigService = codeGenerationConfigService;
         this.useCaseSpringJpaRepository = useCaseSpringJpaRepository;
         this.domainEntitySpringJpaRepository = domainEntitySpringJpaRepository;
         this.generateUseCaseInterfaceJavaFile = generateUseCaseInterfaceJavaFile;
@@ -75,7 +79,9 @@ public class GenerateUseCaseService implements GenerateUseCase {
                 // generate rest controller java
                 this.generateUseCaseRestControllerJavaFile.generate(useCase);
                 // generate use case service java
-                this.generateUseCaseServiceJavaFile.generate(useCase);
+                if (this.codeGenerationConfigService.isSpringBootServiceGenerationEnabled(useCase.getId())) {
+                    this.generateUseCaseServiceJavaFile.generate(useCase);
+                }
                 // generate use case angular cli service
                 this.generateUseCaseServiceAngularFile.generate(useCase);
                 // generate component for angular cli
