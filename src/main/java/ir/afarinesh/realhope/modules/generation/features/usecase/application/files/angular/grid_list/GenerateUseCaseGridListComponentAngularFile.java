@@ -332,15 +332,20 @@ public class GenerateUseCaseGridListComponentAngularFile {
         String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
         String content = "";
         UseCaseData plant = useCaseService.getPlant(useCase);
-        for (int i = 0; i < plant.getUseCaseDataAttributes().size(); i++) {
-            UseCaseDataAttribute attribute = plant.getUseCaseDataAttributes().get(i);
+        Long maxRow = getMaxRowOfUseCaseDataAttributes(plant.getUseCaseDataAttributes());
+        for (long row = 1; row <= maxRow; row++ ){
             content += StringUtility.space(offset) + "<div fxLayout.lt-md='column' fxLayout.gt-sm='row' fxLayoutGap.gt-sm='16px' fxLayoutGap.lt-md='8px'>" + eol;
-            content += StringUtility.space(offset + 2) + "<mat-form-field appearance='outline' fxFlex.gt-sm='33%' fxFlex.lt-md='100%'>" + eol;
-            content += StringUtility.space(offset + 4) + "<mat-label>" + eol;
-            content += StringUtility.space(offset + 6) + "{{'" + useCaseTitle + "." + attribute.getName() + "SearchField' | translate}}" + eol;
-            content += StringUtility.space(offset + 4) + "</mat-label>" + eol;
-            content += StringUtility.space(offset + 4) + "<input matInput [formControl]='" + StringUtility.firstLowerCase(attribute.getName()) + "FormControl'>" + eol;
-            content += StringUtility.space(offset + 2) + "</mat-form-field>" + eol;
+            for (long col = 1; col <= 3; col++) {
+                UseCaseDataAttribute attribute = getAttributeByRowAndColumn(plant.getUseCaseDataAttributes(), row, col);
+                if (attribute != null) {
+                    content += StringUtility.space(offset + 2) + "<mat-form-field appearance='outline' fxFlex.gt-sm='33%' fxFlex.lt-md='100%'>" + eol;
+                    content += StringUtility.space(offset + 4) + "<mat-label>" + eol;
+                    content += StringUtility.space(offset + 6) + "{{'" + useCaseTitle + "." + attribute.getName() + "SearchField' | translate}}" + eol;
+                    content += StringUtility.space(offset + 4) + "</mat-label>" + eol;
+                    content += StringUtility.space(offset + 4) + "<input matInput [formControl]='" + StringUtility.firstLowerCase(attribute.getName()) + "FormControl'>" + eol;
+                    content += StringUtility.space(offset + 2) + "</mat-form-field>" + eol;
+                }
+            }
             content += StringUtility.space(offset) + "</div>" + eol;
         }
         return content;
@@ -445,5 +450,24 @@ public class GenerateUseCaseGridListComponentAngularFile {
                     + "</button>" + eol;
         }
         return content;
+    }
+
+    public UseCaseDataAttribute getAttributeByRowAndColumn(List<UseCaseDataAttribute> attributes, Long row, Long column) {
+        for (UseCaseDataAttribute attribute : attributes) {
+            if (attribute.getUiRow().equals(row) && attribute.getUiColumn().equals(column)) {
+                return attribute;
+            }
+        }
+        return null;
+    }
+
+    public Long getMaxRowOfUseCaseDataAttributes(List<UseCaseDataAttribute> attributes) {
+        Long max = 0L;
+        for (UseCaseDataAttribute attribute : attributes) {
+            if (attribute.getUiRow() > max) {
+                max = attribute.getUiRow();
+            }
+        }
+        return max;
     }
 }

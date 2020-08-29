@@ -36,6 +36,12 @@ public class DomainEntityAttribute {
     @Column(nullable = true)
     private String mapPath;
 
+    @Column(nullable = false)
+    private Long uiRow;
+
+    @Column(nullable = false)
+    private Long uiColumn;
+
     @Column(nullable = true)
     @Enumerated(EnumType.STRING)
     private PrimitiveAttributeTypeEnum mapPathAttributeType;

@@ -36,6 +36,12 @@ public class UseCaseDataAttribute {
     private String description;
 
     @Column(nullable = false)
+    private Long uiRow;
+
+    @Column(nullable = false)
+    private Long uiColumn;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private UseCaseUsageEnum useCaseUsageEnum; // ViewId, ViewEntity, GridListEntity
 
