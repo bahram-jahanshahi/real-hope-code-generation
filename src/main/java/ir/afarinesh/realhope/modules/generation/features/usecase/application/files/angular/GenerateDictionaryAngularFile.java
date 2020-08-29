@@ -85,6 +85,7 @@ public class GenerateDictionaryAngularFile {
                     + this.getGridListDictionary(useCase)
                     + this.getViewDictionary(useCase)
                     + this.getUpdateDictionary(useCase)
+                    + this.getAddNewDictionary(useCase)
                     + this.getPopupDictionary(useCase)
                     + t + "}";
             dictionaryContent += (i < useCaseList.size() - 1) ? "," : "";
@@ -140,6 +141,28 @@ public class GenerateDictionaryAngularFile {
             content += ",\"BooleanYes\": \"بلی\"" + eol;
             content += ",\"BooleanNo\": \"خیر\"" + eol;
             content += ",\"Submit\": \"" + useCase.getFaTitle() + "\"" + eol;
+            content += ",\"Close\": \"بازگشت\"" + eol;
+            try {
+                UseCaseData plant = this.useCaseService.getPlant(useCase);
+                List<UseCaseDataAttribute> attributes = plant.getUseCaseDataAttributes();
+                for (UseCaseDataAttribute attribute : attributes) {
+                    content += t + t + "," + "\"" + attribute.getName() + "\": " + "\"" + attribute.getFaTitle() + "\"" + eol;
+                    content += t + t + "," + "\"" + attribute.getName() + "Error\": " + "\"" + attribute.getDescription() + "\"" + eol;
+                }
+            } catch (GetPlantException e) {
+                e.printStackTrace();
+            }
+        }
+        return content;
+    }
+
+    private String getAddNewDictionary(UseCase useCase) {
+        String content = "";
+        if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.AddNew)) {
+            content += ",\"BooleanYes\": \"بلی\"" + eol;
+            content += ",\"BooleanNo\": \"خیر\"" + eol;
+            content += ",\"Submit\": \"" + useCase.getFaTitle() + "\"" + eol;
+            content += ",\"Close\": \"بازگشت\"" + eol;
             try {
                 UseCaseData plant = this.useCaseService.getPlant(useCase);
                 List<UseCaseDataAttribute> attributes = plant.getUseCaseDataAttributes();

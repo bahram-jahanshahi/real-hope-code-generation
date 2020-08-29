@@ -91,7 +91,7 @@ public class GenerateUseCaseViewComponentAngularFile {
 
     // component content
     protected String getComponentContent(UseCase useCase) throws GetViewDomainEntityException {
-        String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
+        String useCaseTitle = useCaseService.getUseCaseTitle(useCase);
         DomainEntity viewDomainEntity = this.useCaseService.getViewDomainEntity(useCase);
         // imports
         String imports = ""
@@ -168,7 +168,7 @@ public class GenerateUseCaseViewComponentAngularFile {
 
     // html content
     protected String getHtmlContent(UseCase useCase) throws GetViewDomainEntityException {
-        String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
+        String useCaseTitle = useCaseService.getUseCaseTitle(useCase);
         DomainEntity viewDomainEntity = this.useCaseService.getViewDomainEntity(useCase);
         String htmlContent = ""
                 + "<div mat-dialog-title>" + eol

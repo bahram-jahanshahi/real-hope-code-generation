@@ -2,36 +2,32 @@ package ir.afarinesh.realhope.modules.generation.features.usecase.application.fi
 
 import ir.afarinesh.realhope.entities.feature.DomainEntity;
 import ir.afarinesh.realhope.entities.feature.UseCase;
-import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.java.usecase_service.exceptions.GenerateViewUseCaseServiceJavaFileException;
+import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.java.usecase_service.exceptions.GenerateDeleteUseCaseServiceJavaFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCasePathService;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCaseService;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.exceptions.GetViewDomainEntityException;
-import ir.afarinesh.realhope.shares.repositories.DomainEntitySpringJpaRepository;
 import ir.afarinesh.realhope.shares.services.FileManagementService;
 import ir.afarinesh.realhope.shares.services.exceptions.CreateFileException;
 import ir.afarinesh.realhope.shares.utilities.StringUtility;
 import org.springframework.stereotype.Service;
 
 @Service
-public class GenerateViewUseCaseServiceJavaFile {
+public class GenerateDeleteUseCaseServiceJavaFile {
     String t = StringUtility.space(4);
     String eol = StringUtility.endOfLine();
     final FileManagementService fileManagementService;
     final UseCasePathService useCasePathService;
     final UseCaseService useCaseService;
-    final DomainEntitySpringJpaRepository domainEntitySpringJpaRepository;
 
-    public GenerateViewUseCaseServiceJavaFile(FileManagementService fileManagementService,
-                                              UseCasePathService useCasePathService,
-                                              UseCaseService useCaseService,
-                                              DomainEntitySpringJpaRepository domainEntitySpringJpaRepository) {
+    public GenerateDeleteUseCaseServiceJavaFile(FileManagementService fileManagementService,
+                                                UseCasePathService useCasePathService,
+                                                UseCaseService useCaseService) {
         this.fileManagementService = fileManagementService;
         this.useCasePathService = useCasePathService;
         this.useCaseService = useCaseService;
-        this.domainEntitySpringJpaRepository = domainEntitySpringJpaRepository;
     }
 
-    public void generate(UseCase useCase) throws GenerateViewUseCaseServiceJavaFileException {
+    public void generate(UseCase useCase) throws GenerateDeleteUseCaseServiceJavaFileException {
         try {
             fileManagementService
                     .createFile(
@@ -40,7 +36,7 @@ public class GenerateViewUseCaseServiceJavaFile {
                             this.getContent(useCase)
                     );
         } catch (CreateFileException | GetViewDomainEntityException e) {
-            throw new GenerateViewUseCaseServiceJavaFileException(e.getMessage());
+            throw new GenerateDeleteUseCaseServiceJavaFileException(e.getMessage());
         }
     }
 
@@ -57,7 +53,6 @@ public class GenerateViewUseCaseServiceJavaFile {
     protected String getContent(UseCase useCase) throws GetViewDomainEntityException {
         String useCaseTitle = useCaseService.getUseCaseTitle(useCase);
         String entitySpringJpaRepository = useCase.getDataEntity().getName() + "SpringJpaRepository";
-        DomainEntity viewDomainEntity = useCaseService.getViewDomainEntity(useCase);
         // package title
         String packageTitle = "package "
                 + this.useCasePathService.getSpringBootFeaturePackageTitle(useCase.getSoftwareFeature()) + "."
@@ -70,7 +65,7 @@ public class GenerateViewUseCaseServiceJavaFile {
                 + "import " + this.useCasePathService.getEntitiesPackageTitle(useCase.getSoftwareFeature()) + "." + useCase.getDataEntity().getCategory() + "." + useCase.getDataEntity().getName() + ";" + eol
                 + "import " + this.useCasePathService.getSpringBootFeaturePackageTitle(useCase.getSoftwareFeature()) + ".application.ports.in." + useCaseTitle + "UseCase;" + eol
                 + "import " + this.useCasePathService.getSpringBootFeaturePackageTitle(useCase.getSoftwareFeature()) + ".domain.*;" + eol
-                + "import ir.amnpardaz.enterprise.avshop.shares.utilities.CalendarUtility;" + eol
+                + "import " + this.useCasePathService.getSharesPackageTitle(useCase.getSoftwareFeature()) + ".utilities.CalendarUtility;" + eol
                 + "import org.springframework.stereotype.Service;" + eol
                 + eol;
         String serviceContent = ""
@@ -93,7 +88,7 @@ public class GenerateViewUseCaseServiceJavaFile {
                 + eol
                 + t + t + "return new UseCaseFruit<>(" + eol
                 + t + t + t + "new Fruit(" + eol
-                + t + t + t + t + t + "this.map" + viewDomainEntity.getName() + "(entity, plant.getLocale())" + eol
+                + t + t + t + t + t + "true" + eol
                 + t + t + t + ")," + eol
                 + t + t + t + "true," + eol
                 + t + t + t + "\"\"" + eol
@@ -104,13 +99,6 @@ public class GenerateViewUseCaseServiceJavaFile {
                 + t + "public UseCaseFruitSeeds<FruitSeeds> prepare(UseCaseSeedsCommand<SeedsCommands> seedsCommand) throws PrepareException {" + eol
                 + t + t + "return null;" + eol
                 + t + "}" + eol
-                + eol
-                + "\n"
-                + t + "public " + viewDomainEntity.getName() + " map" + viewDomainEntity.getName() + "(" + useCase.getDataEntity().getName() + " entity, String locale){" + "\n"
-                + t + t + "return new " + viewDomainEntity.getName() + "(" + "\n"
-                + this.useCaseService.getDomainEntityMapArguments(viewDomainEntity)
-                + t + t + ");" + "\n"
-                + t + "}" + "\n"
                 + "}";
         return packageTitle
                 + eol
@@ -118,6 +106,4 @@ public class GenerateViewUseCaseServiceJavaFile {
                 + eol
                 + serviceContent;
     }
-
-
 }

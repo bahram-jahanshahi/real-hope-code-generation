@@ -5,6 +5,7 @@ import ir.afarinesh.realhope.entities.feature.UseCase;
 import ir.afarinesh.realhope.entities.feature.UseCaseData;
 import ir.afarinesh.realhope.entities.feature.UseCaseDataAttribute;
 import ir.afarinesh.realhope.entities.feature.enums.PrimitiveAttributeTypeEnum;
+import ir.afarinesh.realhope.entities.feature.enums.UserInterfaceTypeEnum;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.java.usecase_service.exceptions.GenerateUpdateUseCaseServiceJavaFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCasePathService;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCaseService;
@@ -105,9 +106,6 @@ public class GenerateUpdateUseCaseServiceJavaFile {
                 + eol
                 + t + "@Override" + eol
                 + t + "public UseCaseFruitSeeds<FruitSeeds> prepare(UseCaseSeedsCommand<SeedsCommands> seedsCommand) throws PrepareException {" + eol
-                + t + t + useCase.getDataEntity().getName() + " entity =" + eol
-                + t + t + t + t + "this." + StringUtility.firstLowerCase(useCase.getDataEntity().getName()) + "SpringJpaRepository.findById(seedsCommand.getSeedsCommand().getId())" + eol
-                + t + t + t + t + ".orElseThrow(() -> new PrepareException(\"Cannot find by id = \" + seedsCommand.getSeedsCommand().getId()));"
                 + eol
                 + this.getFruitSeedsAttributes(useCase, t + t)
                 + eol
@@ -131,24 +129,30 @@ public class GenerateUpdateUseCaseServiceJavaFile {
 
     private String getFruitSeedsAttributes(UseCase useCase, String offset) throws GetPlantException {
         String content = "";
+        if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.Update)) {
+            content += ""
+                    + t + t + useCase.getDataEntity().getName() + " entity =" + eol
+                    + t + t + t + t + "this." + StringUtility.firstLowerCase(useCase.getDataEntity().getName()) + "SpringJpaRepository.findById(seedsCommand.getSeedsCommand().getId())" + eol
+                    + t + t + t + t + ".orElseThrow(() -> new PrepareException(\"Cannot find by id = \" + seedsCommand.getSeedsCommand().getId()));" + eol;
+        }
         List<UseCaseDataAttribute> attributes = this.useCaseService.getFruitSeeds(useCase).getUseCaseDataAttributes();
         for (UseCaseDataAttribute attribute : attributes) {
             if (attribute.isPrimitive()) {
                 content += offset + attribute.getPrimitiveAttributeType().name() + " " + StringUtility.firstLowerCase(attribute.getName())
-                        + " = " + this.getFruitSeedsAttributeGetter(attribute, false, false) + ";" + eol;
+                        + " = " + this.getFruitSeedsAttributeGetter(attribute, false, false, useCase.getUserInterfaceType()) + ";" + eol;
             }
             if (attribute.isSelectEnum()) {
                 content += offset + "SelectEnum " + StringUtility.firstLowerCase(attribute.getName()) + "Enum"
-                        + " = " + this.getFruitSeedsAttributeGetter(attribute, false, false) + ";" + eol;
+                        + " = " + this.getFruitSeedsAttributeGetter(attribute, false, false, useCase.getUserInterfaceType()) + ";" + eol;
                 content += offset + "List<SelectEnum> " + StringUtility.firstLowerCase(attribute.getName()) + "EnumList"
-                        + " = " + this.getFruitSeedsAttributeGetter(attribute, true, false) + ";" + eol;
+                        + " = " + this.getFruitSeedsAttributeGetter(attribute, true, false, useCase.getUserInterfaceType()) + ";" + eol;
             }
 
             if (attribute.isSelectEntity()) {
                 content += offset + "SelectEntity " + StringUtility.firstLowerCase(attribute.getName())
-                        + " = " + this.getFruitSeedsAttributeGetter(attribute, false, false) + ";" + eol;
+                        + " = " + this.getFruitSeedsAttributeGetter(attribute, false, false, useCase.getUserInterfaceType()) + ";" + eol;
                 content += offset + "List<SelectEntity> " + StringUtility.firstLowerCase(attribute.getName()) + "List"
-                        + " = " + this.getFruitSeedsAttributeGetter(attribute, false, true) + ";" + eol;
+                        + " = " + this.getFruitSeedsAttributeGetter(attribute, false, true, useCase.getUserInterfaceType()) + ";" + eol;
             }
         }
         return content;
@@ -177,29 +181,44 @@ public class GenerateUpdateUseCaseServiceJavaFile {
         return content;
     }
 
-    private String getFruitSeedsAttributeGetter(UseCaseDataAttribute attribute, boolean isEnumList, boolean isEntityList) {
+    private String getFruitSeedsAttributeGetter(UseCaseDataAttribute attribute, boolean isEnumList, boolean isEntityList, UserInterfaceTypeEnum userInterfaceType) {
         String content = "";
         String sequenceOfGetters = this.useCaseService.getSequenceOfGetters(attribute.getGetterOfUpdatePath());
         if (sequenceOfGetters != null) {
             if (attribute.isPrimitive()) {
-                // JavaDate begin
-                if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate)) {
-                    content += "CalendarUtility.getJavaDate(";
+                if (userInterfaceType.equals(UserInterfaceTypeEnum.Update)) {
+                    // JavaDate begin
+                    if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate)) {
+                        content += "CalendarUtility.getJavaDate(";
+                    }
+                    content += "entity." + sequenceOfGetters;
+                    // JavaDate end
+                    if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate)) {
+                        content += ")";
+                    }
                 }
-                content += "entity." + sequenceOfGetters;
-                // JavaDate end
-                if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate)) {
-                    content += ")";
+                if (userInterfaceType.equals(UserInterfaceTypeEnum.AddNew)) {
+                    content += "null";
                 }
             }
+            // Enum
             if (attribute.isSelectEnum()) {
-                if (isEnumList) {
-                    content += "entity." + sequenceOfGetters + ".getSelectEnumList(seedsCommand.getLocale())";
-                } else {
-                    content += "entity." + sequenceOfGetters + ".getSelectEnum(seedsCommand.getLocale())";
+                if (userInterfaceType.equals(UserInterfaceTypeEnum.Update)) {
+                    if (isEnumList) {
+                        content += "entity." + sequenceOfGetters + ".getSelectEnumList(seedsCommand.getLocale())";
+                    } else {
+                        content += "entity." + sequenceOfGetters + ".getSelectEnum(seedsCommand.getLocale())";
+                    }
+                }
+                if (userInterfaceType.equals(UserInterfaceTypeEnum.AddNew)) {
+                    if (isEnumList) {
+                        content += "entity." + sequenceOfGetters + ".getSelectEnumList(seedsCommand.getLocale())";
+                    } else {
+                        content += "null";
+                    }
                 }
             }
-
+            // Data Entity
             if (attribute.isSelectEntity()) {
                 if (isEntityList) {
                     content += "this." + StringUtility.firstLowerCase(attribute.getDataEntityAttributeType().getName()) + "SpringJpaRepository" + eol
@@ -208,7 +227,12 @@ public class GenerateUpdateUseCaseServiceJavaFile {
                             + t + t + t + t + ".map(obj -> new SelectEntity(obj.title(seedsCommand.getLocale()), obj.getId()))" + eol
                             + t + t + t + t + ".collect(Collectors.toList())";
                 } else {
-                    content += "new SelectEntity(entity." + sequenceOfGetters + ".title(seedsCommand.getLocale()), entity." + sequenceOfGetters + ".getId());";
+                    if (userInterfaceType.equals(UserInterfaceTypeEnum.Update)) {
+                        content += "new SelectEntity(entity." + sequenceOfGetters + ".title(seedsCommand.getLocale()), entity." + sequenceOfGetters + ".getId());";
+                    }
+                    if (userInterfaceType.equals(UserInterfaceTypeEnum.AddNew)) {
+                        content += "new SelectEntity()";
+                    }
                 }
             }
         } else {

@@ -2,6 +2,8 @@ package ir.afarinesh.realhope.modules.generation.features.usecase.application.fi
 
 import ir.afarinesh.realhope.entities.feature.UseCase;
 import ir.afarinesh.realhope.entities.feature.enums.UserInterfaceTypeEnum;
+import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.delete.GenerateUseCaseDeleteComponentAngularFile;
+import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.delete.exceptions.GenerateUseCaseDeleteComponentAngularFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.exceptions.GenerateUseCaseComponentAngularFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.grid_list.GenerateUseCaseGridListComponentAngularFile;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.grid_list.exceptions.GenerateUseCaseGridListComponentAngularFileException;
@@ -17,13 +19,16 @@ public class GenerateUseCaseComponentAngularFile {
     final GenerateUseCaseGridListComponentAngularFile generateUseCaseGridListComponentAngularFile;
     final GenerateUseCaseViewComponentAngularFile generateUseCaseViewComponentAngularFile;
     final GenerateUseCaseUpdateComponentAngularFile generateUseCaseUpdateComponentAngularFile;
+    final GenerateUseCaseDeleteComponentAngularFile generateUseCaseDeleteComponentAngularFile;
 
     public GenerateUseCaseComponentAngularFile(GenerateUseCaseGridListComponentAngularFile generateUseCaseGridListComponentAngularFile,
                                                GenerateUseCaseViewComponentAngularFile generateUseCaseViewComponentAngularFile,
-                                               GenerateUseCaseUpdateComponentAngularFile generateUseCaseUpdateComponentAngularFile) {
+                                               GenerateUseCaseUpdateComponentAngularFile generateUseCaseUpdateComponentAngularFile,
+                                               GenerateUseCaseDeleteComponentAngularFile generateUseCaseDeleteComponentAngularFile) {
         this.generateUseCaseGridListComponentAngularFile = generateUseCaseGridListComponentAngularFile;
         this.generateUseCaseViewComponentAngularFile = generateUseCaseViewComponentAngularFile;
         this.generateUseCaseUpdateComponentAngularFile = generateUseCaseUpdateComponentAngularFile;
+        this.generateUseCaseDeleteComponentAngularFile = generateUseCaseDeleteComponentAngularFile;
     }
 
     public void generate(UseCase useCase) throws GenerateUseCaseComponentAngularFileException {
@@ -53,6 +58,24 @@ public class GenerateUseCaseComponentAngularFile {
             }
 
         }
+        // AddNew Entity (same as update!)
+        if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.AddNew)) {
+            try {
+                this.generateUseCaseUpdateComponentAngularFile.generate(useCase);
+            } catch (GenerateUseCaseUpdateComponentAngularFileException e) {
+                throw new GenerateUseCaseComponentAngularFileException(e.getMessage());
+            }
 
+        }
+
+        // Delete
+        if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.Delete)) {
+            try {
+                this.generateUseCaseDeleteComponentAngularFile.generate(useCase);
+            } catch (GenerateUseCaseDeleteComponentAngularFileException e) {
+                throw new GenerateUseCaseComponentAngularFileException(e.getMessage());
+            }
+
+        }
     }
 }

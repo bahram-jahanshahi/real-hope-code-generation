@@ -190,7 +190,7 @@ public class GenerateUseCaseUpdateComponentAngularFile {
 
     // html content
     protected String getHtmlContent(UseCase useCase) throws GetPlantException {
-        String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
+        String useCaseTitle = useCaseService.getUseCaseTitle(useCase);
         String header = ""
                 + "<div mat-dialog-title>" + eol
                 + t + "{{ '" + useCaseTitle + ".FormTitle' | translate }}" + eol
@@ -205,8 +205,11 @@ public class GenerateUseCaseUpdateComponentAngularFile {
                 + t + "</form>" + eol
                 + "</mat-dialog-content>" + eol
                 + "<mat-dialog-actions>" + eol
+                + t + "<button mat-flat-button (click)='close()'>" + eol
+                + t + t + "{{'" + useCaseTitle + ".Close' | translate}}" + eol
+                + t + "</button>" + eol
                 + t + "<button mat-raised-button color='primary' (click)='submit()'>" + eol
-                + t + t + "{{'UpdateContractBySalesChannelDepartment.Submit' | translate}}" + eol
+                + t + t + "{{'" + useCaseTitle + ".Submit' | translate}}" + eol
                 + t + "</button>" + eol
                 + "</mat-dialog-actions>";
         String action = "";
