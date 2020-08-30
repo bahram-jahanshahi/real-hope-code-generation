@@ -73,23 +73,25 @@ public class GenerateUseCaseService implements GenerateUseCase {
         List<UseCase> useCaseList = useCaseSpringJpaRepository.findAll();
         List<DomainEntity> domainEntityList = domainEntitySpringJpaRepository.findAll();
         for (UseCase useCase : useCaseList) {
-            try {
-                // generate use case interface java
-                this.generateUseCaseInterfaceJavaFile.generate(useCase);
-                // generate rest controller java
-                this.generateUseCaseRestControllerJavaFile.generate(useCase);
-                // generate use case service java
-                if (this.codeGenerationConfigService.isSpringBootServiceGenerationEnabled(useCase.getId())) {
-                    this.generateUseCaseServiceJavaFile.generate(useCase);
+            if (useCase.getId() > 0L) {
+                try {
+                    // generate use case interface java
+                    this.generateUseCaseInterfaceJavaFile.generate(useCase);
+                    // generate rest controller java
+                    this.generateUseCaseRestControllerJavaFile.generate(useCase);
+                    // generate use case service java
+                    if (this.codeGenerationConfigService.isSpringBootServiceGenerationEnabled(useCase.getId())) {
+                        this.generateUseCaseServiceJavaFile.generate(useCase);
+                    }
+                    // generate use case angular cli service
+                    this.generateUseCaseServiceAngularFile.generate(useCase);
+                    // generate component for angular cli
+                    this.generateUseCaseComponentAngularFile.generate(useCase);
+                    // generate dictionary for angular cli
+                    this.generateDictionaryAngularFile.generate();
+                } catch (GenerateUseCaseInterfaceJavaFileException | GenerateUseCaseRestControllerJavaFileException | GenerateUseCaseServiceAngularFileException | GenerateUseCaseComponentAngularFileException | GenerateUseCaseServiceJavaFileException | GenerateDictionaryAngularFileException e) {
+                    throw new CultivateException(e.getMessage());
                 }
-                // generate use case angular cli service
-                this.generateUseCaseServiceAngularFile.generate(useCase);
-                // generate component for angular cli
-                this.generateUseCaseComponentAngularFile.generate(useCase);
-                // generate dictionary for angular cli
-                this.generateDictionaryAngularFile.generate();
-            } catch (GenerateUseCaseInterfaceJavaFileException | GenerateUseCaseRestControllerJavaFileException | GenerateUseCaseServiceAngularFileException | GenerateUseCaseComponentAngularFileException | GenerateUseCaseServiceJavaFileException | GenerateDictionaryAngularFileException e) {
-                throw new CultivateException(e.getMessage());
             }
         }
 

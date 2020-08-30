@@ -54,7 +54,8 @@ public class GenerateDictionaryAngularFile {
                                 .createFile(
                                         this.getPath(softwareApplicationPanel),
                                         this.getFileName(),
-                                        this.getContent(softwareApplicationPanel)
+                                        this.getContent(softwareApplicationPanel),
+                                        true
                                 );
                     } catch (CreateFileException e) {
                         throw new RuntimeException(e.getMessage());

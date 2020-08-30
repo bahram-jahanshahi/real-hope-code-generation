@@ -38,7 +38,8 @@ public class GenerateUseCaseInterfaceJavaFile {
                     .createFile(
                             this.getPath(useCase),
                             this.getFileName(useCase),
-                            this.getContent(useCase)
+                            this.getContent(useCase),
+                            true
                     );
         } catch (CreateFileException e) {
             throw new GenerateUseCaseInterfaceJavaFileException(e.getMessage());

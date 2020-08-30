@@ -6,6 +6,7 @@ import ir.afarinesh.realhope.entities.feature.enums.UseCaseDataTypeEnum;
 import ir.afarinesh.realhope.entities.feature.enums.UserInterfaceTypeEnum;
 import ir.afarinesh.realhope.entities.project.SoftwareFeature;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.grid_list.exceptions.GenerateUseCaseGridListComponentAngularFileException;
+import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCaseAngularFormService;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCasePathService;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCaseService;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.exceptions.GetPlantException;
@@ -26,17 +27,20 @@ public class GenerateUseCaseGridListComponentAngularFile {
     final FileManagementService fileManagementService;
     final UseCasePathService useCasePathService;
     final UseCaseService useCaseService;
+    final UseCaseAngularFormService useCaseAngularFormService;
     final DomainEntitySpringJpaRepository domainEntitySpringJpaRepository;
     final UseCaseRelationSpringJpaRepository useCaseRelationSpringJpaRepository;
 
     public GenerateUseCaseGridListComponentAngularFile(FileManagementService fileManagementService,
                                                        UseCasePathService useCasePathService,
                                                        UseCaseService useCaseService,
+                                                       UseCaseAngularFormService useCaseAngularFormService,
                                                        DomainEntitySpringJpaRepository domainEntitySpringJpaRepository,
                                                        UseCaseRelationSpringJpaRepository useCaseRelationSpringJpaRepository) {
         this.fileManagementService = fileManagementService;
         this.useCasePathService = useCasePathService;
         this.useCaseService = useCaseService;
+        this.useCaseAngularFormService = useCaseAngularFormService;
         this.domainEntitySpringJpaRepository = domainEntitySpringJpaRepository;
         this.useCaseRelationSpringJpaRepository = useCaseRelationSpringJpaRepository;
     }
@@ -48,21 +52,24 @@ public class GenerateUseCaseGridListComponentAngularFile {
                     .createFile(
                             this.getPath(useCase),
                             this.getComponentFileName(useCase),
-                            this.getComponentContent(useCase)
+                            this.getComponentContent(useCase),
+                            true
                     );
             // create html
             fileManagementService
                     .createFile(
                             this.getPath(useCase),
                             this.getHtmlFileName(useCase),
-                            this.getHtmlContent(useCase)
+                            this.getHtmlContent(useCase),
+                            true
                     );
             // create css
             fileManagementService
                     .createFile(
                             this.getPath(useCase),
                             this.getCssFileName(useCase),
-                            this.getCssContent(useCase)
+                            this.getCssContent(useCase),
+                            true
                     );
         } catch (CreateFileException | GetPlantException e) {
             throw new GenerateUseCaseGridListComponentAngularFileException(e.getMessage());
@@ -95,18 +102,22 @@ public class GenerateUseCaseGridListComponentAngularFile {
                 + "import {Component, OnInit, ViewChild} from '@angular/core';" + eol
                 + "import {MatPaginator} from '@angular/material/paginator';" + eol
                 + "import {MatTableDataSource} from '@angular/material/table';" + eol
-                + "import {FormControl} from '@angular/forms';" + eol
+                + "import {FormControl, FormGroup} from '@angular/forms';" + eol
                 + "import {debounceTime, distinctUntilChanged} from 'rxjs/operators';" + eol
                 + "import {NavigationService} from '../../../../../../core/services/navigation.service';" + eol
                 + "import {UtilityDialogService} from '../../../../../../shares/utilities/utility-dialog.service';" + eol
                 + "import {LocaleService} from '../../../../../../core/services/locale.service';" + eol
                 + "import {ResponsiveService} from '../../../../../../core/services/responsive.service';" + eol
                 + "import {UseCaseCommand} from '../../../../../../core/domain/use-case-command';" + eol
+                + "import {UseCaseSeedsCommand} from '../../../../../../core/domain/use-case-seeds-command';" + eol
                 + "import {PaginationCommand} from '../../../../../../core/domain/pagination-command';" + eol
                 + "import {ErrorDialogData} from '../../../../../../shares/components/dialogs/error-dialog/error-dialog.component';" + eol
+                + "import {SelectEnum} from '../../../../../../core/domain/select-enum';" + eol
                 + "import {" + eol
-                + "  " + useCaseTitle + "Plant" + "," + eol
-                + "  " + useCaseTitle + "Service" + eol
+                + t + useCaseTitle + "Plant" + "," + eol
+                + t + useCaseTitle + "Service" + "," + eol
+                + t + useCaseTitle + "FruitSeeds" + "," + eol
+                + t + useCaseTitle + "SeedsCommand" + "," + eol
                 + "} from '../../services/" + StringUtility.convertCamelToDash(useCaseTitle) + ".service';" + eol
                 + this.getDomainEntitiesImports(useCase.getSoftwareFeature())
                 + this.getRelationImports(useCase);
@@ -126,9 +137,12 @@ public class GenerateUseCaseGridListComponentAngularFile {
                 + t + "dataSource = new MatTableDataSource<" + this.getDisplayedFruitDomainEntity(useCase).getName() + ">();" + eol
                 + t + "dataArray = new Array<" + this.getDisplayedFruitDomainEntity(useCase).getName() + ">();" + eol
                 + eol
+                + this.getEnumListVariables(useCase)
+                + eol
                 + t + "realTimeSearchEnabled = true;" + eol
                 + t + "// form controls" + eol
                 + this.getSearchFormControls(useCase)
+                + eol
                 + t + "isWebMedium = false;" + eol
                 + eol
                 + t + "constructor(private useCase: " + useCaseTitle + "Service," + eol
@@ -183,7 +197,21 @@ public class GenerateUseCaseGridListComponentAngularFile {
                 + t + "}" + eol
                 + eol
                 + t + "prepare(): void {" + eol
-                + t + t + "this.search();" + eol
+                + t + t + "this.useCase" + eol
+                + t + t + t + ".prepare(new UseCaseSeedsCommand<ListChequeBySalesChannelDepartmentSeedsCommand>(" + eol
+                + t + t + t + t + "new ListChequeBySalesChannelDepartmentSeedsCommand(null)," + eol
+                + t + t + t + t + "this.localeService.getLocale().getValue()" + eol
+                + t + t + t + "))" + eol
+                + t + t + t +".subscribe(fruitSeeds => {" + eol
+                + t + t + t + t + "if (fruitSeeds.isSuccessful) {" + eol
+                + this.getPrepareResult(useCase, t + t + t + t + t)
+                + t + t + t + t + t + "this.search();" + eol
+                + t + t + t + t + "} else {" + eol
+                + t + t + t + t + t + "this.dialogService.showErrorDialog(new ErrorDialogData('', Array.of(fruitSeeds.message)));" + eol
+                + t + t + t + t + "}" + eol
+                + t + t + t + "}, error => {" + eol
+                + t + t + t + t + "this.dialogService.showQuickServerErrorDialog(error.message);" + eol
+                + t + t + t + "});" + eol
                 + t + "}" + eol
                 + eol
                 + t + "resetSearchForm(): void {" + eol
@@ -323,7 +351,7 @@ public class GenerateUseCaseGridListComponentAngularFile {
         UseCaseData plant = useCaseService.getPlant(useCase);
         for (int i = 0; i < plant.getUseCaseDataAttributes().size(); i++) {
             UseCaseDataAttribute attribute = plant.getUseCaseDataAttributes().get(i);
-            content += t + StringUtility.firstLowerCase(attribute.getName()) + "FormControl = new FormControl(null);" + eol;
+            content += t + t + StringUtility.firstLowerCase(attribute.getName()) + "FormControl = new FormControl(null);" + eol;
         }
         return content;
     }
@@ -335,14 +363,14 @@ public class GenerateUseCaseGridListComponentAngularFile {
         Long maxRow = getMaxRowOfUseCaseDataAttributes(plant.getUseCaseDataAttributes());
         for (long row = 1; row <= maxRow; row++ ){
             content += StringUtility.space(offset) + "<div fxLayout.lt-md='column' fxLayout.gt-sm='row' fxLayoutGap.gt-sm='16px' fxLayoutGap.lt-md='8px'>" + eol;
-            for (long col = 1; col <= 3; col++) {
+            for (long col = 1; col <= 4; col++) {
                 UseCaseDataAttribute attribute = getAttributeByRowAndColumn(plant.getUseCaseDataAttributes(), row, col);
                 if (attribute != null) {
-                    content += StringUtility.space(offset + 2) + "<mat-form-field appearance='outline' fxFlex.gt-sm='33%' fxFlex.lt-md='100%'>" + eol;
+                    content += StringUtility.space(offset + 2) + "<mat-form-field appearance='outline' fxFlex.gt-sm='25%' fxFlex.lt-md='100%'>" + eol;
                     content += StringUtility.space(offset + 4) + "<mat-label>" + eol;
                     content += StringUtility.space(offset + 6) + "{{'" + useCaseTitle + "." + attribute.getName() + "SearchField' | translate}}" + eol;
                     content += StringUtility.space(offset + 4) + "</mat-label>" + eol;
-                    content += StringUtility.space(offset + 4) + "<input matInput [formControl]='" + StringUtility.firstLowerCase(attribute.getName()) + "FormControl'>" + eol;
+                    content += useCaseAngularFormService.getFormFieldInput(useCaseTitle, attribute, t + t + t + t, true);
                     content += StringUtility.space(offset + 2) + "</mat-form-field>" + eol;
                 }
             }
@@ -469,5 +497,29 @@ public class GenerateUseCaseGridListComponentAngularFile {
             }
         }
         return max;
+    }
+
+    private String getEnumListVariables(UseCase useCase) throws GetPlantException {
+        String content = "";
+        UseCaseData plant = useCaseService.getPlant(useCase);
+        for (int i = 0; i < plant.getUseCaseDataAttributes().size(); i++) {
+            UseCaseDataAttribute attribute = plant.getUseCaseDataAttributes().get(i);
+            if (attribute.isSelectEnum()) {
+                content += t + StringUtility.firstLowerCase(attribute.getName()) + "EnumArray = new Array<SelectEnum>();" + eol;
+            }
+        }
+        return content;
+    }
+
+    private String getPrepareResult(UseCase useCase, String offset) throws GetPlantException {
+        String content = "";
+        UseCaseData fruitSeeds = useCaseService.getFruitSeeds(useCase);
+        for (int i = 0; i < fruitSeeds.getUseCaseDataAttributes().size(); i++) {
+            UseCaseDataAttribute attribute = fruitSeeds.getUseCaseDataAttributes().get(i);
+            if (attribute.isSelectEnum()) {
+                content += offset + "this." + StringUtility.firstLowerCase(attribute.getName()) + "EnumArray = fruitSeeds.fruitSeeds." + StringUtility.firstLowerCase(attribute.getName()) + "EnumArray;" + eol;
+            }
+        }
+        return content;
     }
 }

@@ -33,21 +33,24 @@ public class GenerateUseCaseDeleteComponentAngularFile {
                     .createFile(
                             this.getPath(useCase),
                             this.getComponentFileName(useCase),
-                            this.getComponentContent(useCase)
+                            this.getComponentContent(useCase),
+                            true
                     );
             // create html
             fileManagementService
                     .createFile(
                             this.getPath(useCase),
                             this.getHtmlFileName(useCase),
-                            this.getHtmlContent(useCase)
+                            this.getHtmlContent(useCase),
+                            true
                     );
             // create css
             fileManagementService
                     .createFile(
                             this.getPath(useCase),
                             this.getCssFileName(useCase),
-                            this.getCssContent(useCase)
+                            this.getCssContent(useCase),
+                            true
                     );
         } catch (CreateFileException | GetViewDomainEntityException e) {
             throw new GenerateUseCaseDeleteComponentAngularFileException(e.getMessage());

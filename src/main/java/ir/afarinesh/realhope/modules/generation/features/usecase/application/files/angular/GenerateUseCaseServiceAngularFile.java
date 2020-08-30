@@ -39,7 +39,8 @@ public class GenerateUseCaseServiceAngularFile {
                     .createFile(
                             this.getPath(useCase),
                             this.getFileName(useCase),
-                            this.getContent(useCase)
+                            this.getContent(useCase),
+                            true
                     );
         } catch (CreateFileException e) {
             throw new GenerateUseCaseServiceAngularFileException(e.getMessage());

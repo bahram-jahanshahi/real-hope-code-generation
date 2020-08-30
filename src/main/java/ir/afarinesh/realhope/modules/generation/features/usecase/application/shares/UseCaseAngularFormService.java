@@ -35,57 +35,73 @@ public class UseCaseAngularFormService {
                     + offset + t + t + "<mat-label>" + eol
                     + offset + t + t + t + "{{'" + useCaseTitle + "." + attribute.getName() + "' | translate}}" + eol
                     + offset + t + t + "</mat-label>" + eol
-                    + this.getFormFieldInput(useCaseTitle, attribute, offset + t + t)
+                    + this.getFormFieldInput(useCaseTitle, attribute, offset + t + t, false)
                     + offset + t + "</mat-form-field>" + eol
                     + offset + "</div>" + eol;
         }
         return content;
     }
 
-    protected String getFormFieldInput(String useCaseTitle, UseCaseDataAttribute attribute, String offset) {
-        String content = "";
+    public String getFormFieldInput(String useCaseTitle, UseCaseDataAttribute attribute, String offset, boolean isSearchForm) {
         String attVarName = StringUtility.firstLowerCase(attribute.getName());
+        String formControlAttributeOfTag = "";
+        if (isSearchForm) {
+            formControlAttributeOfTag = "[formControl]='" + attVarName + "FormControl'";
+        } else {
+            if (attribute.isSelectEnum()) {
+                formControlAttributeOfTag = "formControlName='" + attVarName + "Enum'";
+            } else {
+                formControlAttributeOfTag = "formControlName='" + attVarName + "'";
+            }
+        }
+        String content = "";
         if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.Primitive)) {
             if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.String)) {
-                content += offset + "<input matInput formControlName='" + attVarName + "'>" + eol;
+                content += offset + "<input matInput " + formControlAttributeOfTag + ">" + eol;
             }
             if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate)) {
-                content += offset + "<input matInput [matDatepicker]='" + attVarName + "Datepicker' formControlName='" + attVarName + "'>" + eol;
+                content += offset + "<input matInput [matDatepicker]='" + attVarName + "Datepicker' " + formControlAttributeOfTag + ">" + eol;
                 content += offset + "<mat-datepicker-toggle matSuffix [for]='" + attVarName + "Datepicker'></mat-datepicker-toggle>" + eol;
                 content += offset + "<mat-datepicker touchUi #" + attVarName + "Datepicker></mat-datepicker>";
             }
             if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Boolean)) {
-                content += offset + "<mat-select formControlName='" + attVarName + "'>" + eol;
+                content += offset + "<mat-select " + formControlAttributeOfTag + ">" + eol;
                 content += offset + "<mat-option [value]='false'>{{'" + useCaseTitle + ".BooleanNo' | translate}}</mat-option>";
                 content += offset + "<mat-option [value]='true'>{{'" + useCaseTitle + ".BooleanYes' | translate}}</mat-option>";
                 content += offset + "</mat-select>";
             }
             if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Integer) || attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Long)) {
-                content += offset + "<input matInput type='number' formControlName='" + attVarName + "'>" + eol;
+                content += offset + "<input matInput type='number' " + formControlAttributeOfTag + ">" + eol;
             }
-            content += offset + "<mat-error *ngIf=\"this.reactiveForm.get('" + StringUtility.firstLowerCase(attribute.getName()) + "').invalid\">" + eol;
-            content += offset + t + "{{'" + useCaseTitle + "." + attribute.getName() + "Error' | translate}}" + eol;
-            content += offset + "</mat-error>" + eol;
+            if (!isSearchForm) {
+                content += offset + "<mat-error *ngIf=\"this.reactiveForm.get('" + StringUtility.firstLowerCase(attribute.getName()) + "').invalid\">" + eol;
+                content += offset + t + "{{'" + useCaseTitle + "." + attribute.getName() + "Error' | translate}}" + eol;
+                content += offset + "</mat-error>" + eol;
+            }
         }
         if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEnum)) {
-            content += offset + "<mat-select formControlName='" + attVarName + "Enum'>" + eol;
+            content += offset + "<mat-select " + formControlAttributeOfTag + ">" + eol;
             content += offset + t + "<mat-option *ngFor='let " + attVarName + "Enum of " + attVarName + "EnumArray' [value]='" + attVarName + "Enum.value'>" + eol;
             content += offset + t + t + "{{" + attVarName + "Enum.title}}" + eol;
             content += offset + t + "</mat-option>" + eol;
             content += offset + "</mat-select>" + eol;
-            content += offset + "<mat-error *ngIf=\"this.reactiveForm.get('" + StringUtility.firstLowerCase(attribute.getName()) + "Enum').invalid\">" + eol;
-            content += offset + t + "{{'" + useCaseTitle + "." + attribute.getName() + "Error' | translate}}" + eol;
-            content += offset + "</mat-error>" + eol;
+            if (!isSearchForm) {
+                content += offset + "<mat-error *ngIf=\"this.reactiveForm.get('" + StringUtility.firstLowerCase(attribute.getName()) + "Enum').invalid\">" + eol;
+                content += offset + t + "{{'" + useCaseTitle + "." + attribute.getName() + "Error' | translate}}" + eol;
+                content += offset + "</mat-error>" + eol;
+            }
         }
         if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
-            content += offset + "<mat-select formControlName='" + attVarName + "'>" + eol;
+            content += offset + "<mat-select " + formControlAttributeOfTag + ">" + eol;
             content += offset + t + "<mat-option *ngFor='let " + attVarName + " of " + attVarName + "Array' [value]='" + attVarName + ".value'>" + eol;
             content += offset + t + t + "{{" + attVarName + ".title}}" + eol;
             content += offset + t + "</mat-option>" + eol;
             content += offset + "</mat-select>" + eol;
-            content += offset + "<mat-error *ngIf=\"this.reactiveForm.get('" + StringUtility.firstLowerCase(attribute.getName()) + "').invalid\">" + eol;
-            content += offset + t + "{{'" + useCaseTitle + "." + attribute.getName() + "Error' | translate}}" + eol;
-            content += offset + "</mat-error>" + eol;
+            if (!isSearchForm) {
+                content += offset + "<mat-error *ngIf=\"this.reactiveForm.get('" + StringUtility.firstLowerCase(attribute.getName()) + "').invalid\">" + eol;
+                content += offset + t + "{{'" + useCaseTitle + "." + attribute.getName() + "Error' | translate}}" + eol;
+                content += offset + "</mat-error>" + eol;
+            }
         }
         return content;
     }

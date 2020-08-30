@@ -1,6 +1,7 @@
 package ir.afarinesh.realhope.entities.feature;
 
 import ir.afarinesh.realhope.entities.data_model.DataEntity;
+import ir.afarinesh.realhope.entities.data_model.DataEnum;
 import ir.afarinesh.realhope.entities.feature.enums.PrimitiveAttributeTypeEnum;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeCategoryEnum;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeQuantityEnum;
@@ -78,6 +79,10 @@ public class UseCaseDataAttribute {
     @JoinColumn(nullable = true)
     @ManyToOne
     private UseCaseDataAttribute fruitSeedsAttribute;
+
+    @JoinColumn(nullable = true)
+    @ManyToOne
+    private DataEnum dataEnum;
 
     // Utilities
     public boolean isPrimitive() {

@@ -30,7 +30,8 @@ public class GenerateFeatureDomainAngularFile {
                     .createFile(
                             this.getPath(domainEntity),
                             this.getFileName(domainEntity),
-                            this.getContent(domainEntity)
+                            this.getContent(domainEntity),
+                            true
                     );
         } catch (CreateFileException e) {
             throw new GenerateFeatureDomainAngularFileException(e.getMessage());
