@@ -114,6 +114,7 @@ public class GenerateUseCaseDeleteComponentAngularFile {
                 + t + "}" + eol
                 + eol
                 + t + "ngOnInit(): void {" + eol
+                + t + t + "this.prepare();" + eol
                 + t + "}" + eol
                 + eol
                 + t + "public submit(): void {" + eol
@@ -146,6 +147,10 @@ public class GenerateUseCaseDeleteComponentAngularFile {
                 + t + t + t + "}, error => {" + eol
                 + t + t + t + t + "this.dialogService.showQuickServerErrorDialog('Error: ' + error.message);" + eol
                 + t + t + t + "});" + eol
+                + t + "}" + eol
+                + eol
+                + t + "private prepare(): void {" + eol
+                + t + t + "this.readyToDelete = true;" + eol
                 + t + "}" + eol
                 + eol
                 + t + "close(): void {\n"

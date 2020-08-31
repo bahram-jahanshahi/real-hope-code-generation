@@ -1,9 +1,7 @@
 package ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.grid_list;
 
 import ir.afarinesh.realhope.entities.feature.*;
-import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeQuantityEnum;
-import ir.afarinesh.realhope.entities.feature.enums.UseCaseDataTypeEnum;
-import ir.afarinesh.realhope.entities.feature.enums.UserInterfaceTypeEnum;
+import ir.afarinesh.realhope.entities.feature.enums.*;
 import ir.afarinesh.realhope.entities.project.SoftwareFeature;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.grid_list.exceptions.GenerateUseCaseGridListComponentAngularFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCaseAngularFormService;
@@ -11,8 +9,8 @@ import ir.afarinesh.realhope.modules.generation.features.usecase.application.sha
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCaseService;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.exceptions.GetPlantException;
 import ir.afarinesh.realhope.shares.repositories.DomainEntitySpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.UseCaseRelationSpringJpaRepository;
 import ir.afarinesh.realhope.shares.services.FileManagementService;
+import ir.afarinesh.realhope.shares.services.UseCaseRelationService;
 import ir.afarinesh.realhope.shares.services.exceptions.CreateFileException;
 import ir.afarinesh.realhope.shares.utilities.StringUtility;
 import org.springframework.stereotype.Service;
@@ -28,21 +26,21 @@ public class GenerateUseCaseGridListComponentAngularFile {
     final UseCasePathService useCasePathService;
     final UseCaseService useCaseService;
     final UseCaseAngularFormService useCaseAngularFormService;
+    final UseCaseRelationService useCaseRelationService;
     final DomainEntitySpringJpaRepository domainEntitySpringJpaRepository;
-    final UseCaseRelationSpringJpaRepository useCaseRelationSpringJpaRepository;
 
     public GenerateUseCaseGridListComponentAngularFile(FileManagementService fileManagementService,
                                                        UseCasePathService useCasePathService,
                                                        UseCaseService useCaseService,
                                                        UseCaseAngularFormService useCaseAngularFormService,
-                                                       DomainEntitySpringJpaRepository domainEntitySpringJpaRepository,
-                                                       UseCaseRelationSpringJpaRepository useCaseRelationSpringJpaRepository) {
+                                                       UseCaseRelationService useCaseRelationService,
+                                                       DomainEntitySpringJpaRepository domainEntitySpringJpaRepository) {
         this.fileManagementService = fileManagementService;
         this.useCasePathService = useCasePathService;
         this.useCaseService = useCaseService;
         this.useCaseAngularFormService = useCaseAngularFormService;
+        this.useCaseRelationService = useCaseRelationService;
         this.domainEntitySpringJpaRepository = domainEntitySpringJpaRepository;
-        this.useCaseRelationSpringJpaRepository = useCaseRelationSpringJpaRepository;
     }
 
     public void generate(UseCase useCase) throws GenerateUseCaseGridListComponentAngularFileException {
@@ -113,6 +111,7 @@ public class GenerateUseCaseGridListComponentAngularFile {
                 + "import {PaginationCommand} from '../../../../../../core/domain/pagination-command';" + eol
                 + "import {ErrorDialogData} from '../../../../../../shares/components/dialogs/error-dialog/error-dialog.component';" + eol
                 + "import {SelectEnum} from '../../../../../../core/domain/select-enum';" + eol
+                + "import {UtilityDateService} from '../../../../../../shares/utilities/utility-date.service';" + eol
                 + "import {" + eol
                 + t + useCaseTitle + "Plant" + "," + eol
                 + t + useCaseTitle + "Service" + "," + eol
@@ -149,6 +148,7 @@ public class GenerateUseCaseGridListComponentAngularFile {
                 + t + t + t + t + t + t + t + "private navigationService: NavigationService," + eol
                 + t + t + t + t + t + t + t + "private dialogService: UtilityDialogService," + eol
                 + t + t + t + t + t + t + t + "private localeService: LocaleService," + eol
+                + t + t + t + t + t + t + t + "private dateService: UtilityDateService," + eol
                 + t + t + t + t + t + t + t + "private responsiveService: ResponsiveService) {" + eol
                 + t + t + "this.responsiveService.isWebMedium.subscribe(value => this.isWebMedium = value);" + eol
                 + t + "}" + eol
@@ -171,6 +171,7 @@ public class GenerateUseCaseGridListComponentAngularFile {
                 + eol
                 + t + "search(): void {" + eol
                 + t + t + "this.loading = true;" + eol
+                + this.getPlantCultivateVariables(useCase, t + t)
                 + t + t + "this.useCase" + eol
                 + t + t + t + ".cultivate(" + eol
                 + t + t + t + t + "new UseCaseCommand<" + useCaseTitle + "Plant>(" + eol
@@ -198,8 +199,8 @@ public class GenerateUseCaseGridListComponentAngularFile {
                 + eol
                 + t + "prepare(): void {" + eol
                 + t + t + "this.useCase" + eol
-                + t + t + t + ".prepare(new UseCaseSeedsCommand<ListChequeBySalesChannelDepartmentSeedsCommand>(" + eol
-                + t + t + t + t + "new ListChequeBySalesChannelDepartmentSeedsCommand(null)," + eol
+                + t + t + t + ".prepare(new UseCaseSeedsCommand<" + useCaseTitle + "SeedsCommand>(" + eol
+                + t + t + t + t + "new " + useCaseTitle + "SeedsCommand(null)," + eol
                 + t + t + t + t + "this.localeService.getLocale().getValue()" + eol
                 + t + t + t + "))" + eol
                 + t + t + t +".subscribe(fruitSeeds => {" + eol
@@ -379,12 +380,39 @@ public class GenerateUseCaseGridListComponentAngularFile {
         return content;
     }
 
+    private String getPlantCultivateVariables(UseCase useCase, String offset) throws GetPlantException {
+        String content = "";
+        UseCaseData plant = useCaseService.getPlant(useCase);
+        List<UseCaseDataAttribute> attributesOfPlant = plant.getUseCaseDataAttributes();
+        for (UseCaseDataAttribute attribute : attributesOfPlant) {
+            if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.Primitive)) {
+                if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate)) {
+                    content += offset + "const " + StringUtility.firstLowerCase(attribute.getName()) + "Input = "
+                            + "this.dateService.getJavaDateOfMoment(this." + StringUtility.firstLowerCase(attribute.getName()) + "FormControl.value);" + eol;
+
+                } else {
+                    content += offset + "const " + StringUtility.firstLowerCase(attribute.getName()) + "Input = "
+                            + "this." + StringUtility.firstLowerCase(attribute.getName()) + "FormControl.value;" + eol;
+                }
+            }
+            if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEnum)) {
+                content += offset + "const " + StringUtility.firstLowerCase(attribute.getName()) + "Input = new SelectEnum(null, "
+                        + "this." + StringUtility.firstLowerCase(attribute.getName()) + "FormControl.value);" + eol;
+            }
+            if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
+                content += offset + "const " + StringUtility.firstLowerCase(attribute.getName()) + "Input = new SelectEntity(null, "
+                        + "this." + StringUtility.firstLowerCase(attribute.getName()) + "FormControl.value);" + eol;
+            }
+        }
+        return content;
+    }
+
     private String getPlantInputs(UseCase useCase, int offset) throws GetPlantException {
         String content = "";
         UseCaseData plant = useCaseService.getPlant(useCase);
         for (int i = 0; i < plant.getUseCaseDataAttributes().size(); i++) {
             UseCaseDataAttribute attribute = plant.getUseCaseDataAttributes().get(i);
-            content += StringUtility.space(offset) + "this." + StringUtility.firstLowerCase(attribute.getName()) + "FormControl.value," + eol;
+            content += StringUtility.space(offset) + StringUtility.firstLowerCase(attribute.getName()) + "Input," + eol;
         }
         return content;
     }
@@ -411,7 +439,7 @@ public class GenerateUseCaseGridListComponentAngularFile {
 
     private String getRelationImports(UseCase useCase) {
         String content = "";
-        List<UseCaseRelation> relations = this.useCaseRelationSpringJpaRepository.findAllBySource_Id(useCase.getId());
+        List<UseCaseRelation> relations = this.useCaseRelationService.findAllBySource(useCase);
         for (UseCaseRelation relation : relations) {
             String destinationUseCaseTitle = relation.getDestination().getName() + "By" + relation.getDestination().getSoftwareRole().getName();
             content += ""
@@ -424,7 +452,7 @@ public class GenerateUseCaseGridListComponentAngularFile {
 
     private String getPopupView(UseCase useCase) {
         String content = "";
-        List<UseCaseRelation> relations = this.useCaseRelationSpringJpaRepository.findAllBySource_Id(useCase.getId());
+        List<UseCaseRelation> relations = this.useCaseRelationService.findAllBySource(useCase);
         UseCaseRelation viewRelation = null;
         for (UseCaseRelation relation : relations) {
             if (relation.getDestination().getUserInterfaceType().equals(UserInterfaceTypeEnum.View)) {
@@ -444,7 +472,7 @@ public class GenerateUseCaseGridListComponentAngularFile {
 
     private String getPopupAddNew(UseCase useCase) {
         String content = "";
-        List<UseCaseRelation> relations = this.useCaseRelationSpringJpaRepository.findAllBySource_Id(useCase.getId());
+        List<UseCaseRelation> relations = this.useCaseRelationService.findAllBySource(useCase);
         UseCaseRelation addNewRelation = null;
         for (UseCaseRelation relation : relations) {
             if (relation.getDestination().getUserInterfaceType().equals(UserInterfaceTypeEnum.AddNew)) {
@@ -464,7 +492,7 @@ public class GenerateUseCaseGridListComponentAngularFile {
 
     private String getAddNewHtml(UseCase useCase, String offset) {
         String content = "";
-        List<UseCaseRelation> relations = this.useCaseRelationSpringJpaRepository.findAllBySource_Id(useCase.getId());
+        List<UseCaseRelation> relations = this.useCaseRelationService.findAllBySource(useCase);
         UseCaseRelation addNewRelation = null;
         for (UseCaseRelation relation : relations) {
             if (relation.getDestination().getUserInterfaceType().equals(UserInterfaceTypeEnum.AddNew)) {
@@ -473,7 +501,7 @@ public class GenerateUseCaseGridListComponentAngularFile {
         }
         if (addNewRelation != null) {
             content += ""
-                    + offset + "<button mat-raised-button (click)='addNew()'>"
+                    + offset + "<button mat-raised-button color='primary' (click)='addNew()'>"
                     + addNewRelation.getDestination().getFaTitle()
                     + "</button>" + eol;
         }

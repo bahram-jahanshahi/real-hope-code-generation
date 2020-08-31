@@ -14,6 +14,7 @@ import ir.afarinesh.realhope.shares.repositories.SoftwareApplicationPanelSpringJ
 import ir.afarinesh.realhope.shares.repositories.UseCaseRelationSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.UseCaseSpringJpaRepository;
 import ir.afarinesh.realhope.shares.services.FileManagementService;
+import ir.afarinesh.realhope.shares.services.UseCaseRelationService;
 import ir.afarinesh.realhope.shares.services.exceptions.CreateFileException;
 import ir.afarinesh.realhope.shares.utilities.StringUtility;
 import org.springframework.stereotype.Service;
@@ -27,22 +28,22 @@ public class GenerateDictionaryAngularFile {
     final FileManagementService fileManagementService;
     final UseCasePathService useCasePathService;
     final UseCaseService useCaseService;
+    final UseCaseRelationService useCaseRelationService;
     final SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository;
     final UseCaseSpringJpaRepository useCaseSpringJpaRepository;
-    final UseCaseRelationSpringJpaRepository useCaseRelationSpringJpaRepository;
 
     public GenerateDictionaryAngularFile(FileManagementService fileManagementService,
                                          UseCasePathService useCasePathService,
                                          UseCaseService useCaseService,
+                                         UseCaseRelationService useCaseRelationService,
                                          SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository,
-                                         UseCaseSpringJpaRepository useCaseSpringJpaRepository,
-                                         UseCaseRelationSpringJpaRepository useCaseRelationSpringJpaRepository) {
+                                         UseCaseSpringJpaRepository useCaseSpringJpaRepository) {
         this.fileManagementService = fileManagementService;
         this.useCasePathService = useCasePathService;
         this.useCaseService = useCaseService;
+        this.useCaseRelationService = useCaseRelationService;
         this.softwareApplicationPanelSpringJpaRepository = softwareApplicationPanelSpringJpaRepository;
         this.useCaseSpringJpaRepository = useCaseSpringJpaRepository;
-        this.useCaseRelationSpringJpaRepository = useCaseRelationSpringJpaRepository;
     }
 
     public void generate() throws GenerateDictionaryAngularFileException {
@@ -87,6 +88,7 @@ public class GenerateDictionaryAngularFile {
                     + this.getViewDictionary(useCase)
                     + this.getUpdateDictionary(useCase)
                     + this.getAddNewDictionary(useCase)
+                    + this.getDeleteDictionary(useCase)
                     + this.getPopupDictionary(useCase)
                     + t + "}";
             dictionaryContent += (i < useCaseList.size() - 1) ? "," : "";
@@ -178,9 +180,18 @@ public class GenerateDictionaryAngularFile {
         return content;
     }
 
+    private String getDeleteDictionary(UseCase useCase) {
+        String content = "";
+        if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.Delete)) {
+            content += ",\"Submit\": \"" + useCase.getFaTitle() + "\"" + eol;
+            content += ",\"Close\": \"بازگشت\"" + eol;
+        }
+        return content;
+    }
+
     private String getPopupDictionary(UseCase useCase) {
         String content = "";
-        List<UseCaseRelation> relations = this.useCaseRelationSpringJpaRepository.findAllBySource_Id(useCase.getId());
+        List<UseCaseRelation> relations = this.useCaseRelationService.findAllBySource(useCase);
         for (UseCaseRelation relation : relations) {
             if (relation.getFrontendActionType().equals(FrontendActionTypeEnum.PopupForm)) {
                 content += t + t + "," + "\"" + relation.getName() + "\"" + ": " + "\"" + relation.getFaTitle() + "\"" + eol;

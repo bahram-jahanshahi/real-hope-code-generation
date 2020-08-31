@@ -103,7 +103,7 @@ public class UseCaseService {
         }
         content += "entity." + getSequenceOfGetters(mapPath);
         if (primitiveAttributeType == PrimitiveAttributeTypeEnum.Enum) {
-            content += ".name()";
+            content += ".title(locale)";
         }
         if (primitiveAttributeType == PrimitiveAttributeTypeEnum.JavaDate) {
             content += ", locale)";

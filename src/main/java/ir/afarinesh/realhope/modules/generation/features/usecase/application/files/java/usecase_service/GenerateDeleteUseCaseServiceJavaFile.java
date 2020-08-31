@@ -43,7 +43,7 @@ public class GenerateDeleteUseCaseServiceJavaFile {
                             this.getPath(useCase),
                             this.getFileNameImpl(useCase),
                             this.getContentImpl(useCase),
-                            true
+                            false
                     );
         } catch (CreateFileException | GetViewDomainEntityException e) {
             throw new GenerateDeleteUseCaseServiceJavaFileException(e.getMessage());
@@ -71,18 +71,22 @@ public class GenerateDeleteUseCaseServiceJavaFile {
                 + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".annotations.FeatureApplication;" + eol
                 + "import " + this.useCasePathService.getSpringBootFeaturePackageTitle(useCase.getSoftwareFeature()) + ".application.ports.in." + useCaseTitle + "UseCase;" + eol
                 + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".usecase.*;" + eol
-                + "import org.springframework.stereotype.Service;" + eol;
+                + "import org.springframework.stereotype.Service;" + eol
+                + "import org.springframework.transaction.annotation.Transactional;" + eol;
         // content
         String serviceContent = ""
                 + "@Service" + eol
                 + "@FeatureApplication" + eol
                 + "public class " + useCaseTitle + "ServiceImpl implements " + useCaseTitle + "UseCase {" + eol
+                + eol
                 + t + "final " + useCaseTitle + "Service service;" + eol
+                + eol
                 + t + "public " + useCaseTitle + "ServiceImpl(" + useCaseTitle + "Service service) {" + eol
                 + t + t + "this.service = service;" + eol
                 + t + "}" + eol
                 + eol
                 + t + "@Override" + eol
+                + t + "@Transactional" + eol
                 + t + "public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {" + eol
                 + t + t + "return this.service.cultivate(plant);" + eol
                 + t + "}" + eol
@@ -119,6 +123,7 @@ public class GenerateDeleteUseCaseServiceJavaFile {
                 + "import " + this.useCasePathService.getSpringBootFeaturePackageTitle(useCase.getSoftwareFeature()) + ".domain.*;" + eol
                 + "import " + this.useCasePathService.getSharesPackageTitle(useCase.getSoftwareFeature()) + ".utilities.CalendarUtility;" + eol
                 + "import org.springframework.stereotype.Service;" + eol
+                + "import org.springframework.transaction.annotation.Transactional;" + eol
                 + eol;
         String serviceContent = ""
                 + "@Service" + eol
@@ -132,11 +137,12 @@ public class GenerateDeleteUseCaseServiceJavaFile {
                 + t + t + "this." + StringUtility.firstLowerCase(entitySpringJpaRepository) + " = " + StringUtility.firstLowerCase(entitySpringJpaRepository) + ";" + eol
                 + t + "}" + eol
                 + eol
+                + t + "@Transactional" + eol
                 + t + "public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {" + eol
                 + t + t + useCase.getDataEntity().getName() + " entity =" + eol
                 + t + t + t + t + "this." + StringUtility.firstLowerCase(useCase.getDataEntity().getName()) + "SpringJpaRepository.findById(plant.getPlant().getId())" + eol
-                + t + t + t + t + ".orElseThrow(() -> new CultivateException(\"Cannot find by id = \" + plant.getPlant().getId()));"
-                + eol
+                + t + t + t + t + ".orElseThrow(() -> new CultivateException(\"Cannot find by id = \" + plant.getPlant().getId()));" + eol
+                + t + t + "this." + StringUtility.firstLowerCase(useCase.getDataEntity().getName()) + "SpringJpaRepository.delete(entity);" + eol
                 + t + t + "return new UseCaseFruit<>(" + eol
                 + t + t + t + "new Fruit(" + eol
                 + t + t + t + t + t + "true" + eol

@@ -84,12 +84,15 @@ public class GenerateUpdateUseCaseServiceJavaFile {
                 + "@Service" + eol
                 + "@FeatureApplication" + eol
                 + "public class " + useCaseTitle + "ServiceImpl implements " + useCaseTitle + "UseCase {" + eol
+                + eol
                 + t + "final " + useCaseTitle + "Service service;" + eol
+                + eol
                 + t + "public " + useCaseTitle + "ServiceImpl(" + useCaseTitle + "Service service) {" + eol
                 + t + t + "this.service = service;" + eol
                 + t + "}" + eol
                 + eol
                 + t + "@Override" + eol
+                + t + "@Transactional" + eol
                 + t + "public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {" + eol
                 + t + t + "return this.service.cultivate(plant);" + eol
                 + t + "}" + eol
@@ -125,6 +128,7 @@ public class GenerateUpdateUseCaseServiceJavaFile {
                 + "import " + this.useCasePathService.getSharesPackageTitle(useCase.getSoftwareFeature()) + ".utilities.CalendarUtility;" + eol
                 + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".domain.*;" + eol
                 + "import org.springframework.stereotype.Service;" + eol
+                + "import org.springframework.transaction.annotation.Transactional;" + eol
                 + eol
                 + "import java.util.stream.Collectors;" + eol
                 + "import java.util.ArrayList;" + eol
@@ -143,6 +147,7 @@ public class GenerateUpdateUseCaseServiceJavaFile {
                 + eol
                 + this.getConstructor(useCase)
                 + eol
+                + t + "@Transactional" + eol
                 + t + "public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {" + eol
                 + t + t + useCase.getDataEntity().getName() + " entity =" + eol
                 + t + t + t + t + "this." + StringUtility.firstLowerCase(useCase.getDataEntity().getName()) + "SpringJpaRepository.findById(plant.getPlant().getId())" + eol

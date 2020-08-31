@@ -5,15 +5,14 @@ import ir.afarinesh.realhope.entities.feature.DomainEntityAttribute;
 import ir.afarinesh.realhope.entities.feature.UseCase;
 import ir.afarinesh.realhope.entities.feature.UseCaseRelation;
 import ir.afarinesh.realhope.entities.feature.enums.FrontendActionTypeEnum;
-import ir.afarinesh.realhope.entities.feature.enums.UserInterfaceTypeEnum;
 import ir.afarinesh.realhope.entities.project.SoftwareFeature;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.angular.view.exceptions.GenerateUseCaseViewComponentAngularFileException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCasePathService;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCaseService;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.exceptions.GetViewDomainEntityException;
 import ir.afarinesh.realhope.shares.repositories.DomainEntitySpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.UseCaseRelationSpringJpaRepository;
 import ir.afarinesh.realhope.shares.services.FileManagementService;
+import ir.afarinesh.realhope.shares.services.UseCaseRelationService;
 import ir.afarinesh.realhope.shares.services.exceptions.CreateFileException;
 import ir.afarinesh.realhope.shares.utilities.StringUtility;
 import org.springframework.stereotype.Service;
@@ -27,19 +26,19 @@ public class GenerateUseCaseViewComponentAngularFile {
     final FileManagementService fileManagementService;
     final UseCasePathService useCasePathService;
     final UseCaseService useCaseService;
+    final UseCaseRelationService useCaseRelationService;
     final DomainEntitySpringJpaRepository domainEntitySpringJpaRepository;
-    final UseCaseRelationSpringJpaRepository useCaseRelationSpringJpaRepository;
 
     public GenerateUseCaseViewComponentAngularFile(FileManagementService fileManagementService,
                                                    UseCasePathService useCasePathService,
                                                    UseCaseService useCaseService,
-                                                   DomainEntitySpringJpaRepository domainEntitySpringJpaRepository,
-                                                   UseCaseRelationSpringJpaRepository useCaseRelationSpringJpaRepository) {
+                                                   UseCaseRelationService useCaseRelationService, DomainEntitySpringJpaRepository domainEntitySpringJpaRepository
+    ) {
         this.fileManagementService = fileManagementService;
         this.useCasePathService = useCasePathService;
         this.useCaseService = useCaseService;
+        this.useCaseRelationService = useCaseRelationService;
         this.domainEntitySpringJpaRepository = domainEntitySpringJpaRepository;
-        this.useCaseRelationSpringJpaRepository = useCaseRelationSpringJpaRepository;
     }
 
     public void generate(UseCase useCase) throws GenerateUseCaseViewComponentAngularFileException {
@@ -238,7 +237,7 @@ public class GenerateUseCaseViewComponentAngularFile {
     private String getPopupButtons(UseCase useCase, String offset) {
         String content = "";
         String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
-        List<UseCaseRelation> relations = this.useCaseRelationSpringJpaRepository.findAllBySource_Id(useCase.getId());
+        List<UseCaseRelation> relations = this.useCaseRelationService.findAllBySource(useCase);
         for (UseCaseRelation relation : relations) {
             if (relation.getFrontendActionType().equals(FrontendActionTypeEnum.PopupForm)) {
                 content += ""
@@ -253,11 +252,11 @@ public class GenerateUseCaseViewComponentAngularFile {
     private String getPopupMethods(UseCase useCase) {
         String content = "";
         String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
-        List<UseCaseRelation> relations = this.useCaseRelationSpringJpaRepository.findAllBySource_Id(useCase.getId());
+        List<UseCaseRelation> relations = this.useCaseRelationService.findAllBySource(useCase);
         for (UseCaseRelation relation : relations) {
             if (relation.getFrontendActionType().equals(FrontendActionTypeEnum.PopupForm)) {
                 String destinationUseCaseTitle = relation.getDestination().getName() + "By" + relation.getDestination().getSoftwareRole().getName();
-                content = ""
+                content += ""
                         + t + StringUtility.firstLowerCase(relation.getName()) + "(): void {" + eol
                         + t + t + "this.dialogService" + eol
                         + t + t + t + ".quickPopupDialog(" + destinationUseCaseTitle + "Component, this.entityId)" + eol
@@ -272,12 +271,12 @@ public class GenerateUseCaseViewComponentAngularFile {
 
     private String getPopupImports(UseCase useCase) {
         String content = "";
-        List<UseCaseRelation> relations = this.useCaseRelationSpringJpaRepository.findAllBySource_Id(useCase.getId());
+        List<UseCaseRelation> relations = this.useCaseRelationService.findAllBySource(useCase);
         for (UseCaseRelation relation : relations) {
             if (relation.getFrontendActionType().equals(FrontendActionTypeEnum.PopupForm)) {
                 String destinationUseCaseTitle = relation.getDestination().getName() + "By" + relation.getDestination().getSoftwareRole().getName();
                 String destinationUseCaseTitleDashed = StringUtility.convertCamelToDash(destinationUseCaseTitle);
-                content = "import {" + destinationUseCaseTitle + "Component} from '../" + destinationUseCaseTitleDashed + "/" + destinationUseCaseTitleDashed + ".component';" + eol;
+                content += "import {" + destinationUseCaseTitle + "Component} from '../" + destinationUseCaseTitleDashed + "/" + destinationUseCaseTitleDashed + ".component';" + eol;
             }
         }
         return content;

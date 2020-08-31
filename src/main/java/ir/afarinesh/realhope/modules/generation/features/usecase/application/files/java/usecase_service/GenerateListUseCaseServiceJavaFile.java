@@ -51,7 +51,7 @@ public class GenerateListUseCaseServiceJavaFile {
                             this.getPath(useCase),
                             this.getFileNameImpl(useCase),
                             this.getContentImpl(useCase),
-                            true
+                            false
                     );
         } catch (CreateFileException | GetGridListFruitDomainEntityException | GetPlantException e) {
             throw new GenerateListUseCaseServiceJavaFileException(e.getMessage());
@@ -85,7 +85,9 @@ public class GenerateListUseCaseServiceJavaFile {
                 + "@Service" + eol
                 + "@FeatureApplication" + eol
                 + "public class " + useCaseTitle + "ServiceImpl implements " + useCaseTitle + "UseCase {" + eol
+                + eol
                 + t + "final " + useCaseTitle + "Service service;" + eol
+                + eol
                 + t + "public " + useCaseTitle + "ServiceImpl(" + useCaseTitle + "Service service) {" + eol
                 + t + t + "this.service = service;" + eol
                 + t + "}" + eol
