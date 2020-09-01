@@ -78,7 +78,8 @@ public class GenerateUpdateUseCaseServiceJavaFile {
                 + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".annotations.FeatureApplication;" + eol
                 + "import " + this.useCasePathService.getSpringBootFeaturePackageTitle(useCase.getSoftwareFeature()) + ".application.ports.in." + useCaseTitle + "UseCase;" + eol
                 + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".usecase.*;" + eol
-                + "import org.springframework.stereotype.Service;" + eol;
+                + "import org.springframework.stereotype.Service;" + eol
+                + "import org.springframework.transaction.annotation.Transactional;" + eol;
         // content
         String serviceContent = ""
                 + "@Service" + eol
