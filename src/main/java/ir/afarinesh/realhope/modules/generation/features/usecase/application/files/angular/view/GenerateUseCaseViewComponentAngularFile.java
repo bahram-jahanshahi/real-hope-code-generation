@@ -152,7 +152,7 @@ public class GenerateUseCaseViewComponentAngularFile {
                 + t + t + t + ")" + eol
                 + t + t + t + ".subscribe(fruit => {" + eol
                 + t + t + t + t + "if (fruit.isSuccessful) {" + eol
-                + t + t + t + t + t + "this.entity = fruit.result.entity;" + eol
+                + t + t + t + t + t + "this.entity = fruit.fruit.entity;" + eol
                 + t + t + t + t + t + "this.readyToView = true;" + eol
                 + t + t + t + t + "} else {" + eol
                 + t + t + t + t + t + "this.dialogService.showErrorDialog( new ErrorDialogData('', Array.of(fruit.message)));" + eol

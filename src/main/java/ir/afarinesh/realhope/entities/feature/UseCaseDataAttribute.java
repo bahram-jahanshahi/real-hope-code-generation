@@ -64,6 +64,27 @@ public class UseCaseDataAttribute {
     @Column(nullable = true)
     private String getterOfUpdatePath;
 
+    @Column(nullable = false)
+    private Boolean nullable; // validation
+
+    @Column(nullable = false)
+    private Boolean required; // validation
+
+    @Column(nullable = true)
+    private Long minLength; // validation
+
+    @Column(nullable = true)
+    private Long maxLength; // validation
+
+    @Column(nullable = true)
+    private Long min; // validation
+
+    @Column(nullable = true)
+    private Long max; // validation
+
+    @Column(nullable = true)
+    private String errorTip; // validation
+
     @JoinColumn(nullable = true)
     @ManyToOne
     private DomainEntity domainEntityAttributeType; // if attribute type is a domain entity

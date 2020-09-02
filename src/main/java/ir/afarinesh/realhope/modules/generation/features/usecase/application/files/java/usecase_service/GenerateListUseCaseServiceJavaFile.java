@@ -129,7 +129,7 @@ public class GenerateListUseCaseServiceJavaFile {
                 + "import " + this.useCasePathService.getSpringBootFeaturePackageTitle(useCase.getSoftwareFeature()) + ".application.ports.in." + useCaseTitle + "UseCase;" + eol
                 + "import " + this.useCasePathService.getSpringBootFeaturePackageTitle(useCase.getSoftwareFeature()) + ".application.ports.in." + useCaseTitle + "UseCase.*;" + eol
                 + "import " + this.useCasePathService.getSpringBootFeaturePackageTitle(useCase.getSoftwareFeature()) + ".domain.*;" + eol
-                + "import ir.amnpardaz.enterprise.avshop.shares.utilities.CalendarUtility;" + eol
+                + "import " + this.useCasePathService.getSharesPackageTitle(useCase.getSoftwareFeature()) + ".utilities.CalendarUtility;" + eol
                 + "import org.springframework.data.domain.PageRequest;" + eol
                 + "import org.springframework.stereotype.Service;" + eol
                 + "import org.springframework.data.domain.Page;" + eol

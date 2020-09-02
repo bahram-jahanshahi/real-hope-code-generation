@@ -16,6 +16,7 @@ import ir.afarinesh.realhope.shares.services.exceptions.CreateFileException;
 import ir.afarinesh.realhope.shares.utilities.StringUtility;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -258,13 +259,23 @@ public class GenerateUseCaseUpdateComponentAngularFile {
         for (int i = 0; i < attributesOfPlant.size(); i++) {
             UseCaseDataAttribute attribute = attributesOfPlant.get(i);
             if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.Primitive)) {
-                content += offset + t + t + StringUtility.firstLowerCase(attribute.getName()) + ": new FormControl(" + StringUtility.firstLowerCase(attribute.getName()) + "FruitSeeds" + ")";
+                content += offset + t + t + StringUtility.firstLowerCase(attribute.getName())
+                        + ": new FormControl("
+                        + StringUtility.firstLowerCase(attribute.getName()) + "FruitSeeds"
+                        + ", " + getValidators(attribute)
+                        + ")";
             }
             if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEnum)) {
-                content += offset + t + t + StringUtility.firstLowerCase(attribute.getName()) + "Enum: new FormControl(" + StringUtility.firstLowerCase(attribute.getName()) + "EnumFruitSeeds.value" + ")";
+                content += offset + t + t + StringUtility.firstLowerCase(attribute.getName()) + "Enum"
+                        + ": new FormControl(" + StringUtility.firstLowerCase(attribute.getName()) + "EnumFruitSeeds.value"
+                        + ", " + getValidators(attribute)
+                        + ")";
             }
             if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
-                content += offset + t + t + StringUtility.firstLowerCase(attribute.getName()) + ": new FormControl(" + StringUtility.firstLowerCase(attribute.getName()) + "FruitSeeds.value" + ")";
+                content += offset + t + t + StringUtility.firstLowerCase(attribute.getName())
+                        + ": new FormControl(" + StringUtility.firstLowerCase(attribute.getName()) + "FruitSeeds.value"
+                        + ", " + getValidators(attribute)
+                        + ")";
             }
             content += (i < attributesOfPlant.size() - 1) ? "," : "";
             content += eol;
@@ -275,7 +286,7 @@ public class GenerateUseCaseUpdateComponentAngularFile {
 
     public String getCultivateInputVariables(UseCase useCase, String offset) throws GetPlantException {
         String content = "";
-        String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
+        String useCaseTitle = this.useCaseService.getUseCaseTitle(useCase);
         UseCaseData plant = useCaseService.getPlant(useCase);
         List<UseCaseDataAttribute> attributesOfPlant = plant.getUseCaseDataAttributes();
         for (UseCaseDataAttribute attribute : attributesOfPlant) {
@@ -336,6 +347,36 @@ public class GenerateUseCaseUpdateComponentAngularFile {
                 content += t + StringUtility.firstLowerCase(attribute.getName()) + "Array: Array<SelectEntity>;" + eol;
             }
         }
+        return content;
+    }
+
+    // validation
+    public String getValidators(UseCaseDataAttribute attribute) {
+        String content = "[";
+        List<String> validators = new ArrayList<>();
+        if (!attribute.getNullable()) {
+            validators.add("Validators.nullValidator");
+        }
+        if (attribute.getRequired()) {
+            validators.add("Validators.required");
+        }
+        if (attribute.getMinLength() != null) {
+            validators.add("Validators.minLength(" + attribute.getMinLength() + ")");
+        }
+        if (attribute.getMaxLength() != null) {
+            validators.add("Validators.maxLength(" + attribute.getMaxLength() + ")");
+        }
+        if (attribute.getMin() != null) {
+            validators.add("Validators.min(" + attribute.getMin() + ")");
+        }
+        if (attribute.getMax() != null) {
+            validators.add("Validators.max(" + attribute.getMax() + ")");
+        }
+        for (int i = 0; i < validators.size(); i++) {
+            content += validators.get(i);
+            content += (i < validators.size() - 1) ? ", " : "";
+        }
+        content += "]";
         return content;
     }
 }

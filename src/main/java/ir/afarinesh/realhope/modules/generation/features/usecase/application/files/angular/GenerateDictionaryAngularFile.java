@@ -150,7 +150,11 @@ public class GenerateDictionaryAngularFile {
                 List<UseCaseDataAttribute> attributes = plant.getUseCaseDataAttributes();
                 for (UseCaseDataAttribute attribute : attributes) {
                     content += t + t + "," + "\"" + attribute.getName() + "\": " + "\"" + attribute.getFaTitle() + "\"" + eol;
-                    content += t + t + "," + "\"" + attribute.getName() + "Error\": " + "\"" + attribute.getDescription() + "\"" + eol;
+                    if (attribute.getErrorTip() != null) {
+                        content += t + t + "," + "\"" + attribute.getName() + "Error\": " + "\"" + attribute.getErrorTip() + "\"" + eol;
+                    } else {
+                        content += t + t + "," + "\"" + attribute.getName() + "Error\": " + "\"" + attribute.getDescription() + "\"" + eol;
+                    }
                 }
             } catch (GetPlantException e) {
                 e.printStackTrace();
@@ -171,7 +175,11 @@ public class GenerateDictionaryAngularFile {
                 List<UseCaseDataAttribute> attributes = plant.getUseCaseDataAttributes();
                 for (UseCaseDataAttribute attribute : attributes) {
                     content += t + t + "," + "\"" + attribute.getName() + "\": " + "\"" + attribute.getFaTitle() + "\"" + eol;
-                    content += t + t + "," + "\"" + attribute.getName() + "Error\": " + "\"" + attribute.getDescription() + "\"" + eol;
+                    if (attribute.getErrorTip() != null) {
+                        content += t + t + "," + "\"" + attribute.getName() + "Error\": " + "\"" + attribute.getErrorTip() + "\"" + eol;
+                    } else {
+                        content += t + t + "," + "\"" + attribute.getName() + "Error\": " + "\"" + attribute.getDescription() + "\"" + eol;
+                    }
                 }
             } catch (GetPlantException e) {
                 e.printStackTrace();

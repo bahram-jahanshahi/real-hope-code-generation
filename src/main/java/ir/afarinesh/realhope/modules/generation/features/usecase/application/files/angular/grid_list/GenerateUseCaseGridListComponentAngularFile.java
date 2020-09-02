@@ -185,9 +185,9 @@ public class GenerateUseCaseGridListComponentAngularFile {
                 + t + t + t + ".subscribe(fruit => {" + eol
                 + t + t + t + t + "this.loading = false;" + eol
                 + t + t + t + t + "if (fruit.isSuccessful) {" + eol
-                + t + t + t + t + t + "this.dataSource.data = fruit.result.dataArray" + ";" + eol
-                + t + t + t + t + t + "this.dataArray = fruit.result.dataArray;" + eol
-                + t + t + t + t + t + "this.paginator.length = fruit.result.pagedResultFruit.totalElements;" + eol
+                + t + t + t + t + t + "this.dataSource.data = fruit.fruit.dataArray" + ";" + eol
+                + t + t + t + t + t + "this.dataArray = fruit.fruit.dataArray;" + eol
+                + t + t + t + t + t + "this.paginator.length = fruit.fruit.pagedResultFruit.totalElements;" + eol
                 + t + t + t + t + "} else {" + eol
                 + t + t + t + t + t + "this.dialogService.showErrorDialog(new ErrorDialogData('', Array.of(fruit.message)));" + eol
                 + t + t + t + t + "}" + eol
