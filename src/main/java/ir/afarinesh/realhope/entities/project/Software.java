@@ -1,5 +1,6 @@
 package ir.afarinesh.realhope.entities.project;
 
+import ir.afarinesh.realhope.core.domain.AbstractDataEntity;
 import lombok.*;
 
 import javax.persistence.*;
@@ -12,7 +13,7 @@ import javax.persistence.*;
 
 @Entity
 @Table
-public class Software {
+public class Software extends AbstractDataEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,6 +25,9 @@ public class Software {
     private String title;
 
     @Column(nullable = false)
+    private String faTitle;
+
+    @Column(nullable = false)
     private String springBootProjectPath;
 
     @Column(nullable = false)
@@ -31,4 +35,17 @@ public class Software {
 
     @Column(nullable = false)
     private String springBootJavaSrcPath;
+
+    @Override
+    public String title(String locale) {
+        if (locale.equals("fa")) {
+            return getFaTitle();
+        }
+
+        if (locale.equals("en")) {
+            return getTitle();
+        }
+
+        return getName();
+    }
 }

@@ -97,7 +97,10 @@ public class UseCaseService {
 
     private String getMapPathByGetters(String mapPath, PrimitiveAttributeTypeEnum primitiveAttributeType) {
         String content = "";
-        String[] parts = mapPath.split("\\.");
+        // if attribute is enum or entity check if it is not null
+        if (primitiveAttributeType == PrimitiveAttributeTypeEnum.Enum || primitiveAttributeType == PrimitiveAttributeTypeEnum.Entity) {
+            content += getSequenceOfIfNotNullGetters(mapPath) + " ? ";
+        }
         if (primitiveAttributeType == PrimitiveAttributeTypeEnum.JavaDate) {
             content = "CalendarUtility.format(";
         }
@@ -105,8 +108,15 @@ public class UseCaseService {
         if (primitiveAttributeType == PrimitiveAttributeTypeEnum.Enum) {
             content += ".title(locale)";
         }
+        if (primitiveAttributeType == PrimitiveAttributeTypeEnum.Entity) {
+            content += ".title(locale)";
+        }
         if (primitiveAttributeType == PrimitiveAttributeTypeEnum.JavaDate) {
             content += ", locale)";
+        }
+        // if attribute is enum or entity check if it is not null
+        if (primitiveAttributeType == PrimitiveAttributeTypeEnum.Enum || primitiveAttributeType == PrimitiveAttributeTypeEnum.Entity) {
+            content += " : null";
         }
         return content;
     }
@@ -122,6 +132,25 @@ public class UseCaseService {
             content += "get" + part + "()";
             content += (i < parts.length - 1) ? "." : "";
         }
+        return content;
+    }
+
+    public String getSequenceOfIfNotNullGetters(String mapPath) {
+        if (mapPath == null) {
+            return null;
+        }
+        String[] parts = mapPath.split("\\.");
+        String content = "(";
+        for (int i = 0; i < parts.length; i++) {
+            content += "entity";
+            for (int j = 0; j <= i; j++) {
+                String part = parts[j];
+                content += ".get" + part + "()";
+            }
+            content += " != null";
+            content += (i < parts.length - 1) ? " && " : "";
+        }
+        content += ")";
         return content;
     }
 

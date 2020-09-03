@@ -1,5 +1,6 @@
 package ir.afarinesh.realhope.entities.feature;
 
+import ir.afarinesh.realhope.core.domain.AbstractDataEntity;
 import ir.afarinesh.realhope.entities.data_model.DataEntity;
 import ir.afarinesh.realhope.entities.data_model.DataEnum;
 import ir.afarinesh.realhope.entities.feature.enums.PrimitiveAttributeTypeEnum;
@@ -18,7 +19,7 @@ import javax.persistence.*;
 
 @Entity
 @Table
-public class UseCaseDataAttribute {
+public class UseCaseDataAttribute extends AbstractDataEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -104,6 +105,17 @@ public class UseCaseDataAttribute {
     @JoinColumn(nullable = true)
     @ManyToOne
     private DataEnum dataEnum;
+
+    @Override
+    public String title(String locale) {
+        if (locale.equals("fa")) {
+            return getFaTitle();
+        }
+        if (locale.equals("en")) {
+            return getTitle();
+        }
+        return getName();
+    }
 
     // Utilities
     public boolean isPrimitive() {

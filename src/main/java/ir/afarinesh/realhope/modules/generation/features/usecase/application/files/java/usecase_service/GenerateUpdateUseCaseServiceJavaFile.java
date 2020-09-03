@@ -242,7 +242,9 @@ public class GenerateUpdateUseCaseServiceJavaFile {
     private String getFruitSeedsAttributeGetter(UseCaseDataAttribute attribute, boolean isEnumList, boolean isEntityList, UserInterfaceTypeEnum userInterfaceType) {
         String content = "";
         String sequenceOfGetters = this.useCaseService.getSequenceOfGetters(attribute.getGetterOfUpdatePath());
+        String sequenceOfIfNotNullGetters = this.useCaseService.getSequenceOfIfNotNullGetters(attribute.getGetterOfUpdatePath());
         if (sequenceOfGetters != null) {
+            // Primitive
             if (attribute.isPrimitive()) {
                 if (userInterfaceType.equals(UserInterfaceTypeEnum.Update)) {
                     // JavaDate begin
@@ -263,9 +265,12 @@ public class GenerateUpdateUseCaseServiceJavaFile {
             if (attribute.isSelectEnum()) {
                 if (userInterfaceType.equals(UserInterfaceTypeEnum.Update)) {
                     if (isEnumList) {
-                        content += "entity." + sequenceOfGetters + ".getSelectEnumList(seedsCommand.getLocale())";
+                        content += attribute.getDataEnum().getName() + ".Void.getSelectEnumList(seedsCommand.getLocale())";
                     } else {
+                        content += sequenceOfIfNotNullGetters + " ? ";
                         content += "entity." + sequenceOfGetters + ".getSelectEnum(seedsCommand.getLocale())";
+                        content += " : ";
+                        content += " new SelectEnum()";
                     }
                 }
                 if (userInterfaceType.equals(UserInterfaceTypeEnum.AddNew)) {
@@ -286,7 +291,10 @@ public class GenerateUpdateUseCaseServiceJavaFile {
                             + t + t + t + t + ".collect(Collectors.toList())";
                 } else {
                     if (userInterfaceType.equals(UserInterfaceTypeEnum.Update)) {
-                        content += "new SelectEntity(entity." + sequenceOfGetters + ".title(seedsCommand.getLocale()), entity." + sequenceOfGetters + ".getId());";
+                        content += sequenceOfIfNotNullGetters + " ? ";
+                        content += "new SelectEntity(entity." + sequenceOfGetters + ".title(seedsCommand.getLocale()), entity." + sequenceOfGetters + ".getId())";
+                        content += " : ";
+                        content += " new SelectEntity()";
                     }
                     if (userInterfaceType.equals(UserInterfaceTypeEnum.AddNew)) {
                         content += "new SelectEntity()";

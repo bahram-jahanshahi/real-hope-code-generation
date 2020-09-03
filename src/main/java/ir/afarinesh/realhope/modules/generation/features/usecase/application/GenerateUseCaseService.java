@@ -74,15 +74,14 @@ public class GenerateUseCaseService implements GenerateUseCase {
         List<DomainEntity> domainEntityList = domainEntitySpringJpaRepository.findAll();
         for (UseCase useCase : useCaseList) {
             if (useCase.getId() > 0L && useCase.getSoftwareFeature().getSoftwareModule().getSoftware().getId() == 2L) {
+                System.out.println("Try to generate use case: " + useCase.getName());
                 try {
                     // generate use case interface java
                     this.generateUseCaseInterfaceJavaFile.generate(useCase);
                     // generate rest controller java
                     this.generateUseCaseRestControllerJavaFile.generate(useCase);
                     // generate use case service java
-                    if (this.codeGenerationConfigService.isSpringBootServiceGenerationEnabled(useCase.getId())) {
-                        this.generateUseCaseServiceJavaFile.generate(useCase);
-                    }
+                    this.generateUseCaseServiceJavaFile.generate(useCase);
                     // generate use case angular cli service
                     this.generateUseCaseServiceAngularFile.generate(useCase);
                     // generate component for angular cli
@@ -92,6 +91,7 @@ public class GenerateUseCaseService implements GenerateUseCase {
                 } catch (GenerateUseCaseInterfaceJavaFileException | GenerateUseCaseRestControllerJavaFileException | GenerateUseCaseServiceAngularFileException | GenerateUseCaseComponentAngularFileException | GenerateUseCaseServiceJavaFileException | GenerateDictionaryAngularFileException e) {
                     throw new CultivateException(e.getMessage());
                 }
+                System.out.println("Done.");
             }
         }
 

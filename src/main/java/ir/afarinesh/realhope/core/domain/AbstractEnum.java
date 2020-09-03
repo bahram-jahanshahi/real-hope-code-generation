@@ -2,7 +2,7 @@ package ir.afarinesh.realhope.core.domain;
 
 import java.util.List;
 
-public interface DataEntityEnum {
+public interface AbstractEnum {
 
     String title(String locale);
 

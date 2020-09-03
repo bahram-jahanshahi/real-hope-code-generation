@@ -1,5 +1,6 @@
 package ir.afarinesh.realhope.entities.feature;
 
+import ir.afarinesh.realhope.core.domain.AbstractDataEntity;
 import ir.afarinesh.realhope.entities.project.SoftwareApplicationPanel;
 import ir.afarinesh.realhope.entities.project.SoftwareFeature;
 import lombok.*;
@@ -15,7 +16,7 @@ import java.util.List;
 
 @Entity
 @Table
-public class DomainEntity {
+public class DomainEntity extends AbstractDataEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +27,9 @@ public class DomainEntity {
 
     @Column(nullable = false)
     private String title;
+
+    @Column(nullable = false)
+    private String faTitle;
 
     @Column(nullable = false)
     private String description;
@@ -40,4 +44,15 @@ public class DomainEntity {
     @JoinColumn(nullable = false)
     @ManyToOne
     private SoftwareFeature softwareFeature;
+
+    @Override
+    public String title(String locale) {
+        if (locale.equals("fa")) {
+            return getFaTitle();
+        }
+        if (locale.equals("en")) {
+            return getTitle();
+        }
+        return getName();
+    }
 }

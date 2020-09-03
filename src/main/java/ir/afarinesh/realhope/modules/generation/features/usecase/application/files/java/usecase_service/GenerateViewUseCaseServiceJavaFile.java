@@ -124,7 +124,7 @@ public class GenerateViewUseCaseServiceJavaFile {
                 + "import " + this.useCasePathService.getSpringBootFeaturePackageTitle(useCase.getSoftwareFeature()) + ".application.ports.in." + useCaseTitle + "UseCase;" + eol
                 + "import " + this.useCasePathService.getSpringBootFeaturePackageTitle(useCase.getSoftwareFeature()) + ".application.ports.in." + useCaseTitle + "UseCase.*;" + eol
                 + "import " + this.useCasePathService.getSpringBootFeaturePackageTitle(useCase.getSoftwareFeature()) + ".domain.*;" + eol
-                + "import " + this.useCasePathService.getSharesPackageTitle(useCase.getSoftwareFeature()) + ".shares.utilities.CalendarUtility;" + eol
+                + "import " + this.useCasePathService.getSharesPackageTitle(useCase.getSoftwareFeature()) + ".utilities.CalendarUtility;" + eol
                 + "import org.springframework.stereotype.Service;" + eol
                 + eol;
         String serviceContent = ""

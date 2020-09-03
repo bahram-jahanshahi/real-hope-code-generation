@@ -1,5 +1,6 @@
 package ir.afarinesh.realhope.entities.feature;
 
+import ir.afarinesh.realhope.core.domain.AbstractDataEntity;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeCategoryEnum;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeQuantityEnum;
 import ir.afarinesh.realhope.entities.feature.enums.PrimitiveAttributeTypeEnum;
@@ -15,7 +16,7 @@ import javax.persistence.*;
 
 @Entity
 @Table
-public class DomainEntityAttribute {
+public class DomainEntityAttribute extends AbstractDataEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,6 +43,9 @@ public class DomainEntityAttribute {
     @Column(nullable = false)
     private Long uiColumn;
 
+    @Column(nullable = false)
+    private Boolean uiGridListShow;
+
     @Column(nullable = true)
     @Enumerated(EnumType.STRING)
     private PrimitiveAttributeTypeEnum mapPathAttributeType;
@@ -65,4 +69,15 @@ public class DomainEntityAttribute {
     @JoinColumn(nullable = false)
     @ManyToOne
     private DomainEntity domainEntity;
+
+    @Override
+    public String title(String locale) {
+        if (locale.equals("fa")) {
+            return getFaTitle();
+        }
+        if (locale.equals("en")) {
+            return getTitle();
+        }
+        return getName();
+    }
 }

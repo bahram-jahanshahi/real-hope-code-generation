@@ -1,5 +1,6 @@
 package ir.afarinesh.realhope.entities.feature;
 
+import ir.afarinesh.realhope.core.domain.AbstractDataEntity;
 import ir.afarinesh.realhope.entities.data_model.DataEntity;
 import ir.afarinesh.realhope.entities.feature.enums.UserInterfaceTypeEnum;
 import ir.afarinesh.realhope.entities.project.SoftwareApplicationPanel;
@@ -18,7 +19,7 @@ import java.util.Set;
 
 @Entity
 @Table
-public class UseCase {
+public class UseCase extends AbstractDataEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -57,4 +58,15 @@ public class UseCase {
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "useCase")
     private Set<UseCaseData> useCaseDataSet;
+
+    @Override
+    public String title(String locale) {
+        if (locale.equals("fa")) {
+            return getFaTitle();
+        }
+        if (locale.equals("en")) {
+            return getTitle();
+        }
+        return getName();
+    }
 }

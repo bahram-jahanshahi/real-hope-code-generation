@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class GenerateUseCaseGridListComponentAngularFile {
@@ -154,7 +155,7 @@ public class GenerateUseCaseGridListComponentAngularFile {
                 + t + "}" + eol
                 + eol
                 + t + "ngOnInit(): void {" + eol
-                + t + t + "this.paginator.pageSize = 5;" + eol
+                + t + t + "this.paginator.pageSize = 10;" + eol
                 + t + t + "this.paginator.page.subscribe(() => this.search());" + eol
                 + t + t + "this.prepare();" + eol
                 + this.getMakeRealTimeFormControls(useCase, 4)
@@ -221,7 +222,7 @@ public class GenerateUseCaseGridListComponentAngularFile {
                 + eol
                 + t + "realTimeSearchChanged($event: boolean): void {" + eol
                 + t + t + "this.realTimeSearchEnabled = $event;" + eol
-                + t + "}"
+                + t + "}" + eol
                 + eol
                 + t + "view(row: any) {" + eol
                 + this.getPopupView(useCase)
@@ -300,7 +301,11 @@ public class GenerateUseCaseGridListComponentAngularFile {
         String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
         String content = "";
         DomainEntity fruitDomainEntity = getDisplayedFruitDomainEntity(useCase);
-        List<DomainEntityAttribute> attributes = fruitDomainEntity.getDomainEntityAttributes();
+        List<DomainEntityAttribute> attributes = fruitDomainEntity
+                .getDomainEntityAttributes()
+                .stream()
+                .filter(DomainEntityAttribute::getUiGridListShow)
+                .collect(Collectors.toList());
         for (DomainEntityAttribute attribute : attributes) {
             content += StringUtility.space(offset + 2) + "<ng-container matColumnDef='" + attribute.getName() + "'>" + eol;
             content += StringUtility.space(offset + 4) + "<mat-header-cell *matHeaderCellDef>" + eol;
@@ -334,10 +339,15 @@ public class GenerateUseCaseGridListComponentAngularFile {
         String content = t + "displayedColumns = [" + eol;
         DomainEntity displayedDomainEntity = this.getDisplayedFruitDomainEntity(useCase);
         if (displayedDomainEntity != null) {
-            for (int i = 0; i < displayedDomainEntity.getDomainEntityAttributes().size(); i++) {
-                DomainEntityAttribute attribute = displayedDomainEntity.getDomainEntityAttributes().get(i);
+            List<DomainEntityAttribute> attributes = displayedDomainEntity
+                    .getDomainEntityAttributes()
+                    .stream()
+                    .filter(DomainEntityAttribute::getUiGridListShow)
+                    .collect(Collectors.toList());
+            for (int i = 0; i < attributes.size(); i++) {
+                DomainEntityAttribute attribute = attributes.get(i);
                 content += t + t + "'" + attribute.getName() + "'";
-                if (i < displayedDomainEntity.getDomainEntityAttributes().size() - 1) {
+                if (i < attributes.size() - 1) {
                     content += ",";
                 }
                 content += "\n";

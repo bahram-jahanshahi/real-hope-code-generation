@@ -24,20 +24,17 @@ class GenerateUseCaseServiceTest {
 
     @Test
     void cultivate() {
-        List<UseCase> useCaseList = useCaseSpringJpaRepository.findAll();
-        for (int i = 0; i < useCaseList.size(); i++) {
-            try {
-                UseCaseFruit<GenerateUseCase.Fruit> fruit = generateUseCase
-                        .cultivate(
-                                new UseCasePlant<>(
-                                        new GenerateUseCase.Plant(useCaseList.get(i).getId()),
-                                        "fa"
-                                )
-                        );
-                assertTrue(fruit.getIsSuccessful());
-            } catch (GenerateUseCase.CultivateException e) {
-                e.printStackTrace();
-            }
+        try {
+            UseCaseFruit<GenerateUseCase.Fruit> fruit = generateUseCase
+                    .cultivate(
+                            new UseCasePlant<>(
+                                    new GenerateUseCase.Plant(),
+                                    "fa"
+                            )
+                    );
+            assertTrue(fruit.getIsSuccessful());
+        } catch (GenerateUseCase.CultivateException e) {
+            e.printStackTrace();
         }
     }
 }

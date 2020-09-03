@@ -1,5 +1,6 @@
 package ir.afarinesh.realhope.entities.feature;
 
+import ir.afarinesh.realhope.core.domain.AbstractDataEntity;
 import ir.afarinesh.realhope.entities.feature.enums.FrontendActionTypeEnum;
 import ir.afarinesh.realhope.entities.feature.enums.UseCaseRelationContextEnum;
 import lombok.*;
@@ -14,7 +15,7 @@ import javax.persistence.*;
 
 @Entity
 @Table
-public class UseCaseRelation {
+public class UseCaseRelation extends AbstractDataEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,4 +45,15 @@ public class UseCaseRelation {
     @JoinColumn(nullable = false)
     @ManyToOne
     private UseCase destination;
+
+    @Override
+    public String title(String locale) {
+        if (locale.equals("fa")) {
+            return getFaTitle();
+        }
+        if (locale.equals("en")) {
+            return getTitle();
+        }
+        return getName();
+    }
 }
