@@ -45,6 +45,9 @@ public class DomainEntity extends AbstractDataEntity {
     @ManyToOne
     private SoftwareFeature softwareFeature;
 
+    @Column(nullable = false)
+    private Boolean generationEnable;
+
     @Override
     public String title(String locale) {
         if (locale.equals("fa")) {

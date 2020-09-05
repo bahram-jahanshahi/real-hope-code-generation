@@ -73,36 +73,40 @@ public class GenerateUseCaseService implements GenerateUseCase {
         List<UseCase> useCaseList = useCaseSpringJpaRepository.findAll();
         List<DomainEntity> domainEntityList = domainEntitySpringJpaRepository.findAll();
         for (UseCase useCase : useCaseList) {
-            if (useCase.getId() > 0L && useCase.getSoftwareFeature().getSoftwareModule().getSoftware().getId() == 2L) {
-                System.out.println("Try to generate use case: " + useCase.getName());
-                try {
-                    // generate use case interface java
-                    this.generateUseCaseInterfaceJavaFile.generate(useCase);
-                    // generate rest controller java
-                    this.generateUseCaseRestControllerJavaFile.generate(useCase);
-                    // generate use case service java
-                    this.generateUseCaseServiceJavaFile.generate(useCase);
-                    // generate use case angular cli service
-                    this.generateUseCaseServiceAngularFile.generate(useCase);
-                    // generate component for angular cli
-                    this.generateUseCaseComponentAngularFile.generate(useCase);
-                    // generate dictionary for angular cli
-                    this.generateDictionaryAngularFile.generate();
-                } catch (GenerateUseCaseInterfaceJavaFileException | GenerateUseCaseRestControllerJavaFileException | GenerateUseCaseServiceAngularFileException | GenerateUseCaseComponentAngularFileException | GenerateUseCaseServiceJavaFileException | GenerateDictionaryAngularFileException e) {
-                    throw new CultivateException(e.getMessage());
+            if (useCase.getSoftwareFeature().getSoftwareModule().getSoftware().getId() == 1L) {
+                if (useCase.getGenerationEnable()) {
+                    System.out.println("Try to generate use case: " + useCase.getName());
+                    try {
+                        // generate use case interface java
+                        this.generateUseCaseInterfaceJavaFile.generate(useCase);
+                        // generate rest controller java
+                        this.generateUseCaseRestControllerJavaFile.generate(useCase);
+                        // generate use case service java
+                        this.generateUseCaseServiceJavaFile.generate(useCase);
+                        // generate use case angular cli service
+                        this.generateUseCaseServiceAngularFile.generate(useCase);
+                        // generate component for angular cli
+                        this.generateUseCaseComponentAngularFile.generate(useCase);
+                        // generate dictionary for angular cli
+                        this.generateDictionaryAngularFile.generate();
+                    } catch (GenerateUseCaseInterfaceJavaFileException | GenerateUseCaseRestControllerJavaFileException | GenerateUseCaseServiceAngularFileException | GenerateUseCaseComponentAngularFileException | GenerateUseCaseServiceJavaFileException | GenerateDictionaryAngularFileException e) {
+                        throw new CultivateException(e.getMessage());
+                    }
+                    System.out.println("Done.");
                 }
-                System.out.println("Done.");
             }
         }
 
         for (DomainEntity domainEntity : domainEntityList) {
-            try {
-                // generate domain entity java
-                this.generateFeatureDomainJavaFile.generate(domainEntity);
-                // generate domain entity for angular cli
-                this.generateFeatureDomainAngularFile.generate(domainEntity);
-            } catch (GenerateFeatureDomainJavaFileException | GenerateFeatureDomainAngularFileException e) {
-                e.printStackTrace();
+            if (domainEntity.getGenerationEnable()) {
+                try {
+                    // generate domain entity java
+                    this.generateFeatureDomainJavaFile.generate(domainEntity);
+                    // generate domain entity for angular cli
+                    this.generateFeatureDomainAngularFile.generate(domainEntity);
+                } catch (GenerateFeatureDomainJavaFileException | GenerateFeatureDomainAngularFileException e) {
+                    e.printStackTrace();
+                }
             }
         }
 

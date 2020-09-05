@@ -59,6 +59,9 @@ public class UseCase extends AbstractDataEntity {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "useCase")
     private Set<UseCaseData> useCaseDataSet;
 
+    @Column(nullable = false)
+    private Boolean generationEnable;
+
     @Override
     public String title(String locale) {
         if (locale.equals("fa")) {
