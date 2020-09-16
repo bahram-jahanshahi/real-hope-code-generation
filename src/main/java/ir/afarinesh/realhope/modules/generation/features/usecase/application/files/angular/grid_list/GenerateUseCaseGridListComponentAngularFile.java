@@ -224,11 +224,11 @@ public class GenerateUseCaseGridListComponentAngularFile {
                 + t + t + "this.realTimeSearchEnabled = $event;" + eol
                 + t + "}" + eol
                 + eol
-                + t + "view(row: any) {" + eol
+                + t + "view(row: any): void {" + eol
                 + this.getPopupView(useCase)
                 + t + "}" + eol
                 + eol
-                + t + "addNew() {" + eol
+                + t + "addNew(): void {" + eol
                 + this.getPopupAddNew(useCase)
                 + t + "}" + eol
                 + eol

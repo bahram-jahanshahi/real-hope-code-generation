@@ -5,6 +5,7 @@ import ir.afarinesh.realhope.entities.feature.UseCaseData;
 import ir.afarinesh.realhope.entities.feature.UseCaseDataAttribute;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeCategoryEnum;
 import ir.afarinesh.realhope.entities.feature.enums.PrimitiveAttributeTypeEnum;
+import ir.afarinesh.realhope.entities.feature.enums.UseCaseUsageEnum;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.exceptions.GetPlantException;
 import ir.afarinesh.realhope.shares.utilities.StringUtility;
 import org.springframework.stereotype.Service;
@@ -29,15 +30,17 @@ public class UseCaseAngularFormService {
         UseCaseData plant = useCaseService.getPlant(useCase);
         List<UseCaseDataAttribute> attributes = plant.getUseCaseDataAttributes();
         for (UseCaseDataAttribute attribute : attributes) {
-            content += ""
-                    + offset + "<div fxLayout.gt-sm='row' fxLayout.lt-md='column' fxLayoutGap.gt-sm='16px' fxLayoutGap.lt-md='8px'>" + eol
-                    + offset + t + "<mat-form-field appearance='outline' fxFlex.gt-sm='50%' fxFlex.lt-md='100%'>" + eol
-                    + offset + t + t + "<mat-label>" + eol
-                    + offset + t + t + t + "{{'" + useCaseTitle + "." + attribute.getName() + "' | translate}}" + eol
-                    + offset + t + t + "</mat-label>" + eol
-                    + this.getFormFieldInput(useCaseTitle, attribute, offset + t + t, false)
-                    + offset + t + "</mat-form-field>" + eol
-                    + offset + "</div>" + eol;
+            if (!attribute.getUseCaseUsageEnum().equals(UseCaseUsageEnum.AddNewId) && !attribute.getUseCaseUsageEnum().equals(UseCaseUsageEnum.UpdateId) ) {
+                content += ""
+                        + offset + "<div fxLayout.gt-sm='row' fxLayout.lt-md='column' fxLayoutGap.gt-sm='16px' fxLayoutGap.lt-md='8px'>" + eol
+                        + offset + t + "<mat-form-field appearance='outline' fxFlex.gt-sm='50%' fxFlex.lt-md='100%'>" + eol
+                        + offset + t + t + "<mat-label>" + eol
+                        + offset + t + t + t + "{{'" + useCaseTitle + "." + attribute.getName() + "' | translate}}" + eol
+                        + offset + t + t + "</mat-label>" + eol
+                        + this.getFormFieldInput(useCaseTitle, attribute, offset + t + t, false)
+                        + offset + t + "</mat-form-field>" + eol
+                        + offset + "</div>" + eol;
+            }
         }
         return content;
     }

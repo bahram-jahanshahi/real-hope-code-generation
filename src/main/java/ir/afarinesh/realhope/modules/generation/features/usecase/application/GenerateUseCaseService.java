@@ -73,7 +73,7 @@ public class GenerateUseCaseService implements GenerateUseCase {
         List<UseCase> useCaseList = useCaseSpringJpaRepository.findAll();
         List<DomainEntity> domainEntityList = domainEntitySpringJpaRepository.findAll();
         for (UseCase useCase : useCaseList) {
-            if (useCase.getSoftwareFeature().getSoftwareModule().getSoftware().getId() == 1L) {
+            if (useCase.getSoftwareFeature().getSoftwareModule().getSoftware().getId() == 2L) {
                 if (useCase.getGenerationEnable()) {
                     System.out.println("Try to generate use case: " + useCase.getName());
                     try {

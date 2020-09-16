@@ -9,7 +9,7 @@ import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeCategoryEnum;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeQuantityEnum;
 import ir.afarinesh.realhope.entities.feature.enums.PrimitiveAttributeTypeEnum;
 import ir.afarinesh.realhope.entities.feature.enums.UseCaseUsageEnum;
-import ir.afarinesh.realhope.modules.software_design.features.use_case_data_attribute.application.ports.in.UpdateUseCaseDataAttributeByProjectManagerUseCase;
+import ir.afarinesh.realhope.modules.software_design.features.use_case_data_attribute.application.ports.in.AddNewUseCaseDataAttributeByProjectManagerUseCase;
 import ir.afarinesh.realhope.core.usecase.*;
 import ir.afarinesh.realhope.shares.repositories.*;
 import org.springframework.stereotype.Service;
@@ -17,16 +17,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @FeatureApplication
-public class UpdateUseCaseDataAttributeByProjectManagerServiceImpl implements UpdateUseCaseDataAttributeByProjectManagerUseCase {
+public class AddNewUseCaseDataAttributeByProjectManagerServiceImpl implements AddNewUseCaseDataAttributeByProjectManagerUseCase {
 
-    final UpdateUseCaseDataAttributeByProjectManagerService service;
+    final AddNewUseCaseDataAttributeByProjectManagerService service;
     final DomainEntitySpringJpaRepository domainEntitySpringJpaRepository;
     final DataEntitySpringJpaRepository dataEntitySpringJpaRepository;
     final UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository;
     final UseCaseDataAttributeSpringJpaRepository useCaseDataAttributeSpringJpaRepository;
     final DataEnumSpringJpaRepository dataEnumSpringJpaRepository;
 
-    public UpdateUseCaseDataAttributeByProjectManagerServiceImpl(UpdateUseCaseDataAttributeByProjectManagerService service,
+    public AddNewUseCaseDataAttributeByProjectManagerServiceImpl(AddNewUseCaseDataAttributeByProjectManagerService service,
                                                                  DomainEntitySpringJpaRepository domainEntitySpringJpaRepository,
                                                                  DataEntitySpringJpaRepository dataEntitySpringJpaRepository,
                                                                  UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository,
@@ -43,9 +43,6 @@ public class UpdateUseCaseDataAttributeByProjectManagerServiceImpl implements Up
     @Override
     @Transactional
     public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {
-        UseCaseDataAttribute entity =
-                this.useCaseDataAttributeSpringJpaRepository.findById(plant.getPlant().getId())
-                        .orElseThrow(() -> new CultivateException("Cannot find by id = " + plant.getPlant().getId()));
         DomainEntity domainEntityAttributeType = null;
         if (plant.getPlant().getDomainEntityAttributeType().getValue() != null) {
             domainEntityAttributeType = domainEntitySpringJpaRepository
@@ -76,33 +73,36 @@ public class UpdateUseCaseDataAttributeByProjectManagerServiceImpl implements Up
                     .findById(plant.getPlant().getDataEnum().getValue())
                     .orElseThrow();
         }
-        // Setters
-        entity.setName(plant.getPlant().getName().trim());
-        entity.setTitle(plant.getPlant().getTitle().trim());
-        entity.setFaTitle(plant.getPlant().getFaTitle().trim());
-        entity.setDescription(plant.getPlant().getDescription().trim());
-        entity.setUiRow(plant.getPlant().getUiRow());
-        entity.setUiColumn(plant.getPlant().getUiColumn());
-        entity.setUseCaseUsageEnum(UseCaseUsageEnum.findByName(plant.getPlant().getUseCaseUsageEnumEnum().getValue()));
-        entity.setAttributeQuantity(EntityAttributeQuantityEnum.findByName(plant.getPlant().getAttributeQuantityEnum().getValue()));
-        entity.setAttributeCategory(EntityAttributeCategoryEnum.findByName(plant.getPlant().getAttributeCategoryEnum().getValue()));
-        entity.setPrimitiveAttributeType(PrimitiveAttributeTypeEnum.findByName(plant.getPlant().getAttributeCategoryEnum().getValue()));
-        entity.setSetterOfUpdatePath(plant.getPlant().getSetterOfUpdatePath());
-        entity.setGetterOfUpdatePath(plant.getPlant().getGetterOfUpdatePath());
-        entity.setNullable(plant.getPlant().getNullable());
-        entity.setRequired(plant.getPlant().getRequired());
-        entity.setMinLength(plant.getPlant().getMinLength());
-        entity.setMaxLength(plant.getPlant().getMaxLength());
-        entity.setMin(plant.getPlant().getMin());
-        entity.setMax(plant.getPlant().getMax());
-        entity.setErrorTip(plant.getPlant().getErrorTip());
-        entity.setDomainEntityAttributeType(domainEntityAttributeType);
-        entity.setDataEntityAttributeType(dataEntityAttributeType);
-        entity.setUseCaseData(useCaseData);
-        entity.setFruitSeedsAttribute(fruitSeedsAttribute);
-        entity.setDataEnum(dataEnum);
-        // Update
-        this.useCaseDataAttributeSpringJpaRepository.save(entity);
+        // Create
+        UseCaseDataAttribute attribute = new UseCaseDataAttribute(
+                null,
+                plant.getPlant().getName().trim(),
+                plant.getPlant().getTitle().trim(),
+                plant.getPlant().getFaTitle().trim(),
+                plant.getPlant().getDescription().trim(),
+                plant.getPlant().getUiRow(),
+                plant.getPlant().getUiColumn(),
+                UseCaseUsageEnum.findByName(plant.getPlant().getUseCaseUsageEnumEnum().getValue()),
+                EntityAttributeQuantityEnum.findByName(plant.getPlant().getAttributeQuantityEnum().getValue()),
+                EntityAttributeCategoryEnum.findByName(plant.getPlant().getAttributeCategoryEnum().getValue()),
+                PrimitiveAttributeTypeEnum.findByName(plant.getPlant().getAttributeCategoryEnum().getValue()),
+                plant.getPlant().getSetterOfUpdatePath(),
+                plant.getPlant().getGetterOfUpdatePath(),
+                plant.getPlant().getNullable(),
+                plant.getPlant().getRequired(),
+                plant.getPlant().getMinLength(),
+                plant.getPlant().getMaxLength(),
+                plant.getPlant().getMin(),
+                plant.getPlant().getMax(),
+                plant.getPlant().getErrorTip(),
+                domainEntityAttributeType,
+                dataEntityAttributeType,
+                useCaseData,
+                fruitSeedsAttribute,
+                dataEnum
+        );
+        // Save
+        this.useCaseDataAttributeSpringJpaRepository.save(attribute);
         // Return fruit
         return new UseCaseFruit<>(
                 new Fruit(true),

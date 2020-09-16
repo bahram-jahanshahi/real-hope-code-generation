@@ -182,7 +182,7 @@ public class GenerateDictionaryAngularFile {
                     }
                 }
             } catch (GetPlantException e) {
-                e.printStackTrace();
+                // System.err.println(e.getMessage());
             }
         }
         return content;
