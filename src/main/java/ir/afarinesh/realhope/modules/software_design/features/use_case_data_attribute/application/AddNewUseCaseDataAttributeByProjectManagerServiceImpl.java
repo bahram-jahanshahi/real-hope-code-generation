@@ -5,15 +5,14 @@ import ir.afarinesh.realhope.entities.data_model.DataEnum;
 import ir.afarinesh.realhope.entities.feature.DomainEntity;
 import ir.afarinesh.realhope.entities.feature.UseCaseData;
 import ir.afarinesh.realhope.entities.feature.UseCaseDataAttribute;
-import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeCategoryEnum;
-import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeQuantityEnum;
-import ir.afarinesh.realhope.entities.feature.enums.PrimitiveAttributeTypeEnum;
-import ir.afarinesh.realhope.entities.feature.enums.UseCaseUsageEnum;
+import ir.afarinesh.realhope.entities.feature.enums.*;
 import ir.afarinesh.realhope.modules.software_design.features.use_case_data_attribute.application.ports.in.AddNewUseCaseDataAttributeByProjectManagerUseCase;
 import ir.afarinesh.realhope.core.usecase.*;
 import ir.afarinesh.realhope.shares.repositories.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @FeatureApplication
@@ -103,6 +102,50 @@ public class AddNewUseCaseDataAttributeByProjectManagerServiceImpl implements Ad
         );
         // Save
         this.useCaseDataAttributeSpringJpaRepository.save(attribute);
+        // If attribute is for Plant of AddNew or Update use case then copy it to the FruitSeeds one
+        if (attribute.getUseCaseData().getUseCaseDataType().equals(UseCaseDataTypeEnum.Plant) &&
+                (attribute.getUseCaseData().getUseCase().getUserInterfaceType().equals(UserInterfaceTypeEnum.AddNew) || attribute.getUseCaseData().getUseCase().getUserInterfaceType().equals(UserInterfaceTypeEnum.Update))) {
+            Optional<UseCaseData> optionalFruitSeeds = attribute.getUseCaseData().getUseCase()
+                    .getUseCaseDataSet()
+                    .stream()
+                    .filter(data -> data.getUseCaseDataType().equals(UseCaseDataTypeEnum.FruitSeeds))
+                    .findFirst();
+            // duplicate attribute
+            if (optionalFruitSeeds.isPresent()) {
+                UseCaseDataAttribute duplicatedFruitSeedsAttribute = new UseCaseDataAttribute(
+                        null,
+                        plant.getPlant().getName().trim(),
+                        plant.getPlant().getTitle().trim(),
+                        plant.getPlant().getFaTitle().trim(),
+                        plant.getPlant().getDescription().trim(),
+                        plant.getPlant().getUiRow(),
+                        plant.getPlant().getUiColumn(),
+                        UseCaseUsageEnum.findByName(plant.getPlant().getUseCaseUsageEnumEnum().getValue()),
+                        EntityAttributeQuantityEnum.findByName(plant.getPlant().getAttributeQuantityEnum().getValue()),
+                        EntityAttributeCategoryEnum.findByName(plant.getPlant().getAttributeCategoryEnum().getValue()),
+                        PrimitiveAttributeTypeEnum.findByName(plant.getPlant().getPrimitiveAttributeTypeEnum().getValue()),
+                        plant.getPlant().getSetterOfUpdatePath(),
+                        plant.getPlant().getGetterOfUpdatePath(),
+                        plant.getPlant().getNullable(),
+                        plant.getPlant().getRequired(),
+                        plant.getPlant().getMinLength(),
+                        plant.getPlant().getMaxLength(),
+                        plant.getPlant().getMin(),
+                        plant.getPlant().getMax(),
+                        plant.getPlant().getErrorTip(),
+                        domainEntityAttributeType,
+                        dataEntityAttributeType,
+                        optionalFruitSeeds.get(),
+                        fruitSeedsAttribute,
+                        dataEnum
+                );
+                this.useCaseDataAttributeSpringJpaRepository.save(duplicatedFruitSeedsAttribute);
+                // set fruit seeds attribute
+                attribute.setFruitSeedsAttribute(duplicatedFruitSeedsAttribute);
+                // update plant attribute
+                this.useCaseDataAttributeSpringJpaRepository.save(attribute);
+            }
+        }
         // Return fruit
         return new UseCaseFruit<>(
                 new Fruit(true),
