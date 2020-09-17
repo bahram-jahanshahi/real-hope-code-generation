@@ -1,7 +1,10 @@
 package ir.afarinesh.realhope.modules.software_design.features.use_case.domain;
 
 import ir.afarinesh.realhope.core.annotations.FeatureDomain;
+import ir.afarinesh.realhope.modules.software_design.features.use_case_data_attribute.domain.UseCaseDataAttribute4ProjectManager;
 import lombok.*;
+
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,4 +27,9 @@ public class UseCase4ProjectManager{
 	private String softwareRole; // The software role
 	private String dataEntity; // The data entity
 	private Boolean generationEnable; // The generation enable
+	private List<UseCaseDataAttribute4ProjectManager> plantAttributes;
+	private List<UseCaseDataAttribute4ProjectManager> fruitAttributes;
+	private List<UseCaseDataAttribute4ProjectManager> seedsCommandAttributes;
+	private List<UseCaseDataAttribute4ProjectManager> fruitSeedsAttributes;
+
 }

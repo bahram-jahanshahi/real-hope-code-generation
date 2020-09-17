@@ -360,17 +360,22 @@ public class GenerateUseCaseUpdateComponentAngularFile {
         if (attribute.getRequired()) {
             validators.add("Validators.required");
         }
-        if (attribute.getMinLength() != null) {
-            validators.add("Validators.minLength(" + attribute.getMinLength() + ")");
+        if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.Primitive)) {
+            if (attribute.getMinLength() != null) {
+                validators.add("Validators.minLength(" + attribute.getMinLength() + ")");
+            }
+            if (attribute.getMaxLength() != null) {
+                validators.add("Validators.maxLength(" + attribute.getMaxLength() + ")");
+            }
         }
-        if (attribute.getMaxLength() != null) {
-            validators.add("Validators.maxLength(" + attribute.getMaxLength() + ")");
-        }
-        if (attribute.getMin() != null) {
-            validators.add("Validators.min(" + attribute.getMin() + ")");
-        }
-        if (attribute.getMax() != null) {
-            validators.add("Validators.max(" + attribute.getMax() + ")");
+        if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.Primitive)
+                && (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Long) || attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Integer))) {
+            if (attribute.getMin() != null) {
+                validators.add("Validators.min(" + attribute.getMin() + ")");
+            }
+            if (attribute.getMax() != null) {
+                validators.add("Validators.max(" + attribute.getMax() + ")");
+            }
         }
         for (int i = 0; i < validators.size(); i++) {
             content += validators.get(i);
