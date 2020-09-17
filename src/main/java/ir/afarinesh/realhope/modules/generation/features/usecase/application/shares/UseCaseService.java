@@ -30,9 +30,10 @@ public class UseCaseService {
                     .stream()
                     .filter(useCaseDataAttribute -> useCaseDataAttribute.getUseCaseUsageEnum().equals(UseCaseUsageEnum.ViewEntity))
                     .findFirst();
-            if (firstAttribute.isPresent()) {
-                return firstAttribute.get().getDomainEntityAttributeType();
+            if (firstAttribute.isEmpty()) {
+                throw new GetViewDomainEntityException("Cannot find view domain attribute for use case = " + useCase.getName() + ", use case data = " + first.get().getName());
             }
+            return firstAttribute.get().getDomainEntityAttributeType();
         }
         throw new GetViewDomainEntityException("Cannot find view domain entity for use case = " + useCase.getName());
     }
@@ -86,7 +87,7 @@ public class UseCaseService {
         String content = "";
         for (int i = 0; i < domainEntity.getDomainEntityAttributes().size(); i++) {
             DomainEntityAttribute attribute = domainEntity.getDomainEntityAttributes().get(i);
-            content += t + t + t + t +  this.getMapPathByGetters(attribute.getMapPath(), attribute.getMapPathAttributeType());
+            content += t + t + t + t + this.getMapPathByGetters(attribute.getMapPath(), attribute.getMapPathAttributeType());
             if (i < domainEntity.getDomainEntityAttributes().size() - 1) {
                 content += ",";
             }
@@ -154,7 +155,7 @@ public class UseCaseService {
         return content;
     }
 
-    public String getUseCaseTitle(UseCase useCase){
+    public String getUseCaseTitle(UseCase useCase) {
         return useCase.getName() + "By" + useCase.getSoftwareRole().getName();
     }
 }

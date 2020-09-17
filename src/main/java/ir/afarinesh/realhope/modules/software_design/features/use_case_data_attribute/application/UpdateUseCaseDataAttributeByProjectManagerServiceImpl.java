@@ -86,7 +86,7 @@ public class UpdateUseCaseDataAttributeByProjectManagerServiceImpl implements Up
         entity.setUseCaseUsageEnum(UseCaseUsageEnum.findByName(plant.getPlant().getUseCaseUsageEnumEnum().getValue()));
         entity.setAttributeQuantity(EntityAttributeQuantityEnum.findByName(plant.getPlant().getAttributeQuantityEnum().getValue()));
         entity.setAttributeCategory(EntityAttributeCategoryEnum.findByName(plant.getPlant().getAttributeCategoryEnum().getValue()));
-        entity.setPrimitiveAttributeType(PrimitiveAttributeTypeEnum.findByName(plant.getPlant().getAttributeCategoryEnum().getValue()));
+        entity.setPrimitiveAttributeType(PrimitiveAttributeTypeEnum.findByName(plant.getPlant().getPrimitiveAttributeTypeEnum().getValue()));
         entity.setSetterOfUpdatePath(plant.getPlant().getSetterOfUpdatePath());
         entity.setGetterOfUpdatePath(plant.getPlant().getGetterOfUpdatePath());
         entity.setNullable(plant.getPlant().getNullable());

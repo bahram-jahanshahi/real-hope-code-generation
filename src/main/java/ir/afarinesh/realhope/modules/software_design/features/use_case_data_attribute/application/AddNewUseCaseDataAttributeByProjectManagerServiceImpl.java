@@ -85,7 +85,7 @@ public class AddNewUseCaseDataAttributeByProjectManagerServiceImpl implements Ad
                 UseCaseUsageEnum.findByName(plant.getPlant().getUseCaseUsageEnumEnum().getValue()),
                 EntityAttributeQuantityEnum.findByName(plant.getPlant().getAttributeQuantityEnum().getValue()),
                 EntityAttributeCategoryEnum.findByName(plant.getPlant().getAttributeCategoryEnum().getValue()),
-                PrimitiveAttributeTypeEnum.findByName(plant.getPlant().getAttributeCategoryEnum().getValue()),
+                PrimitiveAttributeTypeEnum.findByName(plant.getPlant().getPrimitiveAttributeTypeEnum().getValue()),
                 plant.getPlant().getSetterOfUpdatePath(),
                 plant.getPlant().getGetterOfUpdatePath(),
                 plant.getPlant().getNullable(),

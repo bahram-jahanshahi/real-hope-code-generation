@@ -30,12 +30,13 @@ public class UseCaseAngularFormService {
         UseCaseData plant = useCaseService.getPlant(useCase);
         List<UseCaseDataAttribute> attributes = plant.getUseCaseDataAttributes();
         for (UseCaseDataAttribute attribute : attributes) {
-            if (!attribute.getUseCaseUsageEnum().equals(UseCaseUsageEnum.AddNewId) && !attribute.getUseCaseUsageEnum().equals(UseCaseUsageEnum.UpdateId) ) {
+            if (!attribute.getUseCaseUsageEnum().equals(UseCaseUsageEnum.AddNewId) && !attribute.getUseCaseUsageEnum().equals(UseCaseUsageEnum.UpdateId)) {
                 content += ""
                         + offset + "<div fxLayout.gt-sm='row' fxLayout.lt-md='column' fxLayoutGap.gt-sm='16px' fxLayoutGap.lt-md='8px'>" + eol
                         + offset + t + "<mat-form-field appearance='outline' fxFlex.gt-sm='50%' fxFlex.lt-md='100%'>" + eol
                         + offset + t + t + "<mat-label>" + eol
                         + offset + t + t + t + "{{'" + useCaseTitle + "." + attribute.getName() + "' | translate}}" + eol
+                        + this.getNotNullableStar(attribute, offset + t + t + t) + eol
                         + offset + t + t + "</mat-label>" + eol
                         + this.getFormFieldInput(useCaseTitle, attribute, offset + t + t, false)
                         + offset + t + "</mat-form-field>" + eol
@@ -43,6 +44,13 @@ public class UseCaseAngularFormService {
             }
         }
         return content;
+    }
+
+    private String getNotNullableStar(UseCaseDataAttribute attribute, String offset) {
+        if (!attribute.getNullable()) {
+            return offset + "<span style='color: red;'>*</span>";
+        }
+        return "";
     }
 
     public String getFormFieldInput(String useCaseTitle, UseCaseDataAttribute attribute, String offset, boolean isSearchForm) {
@@ -58,6 +66,7 @@ public class UseCaseAngularFormService {
             }
         }
         String content = "";
+        // Primitive
         if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.Primitive)) {
             if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.String)) {
                 content += offset + "<input matInput " + formControlAttributeOfTag + ">" + eol;
@@ -82,6 +91,7 @@ public class UseCaseAngularFormService {
                 content += offset + "</mat-error>" + eol;
             }
         }
+        // Enumeration
         if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEnum)) {
             content += offset + "<mat-select " + formControlAttributeOfTag + ">" + eol;
             content += offset + t + "<mat-option *ngFor='let " + attVarName + "Enum of " + attVarName + "EnumArray' [value]='" + attVarName + "Enum.value'>" + eol;
@@ -94,8 +104,14 @@ public class UseCaseAngularFormService {
                 content += offset + "</mat-error>" + eol;
             }
         }
+        // Entity
         if (attribute.getAttributeCategory().equals(EntityAttributeCategoryEnum.SelectEntity)) {
             content += offset + "<mat-select " + formControlAttributeOfTag + ">" + eol;
+            if (attribute.getNullable()) {
+                content += offset + t + "<mat-option [value]='null'>" + eol;
+                content += offset + t + t + "{{ '" + useCaseTitle + "." + "None'" + " | translate }}" + eol;
+                content += offset + t + "</mat-option>" + eol;
+            }
             content += offset + t + "<mat-option *ngFor='let " + attVarName + " of " + attVarName + "Array' [value]='" + attVarName + ".value'>" + eol;
             content += offset + t + t + "{{" + attVarName + ".title}}" + eol;
             content += offset + t + "</mat-option>" + eol;

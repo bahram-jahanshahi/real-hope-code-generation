@@ -143,6 +143,7 @@ public class GenerateDictionaryAngularFile {
         if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.Update)) {
             content += ",\"BooleanYes\": \"بلی\"" + eol;
             content += ",\"BooleanNo\": \"خیر\"" + eol;
+            content += ",\"None\": \"هیچکدام\"" + eol;
             content += ",\"Submit\": \"" + useCase.getFaTitle() + "\"" + eol;
             content += ",\"Close\": \"بازگشت\"" + eol;
             try {
@@ -168,6 +169,7 @@ public class GenerateDictionaryAngularFile {
         if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.AddNew)) {
             content += ",\"BooleanYes\": \"بلی\"" + eol;
             content += ",\"BooleanNo\": \"خیر\"" + eol;
+            content += ",\"None\": \"هیچکدام\"" + eol;
             content += ",\"Submit\": \"" + useCase.getFaTitle() + "\"" + eol;
             content += ",\"Close\": \"بازگشت\"" + eol;
             try {
