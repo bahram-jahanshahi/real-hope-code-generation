@@ -1,6 +1,7 @@
 package ir.afarinesh.realhope.modules.software_design.features.use_case_data_attribute.application;
 import ir.afarinesh.realhope.core.annotations.FeatureApplication;
 import ir.afarinesh.realhope.entities.data_model.DataEntity;
+import ir.afarinesh.realhope.entities.data_model.DataEntityAttribute;
 import ir.afarinesh.realhope.entities.data_model.DataEnum;
 import ir.afarinesh.realhope.entities.feature.DomainEntity;
 import ir.afarinesh.realhope.entities.feature.UseCaseData;
@@ -24,19 +25,22 @@ public class AddNewUseCaseDataAttributeByProjectManagerServiceImpl implements Ad
     final UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository;
     final UseCaseDataAttributeSpringJpaRepository useCaseDataAttributeSpringJpaRepository;
     final DataEnumSpringJpaRepository dataEnumSpringJpaRepository;
+    final DataEntityAttributeSpringJpaRepository dataEntityAttributeSpringJpaRepository;
 
     public AddNewUseCaseDataAttributeByProjectManagerServiceImpl(AddNewUseCaseDataAttributeByProjectManagerService service,
                                                                  DomainEntitySpringJpaRepository domainEntitySpringJpaRepository,
                                                                  DataEntitySpringJpaRepository dataEntitySpringJpaRepository,
                                                                  UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository,
                                                                  UseCaseDataAttributeSpringJpaRepository useCaseDataAttributeSpringJpaRepository,
-                                                                 DataEnumSpringJpaRepository dataEnumSpringJpaRepository) {
+                                                                 DataEnumSpringJpaRepository dataEnumSpringJpaRepository,
+                                                                 DataEntityAttributeSpringJpaRepository dataEntityAttributeSpringJpaRepository) {
         this.service = service;
         this.domainEntitySpringJpaRepository = domainEntitySpringJpaRepository;
         this.dataEntitySpringJpaRepository = dataEntitySpringJpaRepository;
         this.useCaseDataSpringJpaRepository = useCaseDataSpringJpaRepository;
         this.useCaseDataAttributeSpringJpaRepository = useCaseDataAttributeSpringJpaRepository;
         this.dataEnumSpringJpaRepository = dataEnumSpringJpaRepository;
+        this.dataEntityAttributeSpringJpaRepository = dataEntityAttributeSpringJpaRepository;
     }
 
     @Override
@@ -72,6 +76,12 @@ public class AddNewUseCaseDataAttributeByProjectManagerServiceImpl implements Ad
                     .findById(plant.getPlant().getDataEnum().getValue())
                     .orElseThrow();
         }
+        DataEntityAttribute relatedDataEntityAttribute = null;
+        if (plant.getPlant().getRelatedDataEntityAttribute().getValue() != null) {
+            relatedDataEntityAttribute = dataEntityAttributeSpringJpaRepository
+                    .findById(plant.getPlant().getRelatedDataEntityAttribute().getValue())
+                    .orElseThrow();
+        }
         // Create
         UseCaseDataAttribute attribute = new UseCaseDataAttribute(
                 null,
@@ -99,20 +109,17 @@ public class AddNewUseCaseDataAttributeByProjectManagerServiceImpl implements Ad
                 useCaseData,
                 fruitSeedsAttribute,
                 dataEnum,
-                null
+                relatedDataEntityAttribute
         );
         // Save
         this.useCaseDataAttributeSpringJpaRepository.save(attribute);
         // If attribute is for Plant of AddNew or Update use case then copy it to the FruitSeeds one
         if (attribute.getUseCaseData().getUseCaseDataType().equals(UseCaseDataTypeEnum.Plant) &&
                 (attribute.getUseCaseData().getUseCase().getUserInterfaceType().equals(UserInterfaceTypeEnum.AddNew) || attribute.getUseCaseData().getUseCase().getUserInterfaceType().equals(UserInterfaceTypeEnum.Update))) {
-            Optional<UseCaseData> optionalFruitSeeds = attribute.getUseCaseData().getUseCase()
-                    .getUseCaseDataSet()
-                    .stream()
-                    .filter(data -> data.getUseCaseDataType().equals(UseCaseDataTypeEnum.FruitSeeds))
-                    .findFirst();
+            UseCaseData fruitSeeds = this.useCaseDataSpringJpaRepository
+                    .findFirstByUseCase_IdAndUseCaseDataType(attribute.getUseCaseData().getUseCase().getId(), UseCaseDataTypeEnum.FruitSeeds);
             // duplicate attribute
-            if (optionalFruitSeeds.isPresent()) {
+            if (fruitSeeds != null) {
                 UseCaseDataAttribute duplicatedFruitSeedsAttribute = new UseCaseDataAttribute(
                         null,
                         plant.getPlant().getName().trim(),
@@ -136,10 +143,10 @@ public class AddNewUseCaseDataAttributeByProjectManagerServiceImpl implements Ad
                         plant.getPlant().getErrorTip(),
                         domainEntityAttributeType,
                         dataEntityAttributeType,
-                        optionalFruitSeeds.get(),
+                        fruitSeeds,
                         fruitSeedsAttribute,
                         dataEnum,
-                        null
+                        relatedDataEntityAttribute
                 );
                 this.useCaseDataAttributeSpringJpaRepository.save(duplicatedFruitSeedsAttribute);
                 // set fruit seeds attribute

@@ -16,10 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ir.afarinesh.realhope.shares.repositories.SoftwareApplicationPanelSpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.UseCaseSpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.SoftwareRoleSpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.DataEntitySpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.SoftwareFeatureSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.UseCaseSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.DataEntitySpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.CrudCodeGenerationSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.SoftwareRoleSpringJpaRepository;
 import ir.afarinesh.realhope.entities.feature.enums.UserInterfaceTypeEnum;
 
 
@@ -28,17 +29,19 @@ public class AddNewUseCaseByProjectManagerService {
 
     // jpa repositories
     final SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository;
-    final UseCaseSpringJpaRepository useCaseSpringJpaRepository;
-    final SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository;
-    final DataEntitySpringJpaRepository dataEntitySpringJpaRepository;
     final SoftwareFeatureSpringJpaRepository softwareFeatureSpringJpaRepository;
+    final UseCaseSpringJpaRepository useCaseSpringJpaRepository;
+    final DataEntitySpringJpaRepository dataEntitySpringJpaRepository;
+    final CrudCodeGenerationSpringJpaRepository crudCodeGenerationSpringJpaRepository;
+    final SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository;
 
-    public AddNewUseCaseByProjectManagerService(SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository, UseCaseSpringJpaRepository useCaseSpringJpaRepository, SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository, DataEntitySpringJpaRepository dataEntitySpringJpaRepository, SoftwareFeatureSpringJpaRepository softwareFeatureSpringJpaRepository){
+    public AddNewUseCaseByProjectManagerService(SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository, SoftwareFeatureSpringJpaRepository softwareFeatureSpringJpaRepository, UseCaseSpringJpaRepository useCaseSpringJpaRepository, DataEntitySpringJpaRepository dataEntitySpringJpaRepository, CrudCodeGenerationSpringJpaRepository crudCodeGenerationSpringJpaRepository, SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository){
         this.softwareApplicationPanelSpringJpaRepository = softwareApplicationPanelSpringJpaRepository;
-        this.useCaseSpringJpaRepository = useCaseSpringJpaRepository;
-        this.softwareRoleSpringJpaRepository = softwareRoleSpringJpaRepository;
-        this.dataEntitySpringJpaRepository = dataEntitySpringJpaRepository;
         this.softwareFeatureSpringJpaRepository = softwareFeatureSpringJpaRepository;
+        this.useCaseSpringJpaRepository = useCaseSpringJpaRepository;
+        this.dataEntitySpringJpaRepository = dataEntitySpringJpaRepository;
+        this.crudCodeGenerationSpringJpaRepository = crudCodeGenerationSpringJpaRepository;
+        this.softwareRoleSpringJpaRepository = softwareRoleSpringJpaRepository;
     }
 
     @Transactional
@@ -89,6 +92,12 @@ public class AddNewUseCaseByProjectManagerService {
                 .map(obj -> new SelectEntity(obj.title(seedsCommand.getLocale()), obj.getId()))
                 .collect(Collectors.toList());
         Boolean generationEnable = null;
+        SelectEntity crudCodeGeneration = new SelectEntity();
+        List<SelectEntity> crudCodeGenerationList = this.crudCodeGenerationSpringJpaRepository
+                .findAll()
+                .stream()
+                .map(obj -> new SelectEntity(obj.title(seedsCommand.getLocale()), obj.getId()))
+                .collect(Collectors.toList());
 
         return new UseCaseFruitSeeds<>(
             new FruitSeeds(
@@ -107,7 +116,9 @@ public class AddNewUseCaseByProjectManagerService {
                 softwareRoleList,
                 dataEntity,
                 dataEntityList,
-                generationEnable
+                generationEnable,
+                crudCodeGeneration,
+                crudCodeGenerationList
             ),
             true,
             ""

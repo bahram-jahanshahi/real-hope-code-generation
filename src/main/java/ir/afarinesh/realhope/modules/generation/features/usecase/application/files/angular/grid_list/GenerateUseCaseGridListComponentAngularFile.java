@@ -112,6 +112,7 @@ public class GenerateUseCaseGridListComponentAngularFile {
                 + "import {PaginationCommand} from '../../../../../../core/domain/pagination-command';" + eol
                 + "import {ErrorDialogData} from '../../../../../../shares/components/dialogs/error-dialog/error-dialog.component';" + eol
                 + "import {SelectEnum} from '../../../../../../core/domain/select-enum';" + eol
+                + "import {SelectEntity} from '../../../../../../core/domain/select-entity';" + eol
                 + "import {UtilityDateService} from '../../../../../../shares/utilities/utility-date.service';" + eol
                 + "import {" + eol
                 + t + useCaseTitle + "Plant" + "," + eol

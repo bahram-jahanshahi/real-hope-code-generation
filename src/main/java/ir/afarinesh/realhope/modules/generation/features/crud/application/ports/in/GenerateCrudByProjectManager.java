@@ -5,6 +5,7 @@ import ir.afarinesh.realhope.core.usecase.UseCaseFruit;
 import ir.afarinesh.realhope.core.usecase.UseCaseFruitSeeds;
 import ir.afarinesh.realhope.core.usecase.UseCasePlant;
 import ir.afarinesh.realhope.core.usecase.UseCaseSeedsCommand;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -24,6 +25,7 @@ public interface GenerateCrudByProjectManager {
 
     @Data
     @NoArgsConstructor
+    @AllArgsConstructor
     class Plant {
         @NonNull
         private Long crudId;

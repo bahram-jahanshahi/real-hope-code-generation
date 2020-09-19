@@ -68,7 +68,11 @@ public class ListUseCaseByProjectManagerService {
                 (entity.getSoftwareApplicationPanel() != null) ? entity.getSoftwareApplicationPanel().title(locale) : null,
                 (entity.getSoftwareRole() != null) ? entity.getSoftwareRole().title(locale) : null,
                 (entity.getDataEntity() != null) ? entity.getDataEntity().title(locale) : null,
-                entity.getGenerationEnable()
+                entity.getGenerationEnable(),
+                null,
+                null,
+                null,
+                null
         );
     }
 }

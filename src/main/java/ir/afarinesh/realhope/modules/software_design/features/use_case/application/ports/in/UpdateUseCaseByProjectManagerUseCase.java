@@ -44,6 +44,8 @@ public interface UpdateUseCaseByProjectManagerUseCase {
     SelectEntity dataEntity;
     List<SelectEntity> dataEntityArray;
     Boolean generationEnable;
+    SelectEntity crudCodeGeneration;
+    List<SelectEntity> crudCodeGenerationArray;
   }
 
   class CultivateException extends Exception {
@@ -72,6 +74,8 @@ public interface UpdateUseCaseByProjectManagerUseCase {
     SelectEntity dataEntity;
     List<SelectEntity> dataEntityArray;
     Boolean generationEnable;
+    SelectEntity crudCodeGeneration;
+    List<SelectEntity> crudCodeGenerationArray;
   }
 
   @Data

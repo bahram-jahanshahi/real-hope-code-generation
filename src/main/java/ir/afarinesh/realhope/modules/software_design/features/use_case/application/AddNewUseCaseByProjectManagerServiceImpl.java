@@ -10,7 +10,6 @@ import ir.afarinesh.realhope.shares.repositories.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 
@@ -25,6 +24,7 @@ public class AddNewUseCaseByProjectManagerServiceImpl implements AddNewUseCaseBy
     final SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository;
     final DataEntitySpringJpaRepository dataEntitySpringJpaRepository;
     final UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository;
+    final CrudCodeGenerationSpringJpaRepository crudCodeGenerationSpringJpaRepository;
 
     public AddNewUseCaseByProjectManagerServiceImpl(AddNewUseCaseByProjectManagerService service,
                                                     UseCaseSpringJpaRepository useCaseSpringJpaRepository,
@@ -32,7 +32,8 @@ public class AddNewUseCaseByProjectManagerServiceImpl implements AddNewUseCaseBy
                                                     SoftwareFeatureSpringJpaRepository softwareFeatureSpringJpaRepository,
                                                     SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository,
                                                     DataEntitySpringJpaRepository dataEntitySpringJpaRepository,
-                                                    UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository) {
+                                                    UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository,
+                                                    CrudCodeGenerationSpringJpaRepository crudCodeGenerationSpringJpaRepository) {
         this.service = service;
         this.useCaseSpringJpaRepository = useCaseSpringJpaRepository;
         this.softwareApplicationPanelSpringJpaRepository = softwareApplicationPanelSpringJpaRepository;
@@ -40,6 +41,7 @@ public class AddNewUseCaseByProjectManagerServiceImpl implements AddNewUseCaseBy
         this.softwareRoleSpringJpaRepository = softwareRoleSpringJpaRepository;
         this.dataEntitySpringJpaRepository = dataEntitySpringJpaRepository;
         this.useCaseDataSpringJpaRepository = useCaseDataSpringJpaRepository;
+        this.crudCodeGenerationSpringJpaRepository = crudCodeGenerationSpringJpaRepository;
     }
 
     @Override
@@ -59,7 +61,8 @@ public class AddNewUseCaseByProjectManagerServiceImpl implements AddNewUseCaseBy
                 this.softwareRoleSpringJpaRepository.findById(plant.getPlant().getSoftwareRole().getValue()).orElseThrow(),
                 this.dataEntitySpringJpaRepository.findById(plant.getPlant().getDataEntity().getValue()).orElseThrow(),
                 Set.of(),
-                plant.getPlant().getGenerationEnable()
+                plant.getPlant().getGenerationEnable(),
+                this.crudCodeGenerationSpringJpaRepository.findById(plant.getPlant().getCrudCodeGeneration().getValue()).orElseThrow()
         );
 
         // Save use case
@@ -76,7 +79,7 @@ public class AddNewUseCaseByProjectManagerServiceImpl implements AddNewUseCaseBy
 
         // Return
         return new UseCaseFruit<>(
-                new Fruit(),
+                new Fruit(useCase.getId()),
                 true,
                 ""
         );

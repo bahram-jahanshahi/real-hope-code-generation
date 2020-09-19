@@ -19,6 +19,7 @@ import ir.afarinesh.realhope.modules.software_design.features.use_case.applicati
 import ir.afarinesh.realhope.modules.software_design.features.use_case_data_attribute.application.ports.in.AddNewUseCaseDataAttributeByProjectManagerUseCase;
 import ir.afarinesh.realhope.shares.repositories.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -65,6 +66,7 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
     }
 
     @Override
+    @Transactional
     public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {
         CrudCodeGeneration crudCodeGeneration = crudCodeGenerationSpringJpaRepository
                 .findById(plant.getPlant().getCrudId())
@@ -72,18 +74,33 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
 
         // Find the data entity attributes
         List<DataEntityAttribute> dataEntityAttributes = this.dataEntityAttributeSpringJpaRepository.findByDataEntity_Id(crudCodeGeneration.getDataEntity().getId());
+        // Delete use case, use case data, use case data attributes, and use case relation by crud id
+        this.useCaseRelationSpringJpaRepository.deleteByCrudCodeGeneration_Id(crudCodeGeneration.getId());
+        this.useCaseDataAttributeSpringJpaRepository.deleteByUseCaseData_UseCase_CrudCodeGeneration_Id(crudCodeGeneration.getId());
+        this.useCaseDataSpringJpaRepository.deleteByUseCase_CrudCodeGeneration_Id(crudCodeGeneration.getId());
+        this.useCaseSpringJpaRepository.deleteByCrudCodeGeneration_Id(crudCodeGeneration.getId());
         // create domain entity
         DomainEntity domainEntity = this.createDomainEntity(crudCodeGeneration, dataEntityAttributes);
-        // create GridList use case
-        UseCase gridListUseCase = this.createGridListUseCase(crudCodeGeneration, domainEntity, plant.getLocale());
-        // create View use case
+
+        // Use case: GridList
+        UseCase gridListUseCase = this.createGridListUseCase(crudCodeGeneration, domainEntity, plant.getLocale(), dataEntityAttributes);
+        // Use case: View
         UseCase viewUseCase = this.createViewUseCase(crudCodeGeneration, domainEntity, plant.getLocale());
-        // create Update use case
+        // Use case: Update
         UseCase updateUseCase = this.createUpdateUseCase(crudCodeGeneration, domainEntity, plant.getLocale(), dataEntityAttributes);
-        // create AddNew use case
+        // Use case: AddNew
         UseCase addNewUseCase = this.createAddNewUseCase(crudCodeGeneration, domainEntity, plant.getLocale(), dataEntityAttributes);
-        // create Remove use case
-        UseCase removeUseCase = this.createDeleteUseCase(crudCodeGeneration, domainEntity, plant.getLocale());
+        // Use case: Delete
+        UseCase deleteUseCase = this.createDeleteUseCase(crudCodeGeneration, domainEntity, plant.getLocale());
+
+        // Relation: grid to view
+        this.createGridListToViewRelation(crudCodeGeneration, gridListUseCase, viewUseCase);
+        // Relation: grid to add new
+        this.createGridListToViewRelation(crudCodeGeneration, gridListUseCase, addNewUseCase);
+        // Relation: view to update
+        this.createGridListToViewRelation(crudCodeGeneration, viewUseCase, updateUseCase);
+        // Relation: view to delete
+        this.createGridListToViewRelation(crudCodeGeneration, viewUseCase, deleteUseCase);
 
         return new UseCaseFruit<>(
                 new Fruit(true),
@@ -142,16 +159,57 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
         return domainEntity;
     }
 
-    // Grid List
-    private UseCase createGridListUseCase(CrudCodeGeneration crudCodeGeneration, DomainEntity domainEntity, String locale) throws CultivateException {
+    // Grid List use case
+    private UseCase createGridListUseCase(CrudCodeGeneration crudCodeGeneration, DomainEntity domainEntity, String locale, List<DataEntityAttribute> dataEntityAttributes) throws CultivateException {
         // Create a new grid list use case
         UseCase useCase = this.createUseCase(crudCodeGeneration, domainEntity, locale, UserInterfaceTypeEnum.GridList);
+        // Get the plant of use case
+        UseCaseData plant = this.getUseCaseData(useCase, UseCaseDataTypeEnum.Plant);
+        // Get the fruit of use case
+        UseCaseData fruit = this.getUseCaseData(useCase, UseCaseDataTypeEnum.Fruit);
+
+        // Plant
+        for (DataEntityAttribute dataEntityAttribute: dataEntityAttributes) {
+            try {
+                this.addNewUseCaseDataAttributeByProjectManagerUseCase
+                        .cultivate(new UseCasePlant<>(
+                                new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
+                                        null,
+                                        dataEntityAttribute.getName(),
+                                        dataEntityAttribute.getTitle(),
+                                        dataEntityAttribute.getFaTitle(),
+                                        dataEntityAttribute.getDescription(),
+                                        dataEntityAttribute.getUiRow(),
+                                        dataEntityAttribute.getUiColumn(),
+                                        new SelectEnum("", UseCaseUsageEnum.GridListSearchField.name()), null,
+                                        new SelectEnum("", dataEntityAttribute.getAttributeQuantity().name()), null,
+                                        new SelectEnum("", dataEntityAttribute.getAttributeCategory().name()), null,
+                                        new SelectEnum("", dataEntityAttribute.getPrimitiveAttributeType().name()), null,
+                                        null,
+                                        null,
+                                        true,
+                                        false,
+                                        dataEntityAttribute.getMinLength(),
+                                        dataEntityAttribute.getMaxLength(),
+                                        dataEntityAttribute.getMin(),
+                                        dataEntityAttribute.getMax(),
+                                        dataEntityAttribute.getErrorTip(),
+                                        new SelectEntity("", null), null,
+                                        new SelectEntity("", dataEntityAttribute.getDataEntityAttributeType() != null ? dataEntityAttribute.getDataEntityAttributeType().getId() : null), null,
+                                        new SelectEntity("", plant.getId()), null,
+                                        new SelectEntity("", null), null,
+                                        new SelectEntity("", dataEntityAttribute.getDataEnum() != null ? dataEntityAttribute.getDataEnum().getId() : null), null,
+                                        new SelectEntity("", null), null
+                                ),
+                                locale
+                        ));
+            } catch (AddNewUseCaseDataAttributeByProjectManagerUseCase.CultivateException e) {
+                e.printStackTrace();
+            }
+        }
+        // Fruit
         try {
-            // Get the plant of use case
-            UseCaseData plant = useCaseService.getPlant(useCase);
-            // Get the fruit of use case
-            UseCaseData fruit = useCaseService.getFruit(useCase);
-            // Add a new use case data grid attribute
+            // Add a new DataArray use case data attribute
             this.addNewUseCaseDataAttributeByProjectManagerUseCase
                     .cultivate(new UseCasePlant<>(
                             new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
@@ -162,14 +220,10 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
                                     "",
                                     0L,
                                     0L,
-                                    new SelectEnum("", UseCaseUsageEnum.GridListEntity.name()),
-                                    null,
-                                    new SelectEnum("", EntityAttributeQuantityEnum.List.name()),
-                                    null,
-                                    new SelectEnum("", EntityAttributeCategoryEnum.DomainEntity.name()),
-                                    null,
-                                    new SelectEnum("", PrimitiveAttributeTypeEnum.Entity.name()),
-                                    null,
+                                    new SelectEnum("", UseCaseUsageEnum.GridListEntity.name()), null,
+                                    new SelectEnum("", EntityAttributeQuantityEnum.List.name()), null,
+                                    new SelectEnum("", EntityAttributeCategoryEnum.DomainEntity.name()), null,
+                                    new SelectEnum("", PrimitiveAttributeTypeEnum.Entity.name()), null,
                                     null,
                                     null,
                                     false,
@@ -179,75 +233,458 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
                                     0L,
                                     0L,
                                     null,
-                                    new SelectEntity("", domainEntity.getId()),
-                                    null,
-                                    new SelectEntity("", null),
-                                    null,
-                                    new SelectEntity("", fruit.getId()),
-                                    null,
-                                    new SelectEntity("", null),
-                                    null,
-                                    new SelectEntity("", null),
-                                    null,
-                                    new SelectEntity("", null),
-                                    null
+                                    new SelectEntity("", domainEntity.getId()), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", fruit.getId()), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null
                             ),
                             locale
                     ));
-        } catch (GetPlantException | GetFruitException | AddNewUseCaseDataAttributeByProjectManagerUseCase.CultivateException e) {
+        } catch (AddNewUseCaseDataAttributeByProjectManagerUseCase.CultivateException e) {
             throw new CultivateException(e.getMessage());
         }
         return useCase;
     }
 
+    // View use case
     private UseCase createViewUseCase(CrudCodeGeneration crudCodeGeneration, DomainEntity domainEntity, String locale) throws CultivateException {
         UseCase useCase = this.createUseCase(crudCodeGeneration, domainEntity, locale, UserInterfaceTypeEnum.View);
+        try {
+            // Get the plant of use case
+            UseCaseData plant = this.getUseCaseData(useCase, UseCaseDataTypeEnum.Plant);
+            // Get the fruit of use case
+            UseCaseData fruit = this.getUseCaseData(useCase, UseCaseDataTypeEnum.Fruit);
+            // Add a new ViewId use case data attribute to plant
+            this.addNewUseCaseDataAttributeByProjectManagerUseCase
+                    .cultivate(new UseCasePlant<>(
+                            new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
+                                    null,
+                                    "Id",
+                                    crudCodeGeneration.getDataEntity().getTitle() + " Id",
+                                    "شناسه " + crudCodeGeneration.getDataEntity().getFaTitle(),
+                                    "",
+                                    0L,
+                                    0L,
+                                    new SelectEnum("", UseCaseUsageEnum.ViewId.name()), null,
+                                    new SelectEnum("", EntityAttributeQuantityEnum.Mono.name()), null,
+                                    new SelectEnum("", EntityAttributeCategoryEnum.Primitive.name()), null,
+                                    new SelectEnum("", PrimitiveAttributeTypeEnum.Long.name()), null,
+                                    null,
+                                    null,
+                                    false,
+                                    true,
+                                    0L,
+                                    100L,
+                                    0L,
+                                    0L,
+                                    null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", plant.getId()), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null
+                            ),
+                            locale
+                    ));
+            // Add a new ViewEntity use case data attribute to fruit
+            this.addNewUseCaseDataAttributeByProjectManagerUseCase
+                    .cultivate(new UseCasePlant<>(
+                            new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
+                                    null,
+                                    "Id",
+                                    crudCodeGeneration.getDataEntity().getTitle() + " Id",
+                                    "شناسه " + crudCodeGeneration.getDataEntity().getFaTitle(),
+                                    "",
+                                    0L,
+                                    0L,
+                                    new SelectEnum("", UseCaseUsageEnum.ViewEntity.name()), null,
+                                    new SelectEnum("", EntityAttributeQuantityEnum.Mono.name()), null,
+                                    new SelectEnum("", EntityAttributeCategoryEnum.DomainEntity.name()), null,
+                                    new SelectEnum("", PrimitiveAttributeTypeEnum.Entity.name()), null,
+                                    null,
+                                    null,
+                                    false,
+                                    true,
+                                    0L,
+                                    100L,
+                                    0L,
+                                    0L,
+                                    null,
+                                    new SelectEntity("", domainEntity.getId()), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", fruit.getId()), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null
+                            ),
+                            locale
+                    ));
+        } catch (AddNewUseCaseDataAttributeByProjectManagerUseCase.CultivateException e) {
+            throw new CultivateException(e.getMessage());
+        }
         return useCase;
     }
 
+    // Delete use case
     private UseCase createDeleteUseCase(CrudCodeGeneration crudCodeGeneration, DomainEntity domainEntity, String locale) throws CultivateException {
         UseCase useCase = this.createUseCase(crudCodeGeneration, domainEntity, locale, UserInterfaceTypeEnum.Delete);
+        // Get the plant of use case
+        UseCaseData plant = this.getUseCaseData(useCase, UseCaseDataTypeEnum.Plant);
+        // Get the fruit of use case
+        UseCaseData fruit = this.getUseCaseData(useCase, UseCaseDataTypeEnum.Fruit);
+        // Add a new DeleteId use case data attribute to plant
+        try {
+            this.addNewUseCaseDataAttributeByProjectManagerUseCase
+                    .cultivate(new UseCasePlant<>(
+                            new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
+                                    null,
+                                    "Id",
+                                    crudCodeGeneration.getDataEntity().getTitle() + " Id",
+                                    "شناسه " + crudCodeGeneration.getDataEntity().getFaTitle(),
+                                    "",
+                                    0L,
+                                    0L,
+                                    new SelectEnum("", UseCaseUsageEnum.DeleteId.name()), null,
+                                    new SelectEnum("", EntityAttributeQuantityEnum.Mono.name()), null,
+                                    new SelectEnum("", EntityAttributeCategoryEnum.Primitive.name()), null,
+                                    new SelectEnum("", PrimitiveAttributeTypeEnum.Long.name()), null,
+                                    null,
+                                    null,
+                                    false,
+                                    true,
+                                    0L,
+                                    100L,
+                                    0L,
+                                    0L,
+                                    null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", plant.getId()), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null
+                            ),
+                            locale
+                    ));
+            // Add a new DeleteResult use case data attribute to fruit
+            this.addNewUseCaseDataAttributeByProjectManagerUseCase
+                    .cultivate(new UseCasePlant<>(
+                            new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
+                                    null,
+                                    "IsSuccessful",
+                                    "IsSuccessful",
+                                    "موفقیت آمیز بود؟",
+                                    "",
+                                    0L,
+                                    0L,
+                                    new SelectEnum("", UseCaseUsageEnum.DeleteResult.name()), null,
+                                    new SelectEnum("", EntityAttributeQuantityEnum.Mono.name()), null,
+                                    new SelectEnum("", EntityAttributeCategoryEnum.Primitive.name()), null,
+                                    new SelectEnum("", PrimitiveAttributeTypeEnum.Boolean.name()), null,
+                                    null,
+                                    null,
+                                    false,
+                                    true,
+                                    0L,
+                                    100L,
+                                    0L,
+                                    0L,
+                                    null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", fruit.getId()), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null
+                            ),
+                            locale
+                    ));
+        } catch (AddNewUseCaseDataAttributeByProjectManagerUseCase.CultivateException e) {
+            throw new CultivateException(e.getMessage());
+        }
         return useCase;
     }
 
+    // AddNew use case
     private UseCase createAddNewUseCase(CrudCodeGeneration crudCodeGeneration, DomainEntity domainEntity, String locale, List<DataEntityAttribute> dataEntityAttributes) throws CultivateException {
         UseCase useCase = this.createUseCase(crudCodeGeneration, domainEntity, locale, UserInterfaceTypeEnum.AddNew);
+        // Get the plant of use case
+        UseCaseData plant = this.getUseCaseData(useCase, UseCaseDataTypeEnum.Plant);
+        // Get the fruit of use case
+        UseCaseData fruit = this.getUseCaseData(useCase, UseCaseDataTypeEnum.Fruit);
+        // Get the seeds command of use case
+        UseCaseData seedsCommand = this.getUseCaseData(useCase, UseCaseDataTypeEnum.SeedsCommand);
+        // Get the fruit seeds of use case
+        UseCaseData fruitSeeds = this.getUseCaseData(useCase, UseCaseDataTypeEnum.FruitSeeds);
+        // Plant (and fruit seeds) Attributes
+        for (DataEntityAttribute dataEntityAttribute : dataEntityAttributes) {
+            try {
+                this.addNewUseCaseDataAttributeByProjectManagerUseCase
+                        .cultivate(new UseCasePlant<>(
+                                new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
+                                        null,
+                                        dataEntityAttribute.getName(),
+                                        dataEntityAttribute.getTitle(),
+                                        dataEntityAttribute.getFaTitle(),
+                                        dataEntityAttribute.getDescription(),
+                                        dataEntityAttribute.getUiRow(),
+                                        dataEntityAttribute.getUiColumn(),
+                                        new SelectEnum("", dataEntityAttribute.getName().equals("Id") ? UseCaseUsageEnum.AddNewId.name() : UseCaseUsageEnum.AddNewField.name()), null,
+                                        new SelectEnum("", dataEntityAttribute.getAttributeQuantity().name()), null,
+                                        new SelectEnum("", dataEntityAttribute.getAttributeCategory().name()), null,
+                                        new SelectEnum("", dataEntityAttribute.getPrimitiveAttributeType().name()), null,
+                                        null,
+                                        dataEntityAttribute.getName(),
+                                        dataEntityAttribute.getNullable(),
+                                        dataEntityAttribute.getRequired(),
+                                        dataEntityAttribute.getMinLength(),
+                                        dataEntityAttribute.getMaxLength(),
+                                        dataEntityAttribute.getMin(),
+                                        dataEntityAttribute.getMax(),
+                                        dataEntityAttribute.getErrorTip(),
+                                        new SelectEntity("", null), null,
+                                        new SelectEntity("", dataEntityAttribute.getDataEntityAttributeType() != null ? dataEntityAttribute.getDataEntityAttributeType().getId() : null), null,
+                                        new SelectEntity("", plant.getId()), null,
+                                        new SelectEntity("", null), null,
+                                        new SelectEntity("", dataEntityAttribute.getDataEnum() != null ? dataEntityAttribute.getDataEnum().getId() : null), null,
+                                        new SelectEntity("", dataEntityAttribute.getId()), null
+                                ),
+                                locale
+                        ));
+            } catch (AddNewUseCaseDataAttributeByProjectManagerUseCase.CultivateException e) {
+                throw new CultivateException(e.getMessage());
+            }
+        }
+        // Fruit
+        try {
+            this.addNewUseCaseDataAttributeByProjectManagerUseCase
+                    .cultivate(new UseCasePlant<>(
+                            new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
+                                    null,
+                                    "Id",
+                                    crudCodeGeneration.getDataEntity().getTitle() + " Id",
+                                    "شناسه " + crudCodeGeneration.getDataEntity().getFaTitle(),
+                                    "",
+                                    0L,
+                                    0L,
+                                    new SelectEnum("", UseCaseUsageEnum.AddNewResult.name()), null,
+                                    new SelectEnum("", EntityAttributeQuantityEnum.Mono.name()), null,
+                                    new SelectEnum("", EntityAttributeCategoryEnum.Primitive.name()), null,
+                                    new SelectEnum("", PrimitiveAttributeTypeEnum.Long.name()), null,
+                                    null,
+                                    null,
+                                    false,
+                                    true,
+                                    0L,
+                                    100L,
+                                    0L,
+                                    0L,
+                                    null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", fruit.getId()), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null
+                            ),
+                            locale
+                    ));
+        } catch (AddNewUseCaseDataAttributeByProjectManagerUseCase.CultivateException e) {
+            throw new CultivateException(e.getMessage());
+        }
+        // Seeds Command
+        try {
+            this.addNewUseCaseDataAttributeByProjectManagerUseCase
+                    .cultivate(new UseCasePlant<>(
+                            new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
+                                    null,
+                                    "Id",
+                                    crudCodeGeneration.getDataEntity().getTitle() + " Id",
+                                    "شناسه " + crudCodeGeneration.getDataEntity().getFaTitle(),
+                                    "",
+                                    0L,
+                                    0L,
+                                    new SelectEnum("", UseCaseUsageEnum.AddNewId.name()), null,
+                                    new SelectEnum("", EntityAttributeQuantityEnum.Mono.name()), null,
+                                    new SelectEnum("", EntityAttributeCategoryEnum.Primitive.name()), null,
+                                    new SelectEnum("", PrimitiveAttributeTypeEnum.Long.name()), null,
+                                    null,
+                                    null,
+                                    false,
+                                    true,
+                                    0L,
+                                    100L,
+                                    0L,
+                                    0L,
+                                    null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", seedsCommand.getId()), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null
+                            ),
+                            locale
+                    ));
+        } catch (AddNewUseCaseDataAttributeByProjectManagerUseCase.CultivateException e) {
+            throw new CultivateException(e.getMessage());
+        }
+
+        // Return
         return useCase;
     }
 
+    // Update use case
     private UseCase createUpdateUseCase(CrudCodeGeneration crudCodeGeneration, DomainEntity domainEntity, String locale, List<DataEntityAttribute> dataEntityAttributes) throws CultivateException {
         UseCase useCase = this.createUseCase(crudCodeGeneration, domainEntity, locale, UserInterfaceTypeEnum.Update);
+        // Get the plant of use case
+        UseCaseData plant = this.getUseCaseData(useCase, UseCaseDataTypeEnum.Plant);
+        // Get the fruit of use case
+        UseCaseData fruit = this.getUseCaseData(useCase, UseCaseDataTypeEnum.Fruit);
+        // Get the seeds command of use case
+        UseCaseData seedsCommand = this.getUseCaseData(useCase, UseCaseDataTypeEnum.SeedsCommand);
+        // Get the fruit seeds of use case
+        UseCaseData fruitSeeds = this.getUseCaseData(useCase, UseCaseDataTypeEnum.FruitSeeds);
+        // Plant (and fruit seeds) Attributes
+        for (DataEntityAttribute dataEntityAttribute : dataEntityAttributes) {
+            try {
+                this.addNewUseCaseDataAttributeByProjectManagerUseCase
+                        .cultivate(new UseCasePlant<>(
+                                new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
+                                        null,
+                                        dataEntityAttribute.getName(),
+                                        dataEntityAttribute.getTitle(),
+                                        dataEntityAttribute.getFaTitle(),
+                                        dataEntityAttribute.getDescription(),
+                                        dataEntityAttribute.getUiRow(),
+                                        dataEntityAttribute.getUiColumn(),
+                                        new SelectEnum("", dataEntityAttribute.getName().equals("Id") ? UseCaseUsageEnum.UpdateId.name() : UseCaseUsageEnum.UpdateField.name()), null,
+                                        new SelectEnum("", dataEntityAttribute.getAttributeQuantity().name()), null,
+                                        new SelectEnum("", dataEntityAttribute.getAttributeCategory().name()), null,
+                                        new SelectEnum("", dataEntityAttribute.getPrimitiveAttributeType().name()), null,
+                                        null,
+                                        dataEntityAttribute.getName(),
+                                        dataEntityAttribute.getNullable(),
+                                        dataEntityAttribute.getRequired(),
+                                        dataEntityAttribute.getMinLength(),
+                                        dataEntityAttribute.getMaxLength(),
+                                        dataEntityAttribute.getMin(),
+                                        dataEntityAttribute.getMax(),
+                                        dataEntityAttribute.getErrorTip(),
+                                        new SelectEntity("", null), null,
+                                        new SelectEntity("", dataEntityAttribute.getDataEntityAttributeType() != null ? dataEntityAttribute.getDataEntityAttributeType().getId() : null), null,
+                                        new SelectEntity("", plant.getId()), null,
+                                        new SelectEntity("", null), null,
+                                        new SelectEntity("", dataEntityAttribute.getDataEnum() != null ? dataEntityAttribute.getDataEnum().getId() : null), null,
+                                        new SelectEntity("", dataEntityAttribute.getId()), null
+                                ),
+                                locale
+                        ));
+            } catch (AddNewUseCaseDataAttributeByProjectManagerUseCase.CultivateException e) {
+                throw new CultivateException(e.getMessage());
+            }
+        }
+        // Fruit
+        try {
+            this.addNewUseCaseDataAttributeByProjectManagerUseCase
+                    .cultivate(new UseCasePlant<>(
+                            new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
+                                    null,
+                                    "Id",
+                                    crudCodeGeneration.getDataEntity().getTitle() + " Id",
+                                    "شناسه " + crudCodeGeneration.getDataEntity().getFaTitle(),
+                                    "",
+                                    0L,
+                                    0L,
+                                    new SelectEnum("", UseCaseUsageEnum.UpdateResult.name()), null,
+                                    new SelectEnum("", EntityAttributeQuantityEnum.Mono.name()), null,
+                                    new SelectEnum("", EntityAttributeCategoryEnum.Primitive.name()), null,
+                                    new SelectEnum("", PrimitiveAttributeTypeEnum.Long.name()), null,
+                                    null,
+                                    null,
+                                    false,
+                                    true,
+                                    0L,
+                                    100L,
+                                    0L,
+                                    0L,
+                                    null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", fruit.getId()), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null
+                            ),
+                            locale
+                    ));
+        } catch (AddNewUseCaseDataAttributeByProjectManagerUseCase.CultivateException e) {
+            throw new CultivateException(e.getMessage());
+        }
+        // Seeds Command
+        try {
+            this.addNewUseCaseDataAttributeByProjectManagerUseCase
+                    .cultivate(new UseCasePlant<>(
+                            new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
+                                    null,
+                                    "Id",
+                                    crudCodeGeneration.getDataEntity().getTitle() + " Id",
+                                    "شناسه " + crudCodeGeneration.getDataEntity().getFaTitle(),
+                                    "",
+                                    0L,
+                                    0L,
+                                    new SelectEnum("", UseCaseUsageEnum.UpdateId.name()), null,
+                                    new SelectEnum("", EntityAttributeQuantityEnum.Mono.name()), null,
+                                    new SelectEnum("", EntityAttributeCategoryEnum.Primitive.name()), null,
+                                    new SelectEnum("", PrimitiveAttributeTypeEnum.Long.name()), null,
+                                    null,
+                                    null,
+                                    false,
+                                    true,
+                                    0L,
+                                    100L,
+                                    0L,
+                                    0L,
+                                    null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", seedsCommand.getId()), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null,
+                                    new SelectEntity("", null), null
+                            ),
+                            locale
+                    ));
+        } catch (AddNewUseCaseDataAttributeByProjectManagerUseCase.CultivateException e) {
+            throw new CultivateException(e.getMessage());
+        }
+
+        // Return
         return useCase;
     }
 
-
+    // Create Use Case
     protected UseCase createUseCase(CrudCodeGeneration crudCodeGeneration, DomainEntity domainEntity, String locale, UserInterfaceTypeEnum userInterfaceType) throws CultivateException {
-        // Delete use case, use case data, use case data attributes, and use case relation by crud id
-        this.useCaseRelationSpringJpaRepository.deleteByCrudCodeGeneration_Id(crudCodeGeneration.getId());
-        this.useCaseDataAttributeSpringJpaRepository.deleteByUseCaseData_UseCase_CrudCodeGeneration_Id(crudCodeGeneration.getId());
-        this.useCaseDataSpringJpaRepository.deleteByUseCase_CrudCodeGeneration_Id(crudCodeGeneration.getId());
-        this.useCaseSpringJpaRepository.deleteByCrudCodeGeneration_Id(crudCodeGeneration.getId());
         // Add a new use case
         try {
             Long useCaseId = this.addNewUseCaseByProjectManagerUseCase
                     .cultivate(new UseCasePlant<>(
                             new AddNewUseCaseByProjectManagerUseCase.Plant(
                                     null,
-                                    "List" + crudCodeGeneration.getDataEntity().getName() + "By" + crudCodeGeneration.getSoftwareRole().getName(),
-                                    "List " + crudCodeGeneration.getDataEntity().getTitle() + " by " + crudCodeGeneration.getSoftwareRole().getTitle(),
-                                    "فهرست" + crudCodeGeneration.getDataEntity().getFaTitle() + " به دست " + crudCodeGeneration.getSoftwareRole().getFaTitle(),
+                                    userInterfaceType.name() + crudCodeGeneration.getDataEntity().getName(),
+                                    userInterfaceType.title("en") + crudCodeGeneration.getDataEntity().getTitle() + " by " + crudCodeGeneration.getSoftwareRole().getTitle(),
+                                    userInterfaceType.title("fa") + crudCodeGeneration.getDataEntity().getFaTitle() + " به دست " + crudCodeGeneration.getSoftwareRole().getFaTitle(),
                                     "",
-                                    new SelectEnum("", userInterfaceType.name()),
-                                    null,
-                                    new SelectEntity("", crudCodeGeneration.getSoftwareFeature().getId()),
-                                    null,
-                                    new SelectEntity("", crudCodeGeneration.getSoftwareApplicationPanel().getId()),
-                                    null,
-                                    new SelectEntity("", crudCodeGeneration.getSoftwareRole().getId()),
-                                    null,
-                                    new SelectEntity("", crudCodeGeneration.getDataEntity().getId()),
-                                    null,
-                                    true
+                                    new SelectEnum("", userInterfaceType.name()), null,
+                                    new SelectEntity("", crudCodeGeneration.getSoftwareFeature().getId()), null,
+                                    new SelectEntity("", crudCodeGeneration.getSoftwareApplicationPanel().getId()), null,
+                                    new SelectEntity("", crudCodeGeneration.getSoftwareRole().getId()), null,
+                                    new SelectEntity("", crudCodeGeneration.getDataEntity().getId()), null,
+                                    true,
+                                    new SelectEntity("", crudCodeGeneration.getId()), null
                             ),
                             locale
                     ))
@@ -257,6 +694,23 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
         } catch (AddNewUseCaseByProjectManagerUseCase.CultivateException e) {
             throw new CultivateException(e.getMessage());
         }
+    }
+
+    // Relation GidList to View
+    private void createGridListToViewRelation(CrudCodeGeneration crudCodeGeneration, UseCase gridListUseCase, UseCase viewUseCase) {
+        this.useCaseRelationSpringJpaRepository.save(
+                new UseCaseRelation(
+                        null,
+                        "View" + crudCodeGeneration.getDataEntity().getName() + "By" + crudCodeGeneration.getSoftwareRole().getName(),
+                        "",
+                        "",
+                        UseCaseRelationContextEnum.Frontend,
+                        FrontendActionTypeEnum.PopupForm,
+                        gridListUseCase,
+                        viewUseCase,
+                        crudCodeGeneration
+                )
+        );
     }
 
     protected PrimitiveAttributeTypeEnum getDomainEntityAttributePrimitiveType(DataEntityAttribute dataEntityAttribute) {
@@ -270,6 +724,10 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
             }
         }
         return PrimitiveAttributeTypeEnum.String;
+    }
+
+    private UseCaseData getUseCaseData(UseCase useCase, UseCaseDataTypeEnum type) {
+        return this.useCaseDataSpringJpaRepository.findFirstByUseCase_IdAndUseCaseDataType(useCase.getId(), type);
     }
 
 }

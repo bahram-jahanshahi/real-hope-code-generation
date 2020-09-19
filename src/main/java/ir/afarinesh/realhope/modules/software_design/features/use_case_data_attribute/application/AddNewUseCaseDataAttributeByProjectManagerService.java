@@ -15,12 +15,12 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.List;
 
-import ir.afarinesh.realhope.shares.repositories.UseCaseDataAttributeSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.UseCaseDataSpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.DataEntityAttributeSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.DataEntitySpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.DataEnumSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.DomainEntitySpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.UseCaseDataAttributeSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.DataEnumSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.DataEntityAttributeSpringJpaRepository;
 import ir.afarinesh.realhope.entities.feature.enums.UseCaseUsageEnum;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeQuantityEnum;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeCategoryEnum;
@@ -31,20 +31,20 @@ import ir.afarinesh.realhope.entities.feature.enums.PrimitiveAttributeTypeEnum;
 public class AddNewUseCaseDataAttributeByProjectManagerService {
 
     // jpa repositories
-    final UseCaseDataAttributeSpringJpaRepository useCaseDataAttributeSpringJpaRepository;
     final UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository;
-    final DataEntityAttributeSpringJpaRepository dataEntityAttributeSpringJpaRepository;
     final DataEntitySpringJpaRepository dataEntitySpringJpaRepository;
-    final DataEnumSpringJpaRepository dataEnumSpringJpaRepository;
     final DomainEntitySpringJpaRepository domainEntitySpringJpaRepository;
+    final UseCaseDataAttributeSpringJpaRepository useCaseDataAttributeSpringJpaRepository;
+    final DataEnumSpringJpaRepository dataEnumSpringJpaRepository;
+    final DataEntityAttributeSpringJpaRepository dataEntityAttributeSpringJpaRepository;
 
-    public AddNewUseCaseDataAttributeByProjectManagerService(UseCaseDataAttributeSpringJpaRepository useCaseDataAttributeSpringJpaRepository, UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository, DataEntityAttributeSpringJpaRepository dataEntityAttributeSpringJpaRepository, DataEntitySpringJpaRepository dataEntitySpringJpaRepository, DataEnumSpringJpaRepository dataEnumSpringJpaRepository, DomainEntitySpringJpaRepository domainEntitySpringJpaRepository){
-        this.useCaseDataAttributeSpringJpaRepository = useCaseDataAttributeSpringJpaRepository;
+    public AddNewUseCaseDataAttributeByProjectManagerService(UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository, DataEntitySpringJpaRepository dataEntitySpringJpaRepository, DomainEntitySpringJpaRepository domainEntitySpringJpaRepository, UseCaseDataAttributeSpringJpaRepository useCaseDataAttributeSpringJpaRepository, DataEnumSpringJpaRepository dataEnumSpringJpaRepository, DataEntityAttributeSpringJpaRepository dataEntityAttributeSpringJpaRepository){
         this.useCaseDataSpringJpaRepository = useCaseDataSpringJpaRepository;
-        this.dataEntityAttributeSpringJpaRepository = dataEntityAttributeSpringJpaRepository;
         this.dataEntitySpringJpaRepository = dataEntitySpringJpaRepository;
-        this.dataEnumSpringJpaRepository = dataEnumSpringJpaRepository;
         this.domainEntitySpringJpaRepository = domainEntitySpringJpaRepository;
+        this.useCaseDataAttributeSpringJpaRepository = useCaseDataAttributeSpringJpaRepository;
+        this.dataEnumSpringJpaRepository = dataEnumSpringJpaRepository;
+        this.dataEntityAttributeSpringJpaRepository = dataEntityAttributeSpringJpaRepository;
     }
 
     @Transactional
