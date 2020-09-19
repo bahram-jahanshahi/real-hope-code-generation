@@ -16,9 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ir.afarinesh.realhope.shares.repositories.DataEntitySpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.SoftwareFeatureSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.UseCaseSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.SoftwareApplicationPanelSpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.SoftwareFeatureSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.SoftwareRoleSpringJpaRepository;
 import ir.afarinesh.realhope.entities.feature.enums.UserInterfaceTypeEnum;
 
@@ -28,16 +28,16 @@ public class UpdateUseCaseByProjectManagerService {
 
     // jpa repositories
     final DataEntitySpringJpaRepository dataEntitySpringJpaRepository;
+    final SoftwareFeatureSpringJpaRepository softwareFeatureSpringJpaRepository;
     final UseCaseSpringJpaRepository useCaseSpringJpaRepository;
     final SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository;
-    final SoftwareFeatureSpringJpaRepository softwareFeatureSpringJpaRepository;
     final SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository;
 
-    public UpdateUseCaseByProjectManagerService(DataEntitySpringJpaRepository dataEntitySpringJpaRepository, UseCaseSpringJpaRepository useCaseSpringJpaRepository, SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository, SoftwareFeatureSpringJpaRepository softwareFeatureSpringJpaRepository, SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository){
+    public UpdateUseCaseByProjectManagerService(DataEntitySpringJpaRepository dataEntitySpringJpaRepository, SoftwareFeatureSpringJpaRepository softwareFeatureSpringJpaRepository, UseCaseSpringJpaRepository useCaseSpringJpaRepository, SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository, SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository){
         this.dataEntitySpringJpaRepository = dataEntitySpringJpaRepository;
+        this.softwareFeatureSpringJpaRepository = softwareFeatureSpringJpaRepository;
         this.useCaseSpringJpaRepository = useCaseSpringJpaRepository;
         this.softwareApplicationPanelSpringJpaRepository = softwareApplicationPanelSpringJpaRepository;
-        this.softwareFeatureSpringJpaRepository = softwareFeatureSpringJpaRepository;
         this.softwareRoleSpringJpaRepository = softwareRoleSpringJpaRepository;
     }
 
