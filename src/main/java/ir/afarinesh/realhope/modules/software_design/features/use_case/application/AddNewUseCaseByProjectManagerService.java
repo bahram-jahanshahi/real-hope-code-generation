@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.List;
 
+import ir.afarinesh.realhope.shares.repositories.SoftwareApplicationPanelSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.UseCaseSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.SoftwareRoleSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.DataEntitySpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.SoftwareFeatureSpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.UseCaseSpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.SoftwareApplicationPanelSpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.SoftwareRoleSpringJpaRepository;
 import ir.afarinesh.realhope.entities.feature.enums.UserInterfaceTypeEnum;
 
 
@@ -27,18 +27,18 @@ import ir.afarinesh.realhope.entities.feature.enums.UserInterfaceTypeEnum;
 public class AddNewUseCaseByProjectManagerService {
 
     // jpa repositories
+    final SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository;
+    final UseCaseSpringJpaRepository useCaseSpringJpaRepository;
+    final SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository;
     final DataEntitySpringJpaRepository dataEntitySpringJpaRepository;
     final SoftwareFeatureSpringJpaRepository softwareFeatureSpringJpaRepository;
-    final UseCaseSpringJpaRepository useCaseSpringJpaRepository;
-    final SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository;
-    final SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository;
 
-    public AddNewUseCaseByProjectManagerService(DataEntitySpringJpaRepository dataEntitySpringJpaRepository, SoftwareFeatureSpringJpaRepository softwareFeatureSpringJpaRepository, UseCaseSpringJpaRepository useCaseSpringJpaRepository, SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository, SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository){
+    public AddNewUseCaseByProjectManagerService(SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository, UseCaseSpringJpaRepository useCaseSpringJpaRepository, SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository, DataEntitySpringJpaRepository dataEntitySpringJpaRepository, SoftwareFeatureSpringJpaRepository softwareFeatureSpringJpaRepository){
+        this.softwareApplicationPanelSpringJpaRepository = softwareApplicationPanelSpringJpaRepository;
+        this.useCaseSpringJpaRepository = useCaseSpringJpaRepository;
+        this.softwareRoleSpringJpaRepository = softwareRoleSpringJpaRepository;
         this.dataEntitySpringJpaRepository = dataEntitySpringJpaRepository;
         this.softwareFeatureSpringJpaRepository = softwareFeatureSpringJpaRepository;
-        this.useCaseSpringJpaRepository = useCaseSpringJpaRepository;
-        this.softwareApplicationPanelSpringJpaRepository = softwareApplicationPanelSpringJpaRepository;
-        this.softwareRoleSpringJpaRepository = softwareRoleSpringJpaRepository;
     }
 
     @Transactional

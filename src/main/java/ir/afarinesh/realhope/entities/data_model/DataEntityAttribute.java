@@ -1,13 +1,11 @@
-package ir.afarinesh.realhope.entities.feature;
+package ir.afarinesh.realhope.entities.data_model;
 
 import ir.afarinesh.realhope.core.domain.AbstractDataEntity;
-import ir.afarinesh.realhope.entities.data_model.DataEntity;
-import ir.afarinesh.realhope.entities.data_model.DataEntityAttribute;
-import ir.afarinesh.realhope.entities.data_model.DataEnum;
-import ir.afarinesh.realhope.entities.feature.enums.PrimitiveAttributeTypeEnum;
+import ir.afarinesh.realhope.entities.data_model.enums.DataEntityRelationshipCardinalityEnum;
+import ir.afarinesh.realhope.entities.data_model.enums.DataEntityRelationshipTypeEnum;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeCategoryEnum;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeQuantityEnum;
-import ir.afarinesh.realhope.entities.feature.enums.UseCaseUsageEnum;
+import ir.afarinesh.realhope.entities.feature.enums.PrimitiveAttributeTypeEnum;
 import lombok.*;
 
 import javax.persistence.*;
@@ -20,8 +18,7 @@ import javax.persistence.*;
 
 @Entity
 @Table
-public class UseCaseDataAttribute extends AbstractDataEntity {
-
+public class DataEntityAttribute extends AbstractDataEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -45,8 +42,7 @@ public class UseCaseDataAttribute extends AbstractDataEntity {
     private Long uiColumn;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private UseCaseUsageEnum useCaseUsageEnum; // ViewId, ViewEntity, GridListEntity
+    private Boolean uiGridListShow;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -54,17 +50,11 @@ public class UseCaseDataAttribute extends AbstractDataEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private EntityAttributeCategoryEnum attributeCategory; //Primitive, DomainEntity, SelectEntity, SelectEnum;
+    private EntityAttributeCategoryEnum attributeCategory; // Primitive, DomainEntity, SelectEntity, SelectEnum;
 
     @Column(nullable = true)
     @Enumerated(EnumType.STRING)
     private PrimitiveAttributeTypeEnum primitiveAttributeType; // if attribute type is primitive
-
-    @Column(nullable = true)
-    private String setterOfUpdatePath;
-
-    @Column(nullable = true)
-    private String getterOfUpdatePath;
 
     @Column(nullable = false)
     private Boolean nullable; // validation
@@ -89,35 +79,31 @@ public class UseCaseDataAttribute extends AbstractDataEntity {
 
     @JoinColumn(nullable = true)
     @ManyToOne
-    private DomainEntity domainEntityAttributeType; // if attribute type is a domain entity
-
-    @JoinColumn(nullable = true)
-    @ManyToOne
     private DataEntity dataEntityAttributeType; // if attribute type is a select entity
-
-    @JoinColumn(nullable = false)
-    @ManyToOne
-    private UseCaseData useCaseData;
-
-    @JoinColumn(nullable = true)
-    @ManyToOne
-    private UseCaseDataAttribute fruitSeedsAttribute;
 
     @JoinColumn(nullable = true)
     @ManyToOne
     private DataEnum dataEnum;
 
-    @JoinColumn(nullable = true)
+    @JoinColumn(nullable = false)
     @ManyToOne
-    private DataEntityAttribute relatedDataEntityAttribute;
+    private DataEntity dataEntity;
+
+    @Column(nullable = true)
+    @Enumerated(EnumType.STRING)
+    private DataEntityRelationshipTypeEnum dataEntityRelationshipType;
+
+    @Column(nullable = true)
+    @Enumerated(EnumType.STRING)
+    private DataEntityRelationshipCardinalityEnum dataEntityRelationshipCardinality;
 
     @Override
     public String title(String locale) {
         if (locale.equals("fa")) {
-            return getFaTitle();
+            return dataEntity.getFaTitle() + "." + getFaTitle();
         }
         if (locale.equals("en")) {
-            return getTitle();
+            return dataEntity.getTitle() + "." + getTitle();
         }
         return getName();
     }
@@ -125,10 +111,6 @@ public class UseCaseDataAttribute extends AbstractDataEntity {
     // Utilities
     public boolean isPrimitive() {
         return attributeCategory.equals(EntityAttributeCategoryEnum.Primitive);
-    }
-
-    public boolean isDomainEntity() {
-        return attributeCategory.equals(EntityAttributeCategoryEnum.DomainEntity);
     }
 
     public boolean isSelectEntity() {

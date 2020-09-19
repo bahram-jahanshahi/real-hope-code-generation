@@ -15,11 +15,12 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.List;
 
+import ir.afarinesh.realhope.shares.repositories.UseCaseDataAttributeSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.UseCaseDataSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.DataEntityAttributeSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.DataEntitySpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.DataEnumSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.DomainEntitySpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.UseCaseDataAttributeSpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.UseCaseDataSpringJpaRepository;
 import ir.afarinesh.realhope.entities.feature.enums.UseCaseUsageEnum;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeQuantityEnum;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeCategoryEnum;
@@ -30,18 +31,20 @@ import ir.afarinesh.realhope.entities.feature.enums.PrimitiveAttributeTypeEnum;
 public class UpdateUseCaseDataAttributeByProjectManagerService {
 
     // jpa repositories
+    final UseCaseDataAttributeSpringJpaRepository useCaseDataAttributeSpringJpaRepository;
+    final UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository;
+    final DataEntityAttributeSpringJpaRepository dataEntityAttributeSpringJpaRepository;
     final DataEntitySpringJpaRepository dataEntitySpringJpaRepository;
     final DataEnumSpringJpaRepository dataEnumSpringJpaRepository;
     final DomainEntitySpringJpaRepository domainEntitySpringJpaRepository;
-    final UseCaseDataAttributeSpringJpaRepository useCaseDataAttributeSpringJpaRepository;
-    final UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository;
 
-    public UpdateUseCaseDataAttributeByProjectManagerService(DataEntitySpringJpaRepository dataEntitySpringJpaRepository, DataEnumSpringJpaRepository dataEnumSpringJpaRepository, DomainEntitySpringJpaRepository domainEntitySpringJpaRepository, UseCaseDataAttributeSpringJpaRepository useCaseDataAttributeSpringJpaRepository, UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository){
+    public UpdateUseCaseDataAttributeByProjectManagerService(UseCaseDataAttributeSpringJpaRepository useCaseDataAttributeSpringJpaRepository, UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository, DataEntityAttributeSpringJpaRepository dataEntityAttributeSpringJpaRepository, DataEntitySpringJpaRepository dataEntitySpringJpaRepository, DataEnumSpringJpaRepository dataEnumSpringJpaRepository, DomainEntitySpringJpaRepository domainEntitySpringJpaRepository){
+        this.useCaseDataAttributeSpringJpaRepository = useCaseDataAttributeSpringJpaRepository;
+        this.useCaseDataSpringJpaRepository = useCaseDataSpringJpaRepository;
+        this.dataEntityAttributeSpringJpaRepository = dataEntityAttributeSpringJpaRepository;
         this.dataEntitySpringJpaRepository = dataEntitySpringJpaRepository;
         this.dataEnumSpringJpaRepository = dataEnumSpringJpaRepository;
         this.domainEntitySpringJpaRepository = domainEntitySpringJpaRepository;
-        this.useCaseDataAttributeSpringJpaRepository = useCaseDataAttributeSpringJpaRepository;
-        this.useCaseDataSpringJpaRepository = useCaseDataSpringJpaRepository;
     }
 
     @Transactional
@@ -117,6 +120,12 @@ public class UpdateUseCaseDataAttributeByProjectManagerService {
                 .stream()
                 .map(obj -> new SelectEntity(obj.title(seedsCommand.getLocale()), obj.getId()))
                 .collect(Collectors.toList());
+        SelectEntity relatedDataEntityAttribute = (entity.getRelatedDataEntityAttribute() != null) ? new SelectEntity(entity.getRelatedDataEntityAttribute().title(seedsCommand.getLocale()), entity.getRelatedDataEntityAttribute().getId()) :  new SelectEntity();
+        List<SelectEntity> relatedDataEntityAttributeList = this.dataEntityAttributeSpringJpaRepository
+                .findAll()
+                .stream()
+                .map(obj -> new SelectEntity(obj.title(seedsCommand.getLocale()), obj.getId()))
+                .collect(Collectors.toList());
 
         return new UseCaseFruitSeeds<>(
             new FruitSeeds(
@@ -153,7 +162,9 @@ public class UpdateUseCaseDataAttributeByProjectManagerService {
                 fruitSeedsAttribute,
                 fruitSeedsAttributeList,
                 dataEnum,
-                dataEnumList
+                dataEnumList,
+                relatedDataEntityAttribute,
+                relatedDataEntityAttributeList
             ),
             true,
             ""

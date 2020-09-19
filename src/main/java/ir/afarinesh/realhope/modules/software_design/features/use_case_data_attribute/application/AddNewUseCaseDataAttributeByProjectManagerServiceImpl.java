@@ -98,7 +98,8 @@ public class AddNewUseCaseDataAttributeByProjectManagerServiceImpl implements Ad
                 dataEntityAttributeType,
                 useCaseData,
                 fruitSeedsAttribute,
-                dataEnum
+                dataEnum,
+                null
         );
         // Save
         this.useCaseDataAttributeSpringJpaRepository.save(attribute);
@@ -137,7 +138,8 @@ public class AddNewUseCaseDataAttributeByProjectManagerServiceImpl implements Ad
                         dataEntityAttributeType,
                         optionalFruitSeeds.get(),
                         fruitSeedsAttribute,
-                        dataEnum
+                        dataEnum,
+                        null
                 );
                 this.useCaseDataAttributeSpringJpaRepository.save(duplicatedFruitSeedsAttribute);
                 // set fruit seeds attribute

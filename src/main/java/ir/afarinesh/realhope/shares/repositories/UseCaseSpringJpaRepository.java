@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface UseCaseSpringJpaRepository extends JpaRepository<UseCase, Long> {
     List<UseCase> findAllBySoftwareApplicationPanel_Id(Long panelId);
+    void deleteByCrudCodeGeneration_Id(Long crudCodeGeneration_Id);
 }

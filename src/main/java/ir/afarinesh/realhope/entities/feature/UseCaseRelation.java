@@ -1,6 +1,7 @@
 package ir.afarinesh.realhope.entities.feature;
 
 import ir.afarinesh.realhope.core.domain.AbstractDataEntity;
+import ir.afarinesh.realhope.entities.code_generation.CrudCodeGeneration;
 import ir.afarinesh.realhope.entities.feature.enums.FrontendActionTypeEnum;
 import ir.afarinesh.realhope.entities.feature.enums.UseCaseRelationContextEnum;
 import lombok.*;
@@ -45,6 +46,10 @@ public class UseCaseRelation extends AbstractDataEntity {
     @JoinColumn(nullable = false)
     @ManyToOne
     private UseCase destination;
+
+    @JoinColumn(nullable = true)
+    @ManyToOne
+    private CrudCodeGeneration crudCodeGeneration;
 
     @Override
     public String title(String locale) {

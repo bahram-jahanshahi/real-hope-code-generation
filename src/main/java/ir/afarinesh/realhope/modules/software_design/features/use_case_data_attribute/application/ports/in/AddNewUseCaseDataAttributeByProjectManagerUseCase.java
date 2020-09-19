@@ -62,6 +62,8 @@ public interface AddNewUseCaseDataAttributeByProjectManagerUseCase {
     List<SelectEntity> fruitSeedsAttributeArray;
     SelectEntity dataEnum;
     List<SelectEntity> dataEnumArray;
+    SelectEntity relatedDataEntityAttribute;
+    List<SelectEntity> relatedDataEntityAttributeArray;
   }
 
   class CultivateException extends Exception {
@@ -108,6 +110,8 @@ public interface AddNewUseCaseDataAttributeByProjectManagerUseCase {
     List<SelectEntity> fruitSeedsAttributeArray;
     SelectEntity dataEnum;
     List<SelectEntity> dataEnumArray;
+    SelectEntity relatedDataEntityAttribute;
+    List<SelectEntity> relatedDataEntityAttributeArray;
   }
 
   @Data

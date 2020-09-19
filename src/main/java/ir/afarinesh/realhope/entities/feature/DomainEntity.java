@@ -1,6 +1,7 @@
 package ir.afarinesh.realhope.entities.feature;
 
 import ir.afarinesh.realhope.core.domain.AbstractDataEntity;
+import ir.afarinesh.realhope.entities.code_generation.CrudCodeGeneration;
 import ir.afarinesh.realhope.entities.project.SoftwareApplicationPanel;
 import ir.afarinesh.realhope.entities.project.SoftwareFeature;
 import lombok.*;
@@ -47,6 +48,10 @@ public class DomainEntity extends AbstractDataEntity {
 
     @Column(nullable = false)
     private Boolean generationEnable;
+
+    @JoinColumn(nullable = true)
+    @ManyToOne
+    private CrudCodeGeneration crudCodeGeneration;
 
     @Override
     public String title(String locale) {

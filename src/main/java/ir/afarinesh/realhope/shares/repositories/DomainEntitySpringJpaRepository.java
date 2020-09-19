@@ -6,5 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface DomainEntitySpringJpaRepository extends JpaRepository<DomainEntity, Long> {
-    List<DomainEntity> findAllBySoftwareFeature_Id(Long softwareFeatureId);
+    List<DomainEntity> findAllBySoftwareFeature_Id(Long softwareFeature_Id);
+    void deleteByCrudCodeGeneration_Id(Long crudCodeGeneration_Id);
 }
