@@ -21,7 +21,7 @@ public interface AddNewUseCaseDataAttributeByProjectManagerUseCase {
   @NoArgsConstructor
   @AllArgsConstructor
   class Fruit {
-    Boolean isSuccessful;
+    Long id;
   }
 
   @Data

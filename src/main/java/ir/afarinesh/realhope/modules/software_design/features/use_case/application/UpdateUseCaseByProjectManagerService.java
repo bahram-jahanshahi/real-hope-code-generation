@@ -16,11 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ir.afarinesh.realhope.shares.repositories.CrudCodeGenerationSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.SoftwareApplicationPanelSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.UseCaseSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.DataEntitySpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.SoftwareFeatureSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.SoftwareRoleSpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.SoftwareApplicationPanelSpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.DataEntitySpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.UseCaseSpringJpaRepository;
 import ir.afarinesh.realhope.entities.feature.enums.UserInterfaceTypeEnum;
 
 
@@ -29,19 +29,19 @@ public class UpdateUseCaseByProjectManagerService {
 
     // jpa repositories
     final CrudCodeGenerationSpringJpaRepository crudCodeGenerationSpringJpaRepository;
+    final SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository;
+    final UseCaseSpringJpaRepository useCaseSpringJpaRepository;
+    final DataEntitySpringJpaRepository dataEntitySpringJpaRepository;
     final SoftwareFeatureSpringJpaRepository softwareFeatureSpringJpaRepository;
     final SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository;
-    final SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository;
-    final DataEntitySpringJpaRepository dataEntitySpringJpaRepository;
-    final UseCaseSpringJpaRepository useCaseSpringJpaRepository;
 
-    public UpdateUseCaseByProjectManagerService(CrudCodeGenerationSpringJpaRepository crudCodeGenerationSpringJpaRepository, SoftwareFeatureSpringJpaRepository softwareFeatureSpringJpaRepository, SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository, SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository, DataEntitySpringJpaRepository dataEntitySpringJpaRepository, UseCaseSpringJpaRepository useCaseSpringJpaRepository){
+    public UpdateUseCaseByProjectManagerService(CrudCodeGenerationSpringJpaRepository crudCodeGenerationSpringJpaRepository, SoftwareApplicationPanelSpringJpaRepository softwareApplicationPanelSpringJpaRepository, UseCaseSpringJpaRepository useCaseSpringJpaRepository, DataEntitySpringJpaRepository dataEntitySpringJpaRepository, SoftwareFeatureSpringJpaRepository softwareFeatureSpringJpaRepository, SoftwareRoleSpringJpaRepository softwareRoleSpringJpaRepository){
         this.crudCodeGenerationSpringJpaRepository = crudCodeGenerationSpringJpaRepository;
+        this.softwareApplicationPanelSpringJpaRepository = softwareApplicationPanelSpringJpaRepository;
+        this.useCaseSpringJpaRepository = useCaseSpringJpaRepository;
+        this.dataEntitySpringJpaRepository = dataEntitySpringJpaRepository;
         this.softwareFeatureSpringJpaRepository = softwareFeatureSpringJpaRepository;
         this.softwareRoleSpringJpaRepository = softwareRoleSpringJpaRepository;
-        this.softwareApplicationPanelSpringJpaRepository = softwareApplicationPanelSpringJpaRepository;
-        this.dataEntitySpringJpaRepository = dataEntitySpringJpaRepository;
-        this.useCaseSpringJpaRepository = useCaseSpringJpaRepository;
     }
 
     @Transactional

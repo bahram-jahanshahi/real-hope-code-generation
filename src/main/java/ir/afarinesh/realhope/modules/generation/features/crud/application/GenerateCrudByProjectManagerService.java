@@ -213,7 +213,7 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
                                         new SelectEntity("", plant.getId()), null,
                                         new SelectEntity("", null), null,
                                         new SelectEntity("", dataEntityAttribute.getDataEnum() != null ? dataEntityAttribute.getDataEnum().getId() : null), null,
-                                        new SelectEntity("", null), null
+                                        new SelectEntity("", dataEntityAttribute.getId()), null
                                 ),
                                 locale
                         ));
@@ -250,7 +250,7 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
                                             new SelectEntity("", plant.getId()), null,
                                             new SelectEntity("", null), null,
                                             new SelectEntity("", dataEntityAttribute.getDataEnum() != null ? dataEntityAttribute.getDataEnum().getId() : null), null,
-                                            new SelectEntity("", null), null
+                                            new SelectEntity("", dataEntityAttribute.getId()), null
                                     ),
                                     locale
                             ));
@@ -329,7 +329,7 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
                                             new SelectEntity("", fruitSeeds.getId()), null,
                                             new SelectEntity("", null), null,
                                             new SelectEntity("", dataEntityAttribute.getDataEnum() != null ? dataEntityAttribute.getDataEnum().getId() : null), null,
-                                            new SelectEntity("", null), null
+                                            new SelectEntity("", dataEntityAttribute.getId()), null
                                     ),
                                     locale
                             ));
@@ -338,6 +338,7 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
                 }
             }
         }
+        // Return use case
         return useCase;
     }
 

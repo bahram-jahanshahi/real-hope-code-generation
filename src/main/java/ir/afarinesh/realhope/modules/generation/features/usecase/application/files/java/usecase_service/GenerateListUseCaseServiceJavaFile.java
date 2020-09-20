@@ -1,7 +1,7 @@
 package ir.afarinesh.realhope.modules.generation.features.usecase.application.files.java.usecase_service;
 
-import ir.afarinesh.realhope.core.domain.SelectEntity;
 import ir.afarinesh.realhope.entities.data_model.DataEntity;
+import ir.afarinesh.realhope.entities.data_model.DataEntityAttribute;
 import ir.afarinesh.realhope.entities.feature.*;
 import ir.afarinesh.realhope.entities.feature.enums.PrimitiveAttributeTypeEnum;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.java.usecase_service.exceptions.GenerateListUseCaseServiceJavaFileException;
@@ -9,6 +9,7 @@ import ir.afarinesh.realhope.modules.generation.features.usecase.application.sha
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCaseService;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.exceptions.GetGridListFruitDomainEntityException;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.exceptions.GetPlantException;
+import ir.afarinesh.realhope.shares.repositories.DataEntityAttributeSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.DomainEntitySpringJpaRepository;
 import ir.afarinesh.realhope.shares.services.FileManagementService;
 import ir.afarinesh.realhope.shares.services.exceptions.CreateFileException;
@@ -29,15 +30,18 @@ public class GenerateListUseCaseServiceJavaFile {
     final UseCasePathService useCasePathService;
     final UseCaseService useCaseService;
     final DomainEntitySpringJpaRepository domainEntitySpringJpaRepository;
+    final DataEntityAttributeSpringJpaRepository dataEntityAttributeSpringJpaRepository;
 
     public GenerateListUseCaseServiceJavaFile(FileManagementService fileManagementService,
                                               UseCasePathService useCasePathService,
                                               UseCaseService useCaseService,
-                                              DomainEntitySpringJpaRepository domainEntitySpringJpaRepository) {
+                                              DomainEntitySpringJpaRepository domainEntitySpringJpaRepository,
+                                              DataEntityAttributeSpringJpaRepository dataEntityAttributeSpringJpaRepository) {
         this.fileManagementService = fileManagementService;
         this.useCasePathService = useCasePathService;
         this.useCaseService = useCaseService;
         this.domainEntitySpringJpaRepository = domainEntitySpringJpaRepository;
+        this.dataEntityAttributeSpringJpaRepository = dataEntityAttributeSpringJpaRepository;
     }
 
     public void generate(UseCase useCase) throws GenerateListUseCaseServiceJavaFileException {
@@ -58,6 +62,14 @@ public class GenerateListUseCaseServiceJavaFile {
                             this.getContentImpl(useCase),
                             false
                     );
+            // Repository
+            fileManagementService
+                    .createFile(
+                            this.getRepositoryPath(useCase),
+                            this.getRepositoryFileName(useCase),
+                            this.getRepositoryContent(useCase),
+                            true
+                    );
         } catch (CreateFileException | GetGridListFruitDomainEntityException | GetPlantException e) {
             throw new GenerateListUseCaseServiceJavaFileException(e.getMessage());
         }
@@ -67,6 +79,16 @@ public class GenerateListUseCaseServiceJavaFile {
         String pathSeparator = fileManagementService.pathSeparator();
         return useCasePathService.getSpringBootFeaturePath(useCase.getSoftwareFeature()) + pathSeparator
                 + "application";
+    }
+
+    protected String getRepositoryPath(UseCase useCase) {
+        String pathSeparator = fileManagementService.pathSeparator();
+        return useCasePathService.getSpringBootFeaturePath(useCase.getSoftwareFeature()) + pathSeparator
+                + "adapter" + pathSeparator + "repositories";
+    }
+
+    protected String getRepositoryFileName(UseCase useCase) {
+        return this.useCaseService.getUseCaseTitle(useCase) + "RepositoryImpl.java";
     }
 
     protected String getFileNameImpl(UseCase useCase) {
@@ -110,6 +132,98 @@ public class GenerateListUseCaseServiceJavaFile {
                 + "}";
 
         return packageTitle + imports + eol + serviceContent;
+    }
+
+    private String getRepositoryContent(UseCase useCase) throws GetPlantException {
+        UseCaseData plant = useCaseService.getPlant(useCase);
+        // List<DataEntityAttribute> attributes = this.dataEntityAttributeSpringJpaRepository.findByDataEntity_Id(useCase.getDataEntity().getId());
+        List<UseCaseDataAttribute> attributes = plant.getUseCaseDataAttributes()
+                .stream()
+                .filter(attribute -> attribute.getRelatedDataEntityAttribute() != null)
+                .collect(Collectors.toList());
+        String useCaseTitle = this.useCaseService.getUseCaseTitle(useCase);
+        // package title
+        String packageTitle = "package "
+                + this.useCasePathService.getSpringBootFeaturePackageTitle(useCase.getSoftwareFeature()) + "."
+                + "adapter.repositories;" + eol;
+        String imports = ""
+                + "import " + this.useCasePathService.getEntitiesPackageTitle(useCase.getSoftwareFeature()) + "." + useCase.getDataEntity().getCategory() + "." + useCase.getDataEntity().getName() + ";" + eol
+                + "import org.springframework.data.repository.CrudRepository;" + eol
+                + "import org.springframework.data.domain.Page;" + eol
+                + "import org.springframework.data.domain.Pageable;" + eol
+                + "import org.springframework.data.jpa.repository.Query;" + eol
+                + "import org.springframework.data.repository.query.Param;" + eol
+                + "import java.util.Date;" + eol;
+        String classContent = "";
+        classContent += "public interface " + useCaseTitle + "RepositoryImpl extends CrudRepository<" + useCase.getDataEntity().getName() + ", Long> {" + eol;
+        classContent += t + "@Query(value=\"" + "select Entity from " + useCase.getDataEntity().getName() + " as Entity where 1 = 1 \" +" + eol;
+        for (int i = 0; i < attributes.size(); i++) {
+            UseCaseDataAttribute attribute = attributes.get(i);
+            if (attribute.isPrimitive()) {
+                if (!attribute.getName().equals("Id") && (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate) || attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Long) || attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Integer))) {
+                    String operator = "=";
+                    if (isAttributeBegin(attribute.getName())) {
+                        operator = ">=";
+                    }
+                    if (isAttributeEnd(attribute.getName())) {
+                        operator = "<=";
+                    }
+                    classContent += t + t + t + "\" and ( "
+                            + ":" + StringUtility.firstLowerCase(attribute.getName()) + " is null or "
+                            + "("
+                            + "Entity." + StringUtility.firstLowerCase(attribute.getRelatedDataEntityAttribute().getName()) + " " + operator + " :" + StringUtility.firstLowerCase(attribute.getName()) + ""
+                            + ")"
+                            + ") \" +" + eol;
+                }
+                if (attribute.getName().equals("Id")) {
+                    classContent += t + t + t + "\" and ( :" + StringUtility.firstLowerCase(attribute.getName()) + " is null or Entity." + StringUtility.firstLowerCase(attribute.getRelatedDataEntityAttribute().getName()) + " = :" + StringUtility.firstLowerCase(attribute.getName()) + " ) \" +" + eol;
+                }
+                if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.String)) {
+                    classContent += t + t + t + "\" and ( :" + StringUtility.firstLowerCase(attribute.getName()) + " is null or Entity." + StringUtility.firstLowerCase(attribute.getRelatedDataEntityAttribute().getName()) + " like %:" + StringUtility.firstLowerCase(attribute.getName()) + "% ) \" +" + eol;
+                }
+                if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Boolean)) {
+                    classContent += t + t + t + "\" and ( :" + StringUtility.firstLowerCase(attribute.getName()) + " is null or Entity." + StringUtility.firstLowerCase(attribute.getRelatedDataEntityAttribute().getName()) + " = :" + StringUtility.firstLowerCase(attribute.getName()) + " ) \" +" + eol;
+                }
+            }
+            if (attribute.isSelectEnum()) {
+                classContent += t + t + t + "\" and ( :" + StringUtility.firstLowerCase(attribute.getName()) + " is null or Entity." + StringUtility.firstLowerCase(attribute.getRelatedDataEntityAttribute().getName()) + " = :" + StringUtility.firstLowerCase(attribute.getName()) + " ) \" +" + eol;
+            }
+            if (attribute.isSelectEntity()) {
+                classContent += t + t + t + "\" and ( :" + StringUtility.firstLowerCase(attribute.getName()) + " is null or Entity." + StringUtility.firstLowerCase(attribute.getRelatedDataEntityAttribute().getName()) + ".id = :" + StringUtility.firstLowerCase(attribute.getName()) + " ) \" +" + eol;
+            }
+        }
+        classContent += t + t + t + "\"\"" + eol;
+        classContent += t + ")" + eol;
+        classContent += t + "Page<" + useCase.getDataEntity().getName() + "> findAll(" + eol;
+        for (int i = 0; i < attributes.size(); i++) {
+            UseCaseDataAttribute attribute = attributes.get(i);
+            if (attribute.isPrimitive()) {
+                if (!attribute.getName().equals("Id") && (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate) || attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Long) || attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Integer))) {
+                    if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate)) {
+                        classContent += t + t + "@Param(\"" + StringUtility.firstLowerCase(attribute.getName()) + "\") ";
+                        classContent += "Date " + StringUtility.firstLowerCase(attribute.getName()) + "," + eol;
+                    } else {
+                        classContent += t + t + "@Param(\"" + StringUtility.firstLowerCase(attribute.getName()) + "\") ";
+                        classContent += attribute.getPrimitiveAttributeType().name() + " " + StringUtility.firstLowerCase(attribute.getName()) + "," + eol;
+                    }
+                } else {
+                    classContent += t + t + "@Param(\"" + StringUtility.firstLowerCase(attribute.getName()) + "\") ";
+                    classContent += attribute.getPrimitiveAttributeType().name() + " " + StringUtility.firstLowerCase(attribute.getName()) + "," + eol;
+                }
+            }
+            if (attribute.isSelectEnum()) {
+                classContent += t + t + "@Param(\"" + StringUtility.firstLowerCase(attribute.getName()) + "\") ";
+                classContent += "String " + StringUtility.firstLowerCase(attribute.getName()) + "," + eol;
+            }
+            if (attribute.isSelectEntity()) {
+                classContent += t + t + "@Param(\"" + StringUtility.firstLowerCase(attribute.getName()) + "\") ";
+                classContent += "Long " + StringUtility.firstLowerCase(attribute.getName()) + "," + eol;
+            }
+        }
+        classContent += t + t + "Pageable pageable" + eol;
+        classContent += t + ");" + eol;
+        classContent += "}";
+        return packageTitle + eol + imports + eol + classContent;
     }
 
     protected String getFileName(UseCase useCase) {
@@ -306,5 +420,23 @@ public class GenerateListUseCaseServiceJavaFile {
         }
         content += t + "}" + eol;
         return content;
+    }
+
+    protected boolean isAttributeBegin(String name) {
+        if (name.length() < 7) {
+            return false;
+        }
+        int length = name.length();
+        String begin = name.substring(length - 5, length);
+        return begin.equals("Begin");
+    }
+
+    protected boolean isAttributeEnd(String name) {
+        if (name.length() < 5) {
+            return false;
+        }
+        int length = name.length();
+        String end = name.substring(length - 3, length);
+        return end.equals("End");
     }
 }

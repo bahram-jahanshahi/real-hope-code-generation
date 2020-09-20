@@ -157,7 +157,7 @@ public class AddNewUseCaseDataAttributeByProjectManagerServiceImpl implements Ad
         }
         // Return fruit
         return new UseCaseFruit<>(
-                new Fruit(true),
+                new Fruit(),
                 true,
                 ""
         );

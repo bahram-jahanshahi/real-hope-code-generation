@@ -105,7 +105,7 @@ public class UpdateUseCaseDataAttributeByProjectManagerServiceImpl implements Up
         this.useCaseDataAttributeSpringJpaRepository.save(entity);
         // Return fruit
         return new UseCaseFruit<>(
-                new Fruit(true),
+                new Fruit(),
                 true,
                 ""
         );
