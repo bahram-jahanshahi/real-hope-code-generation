@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.List;
 
-import ir.afarinesh.realhope.shares.repositories.SampleBSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.SampleASpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.SampleBSpringJpaRepository;
 import ir.afarinesh.realhope.entities.sample.enums.SampleStatusEnum;
 
 
@@ -24,22 +24,32 @@ import ir.afarinesh.realhope.entities.sample.enums.SampleStatusEnum;
 public class AddNewSampleBByProjectManagerService {
 
     // jpa repositories
-    final SampleBSpringJpaRepository sampleBSpringJpaRepository;
     final SampleASpringJpaRepository sampleASpringJpaRepository;
+    final SampleBSpringJpaRepository sampleBSpringJpaRepository;
 
-    public AddNewSampleBByProjectManagerService(SampleBSpringJpaRepository sampleBSpringJpaRepository, SampleASpringJpaRepository sampleASpringJpaRepository){
-        this.sampleBSpringJpaRepository = sampleBSpringJpaRepository;
+    public AddNewSampleBByProjectManagerService(SampleASpringJpaRepository sampleASpringJpaRepository, SampleBSpringJpaRepository sampleBSpringJpaRepository){
         this.sampleASpringJpaRepository = sampleASpringJpaRepository;
+        this.sampleBSpringJpaRepository = sampleBSpringJpaRepository;
     }
 
     @Transactional
     public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {
-        SampleB entity =
-                this.sampleBSpringJpaRepository.findById(plant.getPlant().getId())
-                    .orElseThrow(() -> new CultivateException("Cannot find by id = " + plant.getPlant().getId()));
-                // ... 
+        // Entity
+        SampleB entity = new SampleB();
+        // Setters
+        entity.setId(plant.getPlant().getId());
+        entity.setName(plant.getPlant().getName());
+        entity.setActive(plant.getPlant().getActive());
+        entity.setCreateDate(CalendarUtility.getDate(plant.getPlant().getCreateDate()));
+        entity.setValue(plant.getPlant().getValue());
+        entity.setSampleStatus(SampleStatusEnum.findByName(plant.getPlant().getSampleStatusEnum().getValue()));
+        entity.setSampleA(plant.getPlant().getSampleA().getValue() != null ? sampleASpringJpaRepository.findById(plant.getPlant().getSampleA().getValue()).orElseThrow() : null);
+        // Save or update
+        this.sampleBSpringJpaRepository.save(entity);
+        // Return
         return new UseCaseFruit<>(
             new Fruit(
+                    entity.getId()
             ),
             true,
             ""

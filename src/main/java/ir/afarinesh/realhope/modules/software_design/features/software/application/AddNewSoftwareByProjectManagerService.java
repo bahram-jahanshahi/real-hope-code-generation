@@ -30,12 +30,15 @@ public class AddNewSoftwareByProjectManagerService {
 
     @Transactional
     public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {
-        Software entity =
-                this.softwareSpringJpaRepository.findById(plant.getPlant().getId())
-                    .orElseThrow(() -> new CultivateException("Cannot find by id = " + plant.getPlant().getId()));
-                // ... 
+        // Entity
+        Software entity = new Software();
+        // Setters
+        // Save or update
+        this.softwareSpringJpaRepository.save(entity);
+        // Return
         return new UseCaseFruit<>(
             new Fruit(
+                    // entity.getId()
             ),
             true,
             ""

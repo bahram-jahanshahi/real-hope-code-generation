@@ -1,6 +1,7 @@
 package ir.afarinesh.realhope.modules.generation.features.usecase.application.files.java.usecase_service;
 
 import ir.afarinesh.realhope.entities.data_model.DataEntity;
+import ir.afarinesh.realhope.entities.data_model.DataEntityAttribute;
 import ir.afarinesh.realhope.entities.feature.UseCase;
 import ir.afarinesh.realhope.entities.feature.UseCaseData;
 import ir.afarinesh.realhope.entities.feature.UseCaseDataAttribute;
@@ -17,6 +18,7 @@ import ir.afarinesh.realhope.shares.utilities.StringUtility;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class GenerateUpdateUseCaseServiceJavaFile {
@@ -150,17 +152,7 @@ public class GenerateUpdateUseCaseServiceJavaFile {
                 + eol
                 + t + "@Transactional" + eol
                 + t + "public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {" + eol
-                + t + t + useCase.getDataEntity().getName() + " entity =" + eol
-                + t + t + t + t + "this." + StringUtility.firstLowerCase(useCase.getDataEntity().getName()) + "SpringJpaRepository.findById(plant.getPlant().getId())" + eol
-                + t + t + t + t + t + ".orElseThrow(() -> new CultivateException(\"Cannot find by id = \" + plant.getPlant().getId()));" + eol
-                + t + t + t + t + "// ... "
-                + eol
-                + t + t + "return new UseCaseFruit<>(" + eol
-                + t + t + t + "new Fruit(" + eol
-                + t + t + t + ")," + eol
-                + t + t + t + "true," + eol
-                + t + t + t + "\"\"" + eol
-                + t + t + ");" + eol
+                + this.getCultivate(useCase, t + t)
                 + t + "}" + eol
                 + eol
                 + t + "public UseCaseFruitSeeds<FruitSeeds> prepare(UseCaseSeedsCommand<SeedsCommands> seedsCommand) throws PrepareException {" + eol
@@ -374,6 +366,57 @@ public class GenerateUpdateUseCaseServiceJavaFile {
                 content += "import " + this.useCasePathService.getEntitiesPackageTitle(useCase.getSoftwareFeature()) + "." + attribute.getDataEnum().getCategory() + ".enums." + attribute.getDataEnum().getName() + ";" + eol;
             }
         }
+        return content;
+    }
+
+    private String getCultivate(UseCase useCase, String offset) throws GetPlantException {
+        UseCaseData plant = this.useCaseService.getPlant(useCase);
+        List<UseCaseDataAttribute> plantAttributes = plant
+                .getUseCaseDataAttributes()
+                .stream()
+                .filter(attribute -> attribute.getRelatedDataEntityAttribute() != null)
+                .collect(Collectors.toList());
+        String content = "";
+        content += offset + "// Entity" + eol;
+        if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.Update)) {
+            content += ""
+                    + offset + useCase.getDataEntity().getName() + " entity =" + eol
+                    + offset + t + t + "this." + StringUtility.firstLowerCase(useCase.getDataEntity().getName()) + "SpringJpaRepository.findById(plant.getPlant().getId())" + eol
+                    + offset + t + t + t + ".orElseThrow(() -> new CultivateException(\"Cannot find by id = \" + plant.getPlant().getId()));" + eol;
+        }
+        if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.AddNew)) {
+            content += offset + useCase.getDataEntity().getName() + " entity = new " + useCase.getDataEntity().getName() + "();" + eol;
+        }
+        content += offset + "// Setters" + eol;
+        for (UseCaseDataAttribute attribute: plantAttributes) {
+            DataEntityAttribute dataEntityAttribute = attribute.getRelatedDataEntityAttribute();
+            if (attribute.isPrimitive()) {
+                if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate)) {
+                    content += offset + "entity.set" + dataEntityAttribute.getName() + "(CalendarUtility.getDate(plant.getPlant().get" + attribute.getName() + "()));" + eol;
+                } else {
+                    content += offset + "entity.set" + dataEntityAttribute.getName() + "(plant.getPlant().get" + attribute.getName() + "());" + eol;
+                }
+            }
+            if (attribute.isSelectEnum()) {
+                content += offset + "entity.set" + dataEntityAttribute.getName() + "(" + dataEntityAttribute.getDataEnum().getName()
+                        + ".findByName(plant.getPlant().get" + attribute.getName() + "Enum().getValue()));" + eol;
+            }
+            if (attribute.isSelectEntity()) {
+                content += offset + "entity.setSampleA(plant.getPlant().get" + attribute.getName() + "().getValue() != null ? "
+                        + StringUtility.firstLowerCase(dataEntityAttribute.getDataEntityAttributeType().getName()) + "SpringJpaRepository.findById(plant.getPlant().get" + attribute.getName() + "().getValue()).orElseThrow() : null);" + eol;
+            }
+        }
+        content += offset + "// Save or update" + eol;
+        content += offset + "this." + StringUtility.firstLowerCase(useCase.getDataEntity().getName()) + "SpringJpaRepository.save(entity);" + eol;
+        content += ""
+                + offset + "// Return" + eol
+                + offset + "return new UseCaseFruit<>(" + eol
+                + offset + t + "new Fruit(" + eol
+                + offset + t + t + t + "entity.getId()" + eol
+                + offset + t + ")," + eol
+                + offset + t + "true," + eol
+                + offset + t + "\"\"" + eol
+                + offset + ");" + eol;
         return content;
     }
 }

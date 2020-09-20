@@ -13,8 +13,6 @@ import ir.afarinesh.realhope.entities.feature.*;
 import ir.afarinesh.realhope.entities.feature.enums.*;
 import ir.afarinesh.realhope.modules.generation.features.crud.application.ports.in.GenerateCrudByProjectManager;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.UseCaseService;
-import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.exceptions.GetFruitException;
-import ir.afarinesh.realhope.modules.generation.features.usecase.application.shares.exceptions.GetPlantException;
 import ir.afarinesh.realhope.modules.software_design.features.use_case.application.ports.in.AddNewUseCaseByProjectManagerUseCase;
 import ir.afarinesh.realhope.modules.software_design.features.use_case_data_attribute.application.ports.in.AddNewUseCaseDataAttributeByProjectManagerUseCase;
 import ir.afarinesh.realhope.shares.repositories.*;
@@ -94,13 +92,13 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
         UseCase deleteUseCase = this.createDeleteUseCase(crudCodeGeneration, domainEntity, plant.getLocale());
 
         // Relation: grid to view
-        this.createGridListToViewRelation(crudCodeGeneration, gridListUseCase, viewUseCase);
+        this.createRelation(crudCodeGeneration, gridListUseCase, viewUseCase, "View", "نمایش");
         // Relation: grid to add new
-        this.createGridListToViewRelation(crudCodeGeneration, gridListUseCase, addNewUseCase);
+        this.createRelation(crudCodeGeneration, gridListUseCase, addNewUseCase, "AddNew", "افزودن");
         // Relation: view to update
-        this.createGridListToViewRelation(crudCodeGeneration, viewUseCase, updateUseCase);
+        this.createRelation(crudCodeGeneration, viewUseCase, updateUseCase, "Update", "ویرایش");
         // Relation: view to delete
-        this.createGridListToViewRelation(crudCodeGeneration, viewUseCase, deleteUseCase);
+        this.createRelation(crudCodeGeneration, viewUseCase, deleteUseCase, "Delete", "حذف");
 
         return new UseCaseFruit<>(
                 new Fruit(true),
@@ -167,17 +165,33 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
         UseCaseData plant = this.getUseCaseData(useCase, UseCaseDataTypeEnum.Plant);
         // Get the fruit of use case
         UseCaseData fruit = this.getUseCaseData(useCase, UseCaseDataTypeEnum.Fruit);
+        // Get the seeds command of use case
+        UseCaseData seedsCommand = this.getUseCaseData(useCase, UseCaseDataTypeEnum.SeedsCommand);
+        // Get the fruit seeds of use case
+        UseCaseData fruitSeeds = this.getUseCaseData(useCase, UseCaseDataTypeEnum.FruitSeeds);
 
         // Plant
-        for (DataEntityAttribute dataEntityAttribute: dataEntityAttributes) {
+        for (DataEntityAttribute dataEntityAttribute : dataEntityAttributes) {
             try {
+                String namePostfix = "";
+                String titlePostfix = "";
+                String faTitlePostfix = "";
+                if (!dataEntityAttribute.getName().equals("Id") &&
+                        (dataEntityAttribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate) ||
+                                dataEntityAttribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Long) ||
+                                dataEntityAttribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Integer))
+                ) {
+                    namePostfix = "Begin";
+                    titlePostfix = " begin";
+                    faTitlePostfix = " از";
+                }
                 this.addNewUseCaseDataAttributeByProjectManagerUseCase
                         .cultivate(new UseCasePlant<>(
                                 new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
                                         null,
-                                        dataEntityAttribute.getName(),
-                                        dataEntityAttribute.getTitle(),
-                                        dataEntityAttribute.getFaTitle(),
+                                        dataEntityAttribute.getName() + namePostfix,
+                                        dataEntityAttribute.getTitle() + titlePostfix,
+                                        dataEntityAttribute.getFaTitle() + faTitlePostfix,
                                         dataEntityAttribute.getDescription(),
                                         dataEntityAttribute.getUiRow(),
                                         dataEntityAttribute.getUiColumn(),
@@ -203,6 +217,44 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
                                 ),
                                 locale
                         ));
+                if (!dataEntityAttribute.getName().equals("Id") &&
+                        (dataEntityAttribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate) ||
+                                dataEntityAttribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Long) ||
+                                dataEntityAttribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.Integer))
+                ) {
+                    this.addNewUseCaseDataAttributeByProjectManagerUseCase
+                            .cultivate(new UseCasePlant<>(
+                                    new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
+                                            null,
+                                            dataEntityAttribute.getName() + "End",
+                                            dataEntityAttribute.getTitle() + " end",
+                                            dataEntityAttribute.getFaTitle() + " تا",
+                                            dataEntityAttribute.getDescription(),
+                                            dataEntityAttribute.getUiRow(),
+                                            dataEntityAttribute.getUiColumn() + 1,
+                                            new SelectEnum("", UseCaseUsageEnum.GridListSearchField.name()), null,
+                                            new SelectEnum("", dataEntityAttribute.getAttributeQuantity().name()), null,
+                                            new SelectEnum("", dataEntityAttribute.getAttributeCategory().name()), null,
+                                            new SelectEnum("", dataEntityAttribute.getPrimitiveAttributeType().name()), null,
+                                            null,
+                                            null,
+                                            true,
+                                            false,
+                                            dataEntityAttribute.getMinLength(),
+                                            dataEntityAttribute.getMaxLength(),
+                                            dataEntityAttribute.getMin(),
+                                            dataEntityAttribute.getMax(),
+                                            dataEntityAttribute.getErrorTip(),
+                                            new SelectEntity("", null), null,
+                                            new SelectEntity("", dataEntityAttribute.getDataEntityAttributeType() != null ? dataEntityAttribute.getDataEntityAttributeType().getId() : null), null,
+                                            new SelectEntity("", plant.getId()), null,
+                                            new SelectEntity("", null), null,
+                                            new SelectEntity("", dataEntityAttribute.getDataEnum() != null ? dataEntityAttribute.getDataEnum().getId() : null), null,
+                                            new SelectEntity("", null), null
+                                    ),
+                                    locale
+                            ));
+                }
             } catch (AddNewUseCaseDataAttributeByProjectManagerUseCase.CultivateException e) {
                 e.printStackTrace();
             }
@@ -245,6 +297,47 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
         } catch (AddNewUseCaseDataAttributeByProjectManagerUseCase.CultivateException e) {
             throw new CultivateException(e.getMessage());
         }
+        // FruitSeeds
+        for (DataEntityAttribute dataEntityAttribute : dataEntityAttributes) {
+            if (dataEntityAttribute.isSelectEnum() || dataEntityAttribute.isSelectEntity()) {
+                try {
+                    this.addNewUseCaseDataAttributeByProjectManagerUseCase
+                            .cultivate(new UseCasePlant<>(
+                                    new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
+                                            null,
+                                            dataEntityAttribute.getName(),
+                                            dataEntityAttribute.getTitle(),
+                                            dataEntityAttribute.getFaTitle(),
+                                            dataEntityAttribute.getDescription(),
+                                            0L,
+                                            0L,
+                                            new SelectEnum("", UseCaseUsageEnum.GridListSearchField.name()), null,
+                                            new SelectEnum("", dataEntityAttribute.getAttributeQuantity().name()), null,
+                                            new SelectEnum("", dataEntityAttribute.getAttributeCategory().name()), null,
+                                            new SelectEnum("", dataEntityAttribute.getPrimitiveAttributeType().name()), null,
+                                            null,
+                                            null,
+                                            false,
+                                            true,
+                                            0L,
+                                            100L,
+                                            0L,
+                                            0L,
+                                            null,
+                                            new SelectEntity("", null), null,
+                                            new SelectEntity("", dataEntityAttribute.getDataEntityAttributeType() != null ? dataEntityAttribute.getDataEntityAttributeType().getId() : null), null,
+                                            new SelectEntity("", fruitSeeds.getId()), null,
+                                            new SelectEntity("", null), null,
+                                            new SelectEntity("", dataEntityAttribute.getDataEnum() != null ? dataEntityAttribute.getDataEnum().getId() : null), null,
+                                            new SelectEntity("", null), null
+                                    ),
+                                    locale
+                            ));
+                } catch (AddNewUseCaseDataAttributeByProjectManagerUseCase.CultivateException e) {
+                    throw new CultivateException(e.getMessage());
+                }
+            }
+        }
         return useCase;
     }
 
@@ -256,6 +349,7 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
             UseCaseData plant = this.getUseCaseData(useCase, UseCaseDataTypeEnum.Plant);
             // Get the fruit of use case
             UseCaseData fruit = this.getUseCaseData(useCase, UseCaseDataTypeEnum.Fruit);
+
             // Add a new ViewId use case data attribute to plant
             this.addNewUseCaseDataAttributeByProjectManagerUseCase
                     .cultivate(new UseCasePlant<>(
@@ -294,9 +388,9 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
                     .cultivate(new UseCasePlant<>(
                             new AddNewUseCaseDataAttributeByProjectManagerUseCase.Plant(
                                     null,
-                                    "Id",
-                                    crudCodeGeneration.getDataEntity().getTitle() + " Id",
-                                    "شناسه " + crudCodeGeneration.getDataEntity().getFaTitle(),
+                                    "Entity",
+                                    crudCodeGeneration.getDataEntity().getTitle(),
+                                    crudCodeGeneration.getDataEntity().getFaTitle(),
                                     "",
                                     0L,
                                     0L,
@@ -697,17 +791,17 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
     }
 
     // Relation GidList to View
-    private void createGridListToViewRelation(CrudCodeGeneration crudCodeGeneration, UseCase gridListUseCase, UseCase viewUseCase) {
+    private void createRelation(CrudCodeGeneration crudCodeGeneration, UseCase source, UseCase destination, String relationName, String faRelationName) {
         this.useCaseRelationSpringJpaRepository.save(
                 new UseCaseRelation(
                         null,
-                        "View" + crudCodeGeneration.getDataEntity().getName() + "By" + crudCodeGeneration.getSoftwareRole().getName(),
-                        "",
-                        "",
+                        relationName + crudCodeGeneration.getDataEntity().getName() + "By" + crudCodeGeneration.getSoftwareRole().getName(),
+                        relationName,
+                        faRelationName,
                         UseCaseRelationContextEnum.Frontend,
                         FrontendActionTypeEnum.PopupForm,
-                        gridListUseCase,
-                        viewUseCase,
+                        source,
+                        destination,
                         crudCodeGeneration
                 )
         );

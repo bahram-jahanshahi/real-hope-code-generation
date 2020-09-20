@@ -1,5 +1,7 @@
 package ir.afarinesh.realhope.modules.generation.features.usecase.application.files.java.usecase_service;
 
+import ir.afarinesh.realhope.core.domain.SelectEntity;
+import ir.afarinesh.realhope.entities.data_model.DataEntity;
 import ir.afarinesh.realhope.entities.feature.*;
 import ir.afarinesh.realhope.entities.feature.enums.PrimitiveAttributeTypeEnum;
 import ir.afarinesh.realhope.modules.generation.features.usecase.application.files.java.usecase_service.exceptions.GenerateListUseCaseServiceJavaFileException;
@@ -13,7 +15,10 @@ import ir.afarinesh.realhope.shares.services.exceptions.CreateFileException;
 import ir.afarinesh.realhope.shares.utilities.StringUtility;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -123,6 +128,7 @@ public class GenerateListUseCaseServiceJavaFile {
         String imports = ""
                 + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".annotations.FeatureApplication;" + eol
                 + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".domain.SelectEnum;" + eol
+                + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".domain.SelectEntity;" + eol
                 + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".usecase.*;" + eol
                 + "import " + this.useCasePathService.getSharesPackageTitle(useCase.getSoftwareFeature()) + ".repositories." + useCase.getDataEntity().getName() + "SpringJpaRepository;" + eol
                 + "import " + this.useCasePathService.getEntitiesPackageTitle(useCase.getSoftwareFeature()) + "." + useCase.getDataEntity().getCategory() + "." + useCase.getDataEntity().getName() + ";" + eol
@@ -136,6 +142,8 @@ public class GenerateListUseCaseServiceJavaFile {
                 + eol
                 + this.getEnumsImports(useCase)
                 + eol
+                + this.getSpringJpaRepositoriesImports(useCase)
+                + eol
                 + "import java.util.stream.Collectors;" + eol
                 + "import java.util.List;" + eol
                 + eol;
@@ -145,11 +153,9 @@ public class GenerateListUseCaseServiceJavaFile {
                 + "public class " + useCaseTitle + "Service {" + eol
                 + eol
                 + t + "// jpa repositories" + eol
-                + t + "final " + entitySpringJpaRepository + " " + StringUtility.firstLowerCase(entitySpringJpaRepository) + ";" + eol
+                + this.getSpringJpaRepositories(useCase)
                 + eol
-                + t + "public " + useCaseTitle + "Service(" + entitySpringJpaRepository + " " + StringUtility.firstLowerCase(entitySpringJpaRepository) + ") {" + eol
-                + t + t + "this." + StringUtility.firstLowerCase(entitySpringJpaRepository) + " = " + StringUtility.firstLowerCase(entitySpringJpaRepository) + ";" + eol
-                + t + "}" + eol
+                + this.getConstructor(useCase)
                 + eol
                 + t + "public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {" + eol
                 + t + t + "Page<" + useCase.getDataEntity().getName() + "> page = " + "this." + StringUtility.firstLowerCase(entitySpringJpaRepository) + eol
@@ -187,34 +193,47 @@ public class GenerateListUseCaseServiceJavaFile {
 
     private String getPrepare(UseCase useCase) throws GetPlantException {
         String content = "";
-        List<UseCaseDataAttribute> enumAttributes = this.useCaseService
+        List<UseCaseDataAttribute> attributes = this.useCaseService
                 .getFruitSeeds(useCase)
                 .getUseCaseDataAttributes()
                 .stream()
-                .filter(attribute -> attribute.isSelectEnum())
+                .filter(attribute -> attribute.isSelectEntity() || attribute.isSelectEnum())
                 .collect(Collectors.toList());
-        for (UseCaseDataAttribute attribute : enumAttributes) {
+        for (UseCaseDataAttribute attribute : attributes) {
             if (attribute.isSelectEnum()) {
                 content += t + t + "SelectEnum " + StringUtility.firstLowerCase(attribute.getName()) + "Enum = null;" + eol;
                 content += t + t + "List<SelectEnum> " + StringUtility.firstLowerCase(attribute.getName()) + "EnumArray = "
                         + attribute.getDataEnum().getName()
                         + ".Void.getSelectEnumList(seedsCommand.getLocale());" + eol;
             }
+            if (attribute.isSelectEntity()) {
+                content += t + t + "SelectEntity " + StringUtility.firstLowerCase(attribute.getName()) + " = null;" + eol;
+                content += t + t + "List<SelectEntity> " + StringUtility.firstLowerCase(attribute.getName()) + "Array = "
+                        + StringUtility.firstLowerCase(attribute.getDataEntityAttributeType().getName()) + "SpringJpaRepository" + eol
+                        + t + t + t + t + ".findAll()" + eol
+                        + t + t + t + t + ".stream()" + eol
+                        + t + t + t + t + ".map(obj -> new SelectEntity(obj.title(seedsCommand.getLocale()), obj.getId()))" + eol
+                        + t + t + t + t + ".collect(Collectors.toList());" + eol;
+            }
         }
         content += t + t + "return new UseCaseFruitSeeds<>(" + eol;
         content += t + t + t + t + "new FruitSeeds(" + eol;
-        for (int i = 0; i < enumAttributes.size(); i++) {
-            UseCaseDataAttribute attribute = enumAttributes.get(i);
+        for (int i = 0; i < attributes.size(); i++) {
+            UseCaseDataAttribute attribute = attributes.get(i);
             if (attribute.isSelectEnum()) {
                 content += t + t + t + t + t + t + StringUtility.firstLowerCase(attribute.getName()) + "Enum," + eol;
-                content += t + t + t + t + t + t + StringUtility.firstLowerCase(attribute.getName()) + "EnumArray" + eol;
-                content += (i < enumAttributes.size() - 1) ? "," : "";
+                content += t + t + t + t + t + t + StringUtility.firstLowerCase(attribute.getName()) + "EnumArray";
             }
+            if (attribute.isSelectEntity()) {
+                content += t + t + t + t + t + t + StringUtility.firstLowerCase(attribute.getName()) + "," + eol;
+                content += t + t + t + t + t + t + StringUtility.firstLowerCase(attribute.getName()) + "Array";
+            }
+            content += ((i < attributes.size() - 1) ? "," : "") + eol;
         }
         content += t + t + t + t + ")," + eol;
         content += t + t + t + t + "true," + eol;
         content += t + t + t + t + "\"\"" + eol;
-        content += t + t + ");";
+        content += t + t + ");" + eol;
 
         return content;
     }
@@ -227,6 +246,65 @@ public class GenerateListUseCaseServiceJavaFile {
                 content += "import " + this.useCasePathService.getEntitiesPackageTitle(useCase.getSoftwareFeature()) + "." + attribute.getDataEnum().getCategory() + ".enums." + attribute.getDataEnum().getName() + ";" + eol;
             }
         }
+        return content;
+    }
+
+    private String getSpringJpaRepositoriesImports(UseCase useCase) throws GetPlantException {
+        Set<DataEntity> dataEntities = new HashSet<>();
+        dataEntities.add(useCase.getDataEntity());
+        List<UseCaseDataAttribute> attributes = this.useCaseService.getFruitSeeds(useCase).getUseCaseDataAttributes();
+        for (UseCaseDataAttribute attribute : attributes) {
+            if (attribute.isSelectEntity() && attribute.getDataEntityAttributeType() != null) {
+                dataEntities.add(attribute.getDataEntityAttributeType());
+            }
+        }
+        String content = "";
+        List<DataEntity> dataEntitiesArray = new ArrayList<>(dataEntities);
+        for (DataEntity dataEntity : dataEntitiesArray) {
+            content += "import " + this.useCasePathService.getSharesPackageTitle(useCase.getSoftwareFeature()) + ".repositories." + dataEntity.getName() + "SpringJpaRepository;" + eol;
+        }
+        return content;
+    }
+
+    private String getSpringJpaRepositories(UseCase useCase) throws GetPlantException {
+        Set<DataEntity> dataEntities = new HashSet<>();
+        dataEntities.add(useCase.getDataEntity());
+        List<UseCaseDataAttribute> attributes = this.useCaseService.getFruitSeeds(useCase).getUseCaseDataAttributes();
+        for (UseCaseDataAttribute attribute : attributes) {
+            if (attribute.isSelectEntity() && attribute.getDataEntityAttributeType() != null) {
+                dataEntities.add(attribute.getDataEntityAttributeType());
+            }
+        }
+        String content = "";
+        List<DataEntity> dataEntitiesArray = new ArrayList<>(dataEntities);
+        for (DataEntity dataEntity : dataEntitiesArray) {
+            content += t + "final " + dataEntity.getName() + "SpringJpaRepository " + StringUtility.firstLowerCase(dataEntity.getName()) + "SpringJpaRepository;" + eol;
+        }
+        return content;
+    }
+
+    private String getConstructor(UseCase useCase) throws GetPlantException {
+        Set<DataEntity> dataEntities = new HashSet<>();
+        dataEntities.add(useCase.getDataEntity());
+        List<UseCaseDataAttribute> attributes = this.useCaseService.getFruitSeeds(useCase).getUseCaseDataAttributes();
+        for (UseCaseDataAttribute attribute : attributes) {
+            if (attribute.isSelectEntity() && attribute.getDataEntityAttributeType() != null) {
+                dataEntities.add(attribute.getDataEntityAttributeType());
+            }
+        }
+        String content = t + "public " + useCaseService.getUseCaseTitle(useCase) + "Service(";
+        List<DataEntity> dataEntitiesArray = new ArrayList<>(dataEntities);
+        for (int i = 0; i < dataEntitiesArray.size(); i++) {
+            DataEntity dataEntity = dataEntitiesArray.get(i);
+            content += dataEntity.getName() + "SpringJpaRepository " + StringUtility.firstLowerCase(dataEntity.getName()) + "SpringJpaRepository";
+            content += (i < dataEntities.size() - 1) ? ", " : "";
+        }
+        content += "){" + eol;
+        for (int i = 0; i < dataEntitiesArray.size(); i++) {
+            DataEntity dataEntity = dataEntitiesArray.get(i);
+            content += t + t + "this." + StringUtility.firstLowerCase(dataEntity.getName()) + "SpringJpaRepository = " + StringUtility.firstLowerCase(dataEntity.getName()) + "SpringJpaRepository;" + eol;
+        }
+        content += t + "}" + eol;
         return content;
     }
 }

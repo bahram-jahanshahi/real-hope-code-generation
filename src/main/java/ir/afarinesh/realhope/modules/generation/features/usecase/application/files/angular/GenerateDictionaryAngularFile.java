@@ -100,6 +100,9 @@ public class GenerateDictionaryAngularFile {
 
     private String getGridListDictionary(UseCase useCase) {
         String content = "";
+        content += ",\"None\": \"همه\"" + eol;
+        content += ",\"BooleanYes\": \"بلی\"" + eol;
+        content += ",\"BooleanNo\": \"خیر\"" + eol;
         if (useCase.getUserInterfaceType().equals(UserInterfaceTypeEnum.GridList)) {
             try {
                 DomainEntity gridListFruitDomainEntity = this.useCaseService.getGridListFruitDomainEntity(useCase);

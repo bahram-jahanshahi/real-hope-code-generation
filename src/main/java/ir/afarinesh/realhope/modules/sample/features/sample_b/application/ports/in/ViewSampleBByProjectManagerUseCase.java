@@ -21,7 +21,7 @@ public interface ViewSampleBByProjectManagerUseCase {
   @NoArgsConstructor
   @AllArgsConstructor
   class Fruit {
-    SampleB4ProjectManager id;
+    SampleB4ProjectManager entity;
   }
 
   @Data

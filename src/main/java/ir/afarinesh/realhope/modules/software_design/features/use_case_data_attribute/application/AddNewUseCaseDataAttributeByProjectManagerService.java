@@ -15,12 +15,12 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.List;
 
-import ir.afarinesh.realhope.shares.repositories.UseCaseDataSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.UseCaseDataAttributeSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.DataEntitySpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.DomainEntitySpringJpaRepository;
-import ir.afarinesh.realhope.shares.repositories.UseCaseDataAttributeSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.DataEnumSpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.DataEntityAttributeSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.UseCaseDataSpringJpaRepository;
 import ir.afarinesh.realhope.entities.feature.enums.UseCaseUsageEnum;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeQuantityEnum;
 import ir.afarinesh.realhope.entities.feature.enums.EntityAttributeCategoryEnum;
@@ -31,30 +31,33 @@ import ir.afarinesh.realhope.entities.feature.enums.PrimitiveAttributeTypeEnum;
 public class AddNewUseCaseDataAttributeByProjectManagerService {
 
     // jpa repositories
-    final UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository;
+    final UseCaseDataAttributeSpringJpaRepository useCaseDataAttributeSpringJpaRepository;
     final DataEntitySpringJpaRepository dataEntitySpringJpaRepository;
     final DomainEntitySpringJpaRepository domainEntitySpringJpaRepository;
-    final UseCaseDataAttributeSpringJpaRepository useCaseDataAttributeSpringJpaRepository;
     final DataEnumSpringJpaRepository dataEnumSpringJpaRepository;
     final DataEntityAttributeSpringJpaRepository dataEntityAttributeSpringJpaRepository;
+    final UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository;
 
-    public AddNewUseCaseDataAttributeByProjectManagerService(UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository, DataEntitySpringJpaRepository dataEntitySpringJpaRepository, DomainEntitySpringJpaRepository domainEntitySpringJpaRepository, UseCaseDataAttributeSpringJpaRepository useCaseDataAttributeSpringJpaRepository, DataEnumSpringJpaRepository dataEnumSpringJpaRepository, DataEntityAttributeSpringJpaRepository dataEntityAttributeSpringJpaRepository){
-        this.useCaseDataSpringJpaRepository = useCaseDataSpringJpaRepository;
+    public AddNewUseCaseDataAttributeByProjectManagerService(UseCaseDataAttributeSpringJpaRepository useCaseDataAttributeSpringJpaRepository, DataEntitySpringJpaRepository dataEntitySpringJpaRepository, DomainEntitySpringJpaRepository domainEntitySpringJpaRepository, DataEnumSpringJpaRepository dataEnumSpringJpaRepository, DataEntityAttributeSpringJpaRepository dataEntityAttributeSpringJpaRepository, UseCaseDataSpringJpaRepository useCaseDataSpringJpaRepository){
+        this.useCaseDataAttributeSpringJpaRepository = useCaseDataAttributeSpringJpaRepository;
         this.dataEntitySpringJpaRepository = dataEntitySpringJpaRepository;
         this.domainEntitySpringJpaRepository = domainEntitySpringJpaRepository;
-        this.useCaseDataAttributeSpringJpaRepository = useCaseDataAttributeSpringJpaRepository;
         this.dataEnumSpringJpaRepository = dataEnumSpringJpaRepository;
         this.dataEntityAttributeSpringJpaRepository = dataEntityAttributeSpringJpaRepository;
+        this.useCaseDataSpringJpaRepository = useCaseDataSpringJpaRepository;
     }
 
     @Transactional
     public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {
-        UseCaseDataAttribute entity =
-                this.useCaseDataAttributeSpringJpaRepository.findById(plant.getPlant().getId())
-                    .orElseThrow(() -> new CultivateException("Cannot find by id = " + plant.getPlant().getId()));
-                // ... 
+        // Entity
+        UseCaseDataAttribute entity = new UseCaseDataAttribute();
+        // Setters
+        // Save or update
+        this.useCaseDataAttributeSpringJpaRepository.save(entity);
+        // Return
         return new UseCaseFruit<>(
             new Fruit(
+                    // entity.getId()
             ),
             true,
             ""

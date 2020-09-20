@@ -32,8 +32,10 @@ public interface GridListSampleBByProjectManagerUseCase {
     Long id;
     String name;
     Boolean active;
-    JavaDate createDate;
-    Long value;
+    JavaDate createDateBegin;
+    JavaDate createDateEnd;
+    Long valueBegin;
+    Long valueEnd;
     SelectEnum sampleStatusEnum;
     List<SelectEnum> sampleStatusEnumArray;
     SelectEntity sampleA;
@@ -51,7 +53,10 @@ public interface GridListSampleBByProjectManagerUseCase {
   @AllArgsConstructor
   @Data
   class FruitSeeds {
-    boolean something;
+    SelectEnum sampleStatusEnum;
+    List<SelectEnum> sampleStatusEnumArray;
+    SelectEntity sampleA;
+    List<SelectEntity> sampleAArray;
   }
 
   @Data

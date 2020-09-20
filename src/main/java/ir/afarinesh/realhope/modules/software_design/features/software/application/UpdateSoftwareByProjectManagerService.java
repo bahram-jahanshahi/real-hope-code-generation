@@ -30,12 +30,17 @@ public class UpdateSoftwareByProjectManagerService {
 
     @Transactional
     public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {
+        // Entity
         Software entity =
                 this.softwareSpringJpaRepository.findById(plant.getPlant().getId())
                     .orElseThrow(() -> new CultivateException("Cannot find by id = " + plant.getPlant().getId()));
-                // ... 
+        // Setters
+        // Save or update
+        this.softwareSpringJpaRepository.save(entity);
+        // Return
         return new UseCaseFruit<>(
             new Fruit(
+
             ),
             true,
             ""

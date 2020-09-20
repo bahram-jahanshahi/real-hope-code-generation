@@ -140,6 +140,8 @@ public class GenerateUseCaseGridListComponentAngularFile {
                 + eol
                 + this.getEnumListVariables(useCase)
                 + eol
+                + this.getEntityListVariables(useCase)
+                + eol
                 + t + "realTimeSearchEnabled = true;" + eol
                 + t + "// form controls" + eol
                 + this.getSearchFormControls(useCase)
@@ -239,17 +241,6 @@ public class GenerateUseCaseGridListComponentAngularFile {
                 + componentContent;
     }
 
-    private String getMakeRealTimeFormControls(UseCase useCase, int offset) throws GetPlantException {
-        String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
-        String content = "";
-        UseCaseData plant = useCaseService.getPlant(useCase);
-        for (int i = 0; i < plant.getUseCaseDataAttributes().size(); i++) {
-            UseCaseDataAttribute attribute = plant.getUseCaseDataAttributes().get(i);
-            content += StringUtility.space(offset) + "this.realTime(this." + StringUtility.firstLowerCase(attribute.getName()) + "FormControl);" + eol;
-        }
-        return content;
-    }
-
     // html content
     protected String getHtmlContent(UseCase useCase) throws GetPlantException {
         String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
@@ -298,6 +289,22 @@ public class GenerateUseCaseGridListComponentAngularFile {
         return htmlContent;
     }
 
+    // css content
+    protected String getCssContent(UseCase useCase) {
+        return "";
+    }
+
+    private String getMakeRealTimeFormControls(UseCase useCase, int offset) throws GetPlantException {
+        String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
+        String content = "";
+        UseCaseData plant = useCaseService.getPlant(useCase);
+        for (int i = 0; i < plant.getUseCaseDataAttributes().size(); i++) {
+            UseCaseDataAttribute attribute = plant.getUseCaseDataAttributes().get(i);
+            content += StringUtility.space(offset) + "this.realTime(this." + StringUtility.firstLowerCase(attribute.getName()) + "FormControl);" + eol;
+        }
+        return content;
+    }
+
     private String getTableHtmlColumns(UseCase useCase, int offset) {
         String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
         String content = "";
@@ -318,11 +325,6 @@ public class GenerateUseCaseGridListComponentAngularFile {
             content += StringUtility.space(offset + 2) + "</ng-container>" + eol;
         }
         return content;
-    }
-
-    // css content
-    protected String getCssContent(UseCase useCase) {
-        return "";
     }
 
     private String getDomainEntitiesImports(SoftwareFeature softwareFeature) {
@@ -550,6 +552,18 @@ public class GenerateUseCaseGridListComponentAngularFile {
         return content;
     }
 
+    private String getEntityListVariables(UseCase useCase) throws GetPlantException {
+        String content = "";
+        UseCaseData plant = useCaseService.getPlant(useCase);
+        for (int i = 0; i < plant.getUseCaseDataAttributes().size(); i++) {
+            UseCaseDataAttribute attribute = plant.getUseCaseDataAttributes().get(i);
+            if (attribute.isSelectEntity()) {
+                content += t + StringUtility.firstLowerCase(attribute.getName()) + "Array = new Array<SelectEntity>();" + eol;
+            }
+        }
+        return content;
+    }
+
     private String getPrepareResult(UseCase useCase, String offset) throws GetPlantException {
         String content = "";
         UseCaseData fruitSeeds = useCaseService.getFruitSeeds(useCase);
@@ -557,6 +571,9 @@ public class GenerateUseCaseGridListComponentAngularFile {
             UseCaseDataAttribute attribute = fruitSeeds.getUseCaseDataAttributes().get(i);
             if (attribute.isSelectEnum()) {
                 content += offset + "this." + StringUtility.firstLowerCase(attribute.getName()) + "EnumArray = fruitSeeds.fruitSeeds." + StringUtility.firstLowerCase(attribute.getName()) + "EnumArray;" + eol;
+            }
+            if (attribute.isSelectEntity()) {
+                content += offset + "this." + StringUtility.firstLowerCase(attribute.getName()) + "Array = fruitSeeds.fruitSeeds." + StringUtility.firstLowerCase(attribute.getName()) + "Array;" + eol;
             }
         }
         return content;

@@ -2,6 +2,7 @@ package ir.afarinesh.realhope.modules.sample.features.sample_b.application;
 
 import ir.afarinesh.realhope.core.annotations.FeatureApplication;
 import ir.afarinesh.realhope.core.domain.SelectEnum;
+import ir.afarinesh.realhope.core.domain.SelectEntity;
 import ir.afarinesh.realhope.core.usecase.*;
 import ir.afarinesh.realhope.shares.repositories.SampleBSpringJpaRepository;
 import ir.afarinesh.realhope.entities.sample.SampleB;
@@ -13,6 +14,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 
+import ir.afarinesh.realhope.entities.sample.enums.SampleStatusEnum;
+
+import ir.afarinesh.realhope.shares.repositories.SampleASpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.SampleBSpringJpaRepository;
 
 import java.util.stream.Collectors;
 import java.util.List;
@@ -23,9 +28,11 @@ import java.util.List;
 public class GridListSampleBByProjectManagerService {
 
     // jpa repositories
+    final SampleASpringJpaRepository sampleASpringJpaRepository;
     final SampleBSpringJpaRepository sampleBSpringJpaRepository;
 
-    public GridListSampleBByProjectManagerService(SampleBSpringJpaRepository sampleBSpringJpaRepository) {
+    public GridListSampleBByProjectManagerService(SampleASpringJpaRepository sampleASpringJpaRepository, SampleBSpringJpaRepository sampleBSpringJpaRepository){
+        this.sampleASpringJpaRepository = sampleASpringJpaRepository;
         this.sampleBSpringJpaRepository = sampleBSpringJpaRepository;
     }
 
@@ -47,12 +54,25 @@ public class GridListSampleBByProjectManagerService {
     }
 
     public UseCaseFruitSeeds<FruitSeeds> prepare(UseCaseSeedsCommand<SeedsCommands> seedsCommand) throws PrepareException {
+        SelectEnum sampleStatusEnum = null;
+        List<SelectEnum> sampleStatusEnumArray = SampleStatusEnum.Void.getSelectEnumList(seedsCommand.getLocale());
+        SelectEntity sampleA = null;
+        List<SelectEntity> sampleAArray = sampleASpringJpaRepository
+                .findAll()
+                .stream()
+                .map(obj -> new SelectEntity(obj.title(seedsCommand.getLocale()), obj.getId()))
+                .collect(Collectors.toList());
         return new UseCaseFruitSeeds<>(
                 new FruitSeeds(
+                        sampleStatusEnum,
+                        sampleStatusEnumArray,
+                        sampleA,
+                        sampleAArray
                 ),
                 true,
                 ""
-        );    }
+        );
+    }
 
     public SampleB4ProjectManager mapSampleB4ProjectManager(SampleB entity, String locale){
         return new SampleB4ProjectManager(

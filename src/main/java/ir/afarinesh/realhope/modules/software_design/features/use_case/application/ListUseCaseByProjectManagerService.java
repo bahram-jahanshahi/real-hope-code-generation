@@ -2,6 +2,7 @@ package ir.afarinesh.realhope.modules.software_design.features.use_case.applicat
 
 import ir.afarinesh.realhope.core.annotations.FeatureApplication;
 import ir.afarinesh.realhope.core.domain.SelectEnum;
+import ir.afarinesh.realhope.core.domain.SelectEntity;
 import ir.afarinesh.realhope.core.usecase.*;
 import ir.afarinesh.realhope.shares.repositories.UseCaseSpringJpaRepository;
 import ir.afarinesh.realhope.entities.feature.UseCase;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 
 
+import ir.afarinesh.realhope.shares.repositories.UseCaseSpringJpaRepository;
+
 import java.util.stream.Collectors;
 import java.util.List;
 
@@ -25,7 +28,7 @@ public class ListUseCaseByProjectManagerService {
     // jpa repositories
     final UseCaseSpringJpaRepository useCaseSpringJpaRepository;
 
-    public ListUseCaseByProjectManagerService(UseCaseSpringJpaRepository useCaseSpringJpaRepository) {
+    public ListUseCaseByProjectManagerService(UseCaseSpringJpaRepository useCaseSpringJpaRepository){
         this.useCaseSpringJpaRepository = useCaseSpringJpaRepository;
     }
 
@@ -52,7 +55,8 @@ public class ListUseCaseByProjectManagerService {
                 ),
                 true,
                 ""
-        );    }
+        );
+    }
 
     public UseCase4ProjectManager mapUseCase4ProjectManager(UseCase entity, String locale){
         return new UseCase4ProjectManager(
