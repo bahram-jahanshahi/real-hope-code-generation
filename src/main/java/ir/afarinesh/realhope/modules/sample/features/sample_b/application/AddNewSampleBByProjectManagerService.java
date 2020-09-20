@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.List;
 
-import ir.afarinesh.realhope.shares.repositories.SampleASpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.SampleBSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.SampleASpringJpaRepository;
 import ir.afarinesh.realhope.entities.sample.enums.SampleStatusEnum;
 
 
@@ -24,12 +24,12 @@ import ir.afarinesh.realhope.entities.sample.enums.SampleStatusEnum;
 public class AddNewSampleBByProjectManagerService {
 
     // jpa repositories
-    final SampleASpringJpaRepository sampleASpringJpaRepository;
     final SampleBSpringJpaRepository sampleBSpringJpaRepository;
+    final SampleASpringJpaRepository sampleASpringJpaRepository;
 
-    public AddNewSampleBByProjectManagerService(SampleASpringJpaRepository sampleASpringJpaRepository, SampleBSpringJpaRepository sampleBSpringJpaRepository){
-        this.sampleASpringJpaRepository = sampleASpringJpaRepository;
+    public AddNewSampleBByProjectManagerService(SampleBSpringJpaRepository sampleBSpringJpaRepository, SampleASpringJpaRepository sampleASpringJpaRepository){
         this.sampleBSpringJpaRepository = sampleBSpringJpaRepository;
+        this.sampleASpringJpaRepository = sampleASpringJpaRepository;
     }
 
     @Transactional
