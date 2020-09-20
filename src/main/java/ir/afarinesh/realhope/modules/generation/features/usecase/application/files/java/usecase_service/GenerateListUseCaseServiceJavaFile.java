@@ -230,8 +230,9 @@ public class GenerateListUseCaseServiceJavaFile {
         return useCase.getName() + "By" + useCase.getSoftwareRole().getName() + "Service.java";
     }
 
+    // Content
     protected String getContent(UseCase useCase) throws GetGridListFruitDomainEntityException, GetPlantException {
-        String useCaseTitle = useCase.getName() + "By" + useCase.getSoftwareRole().getName();
+        String useCaseTitle = useCaseService.getUseCaseTitle(useCase);
         String entitySpringJpaRepository = useCase.getDataEntity().getName() + "SpringJpaRepository";
         DomainEntity gridListFruitDomainEntity = useCaseService.getGridListFruitDomainEntity(useCase);
         String t = StringUtility.space(4);
@@ -240,6 +241,7 @@ public class GenerateListUseCaseServiceJavaFile {
                 + "application;"
                 + eol;
         String imports = ""
+                + "import " + this.useCasePathService.getSpringBootFeaturePackageTitle(useCase.getSoftwareFeature()) + ".adapter.repositories." + useCaseTitle + "RepositoryImpl;" + eol
                 + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".annotations.FeatureApplication;" + eol
                 + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".domain.SelectEnum;" + eol
                 + "import " + this.useCasePathService.getCorePackageTitle(useCase.getSoftwareFeature()) + ".domain.SelectEntity;" + eol
@@ -268,12 +270,13 @@ public class GenerateListUseCaseServiceJavaFile {
                 + eol
                 + t + "// jpa repositories" + eol
                 + this.getSpringJpaRepositories(useCase)
+                + t + "final " + useCaseTitle + "RepositoryImpl repository;" + eol
                 + eol
                 + this.getConstructor(useCase)
                 + eol
                 + t + "public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {" + eol
-                + t + t + "Page<" + useCase.getDataEntity().getName() + "> page = " + "this." + StringUtility.firstLowerCase(entitySpringJpaRepository) + eol
-                + t + t + t + t + ".findAll(PageRequest.of(plant.getPlant().getPaginationCommand().getPageIndex(), plant.getPlant().getPaginationCommand().getPageSize()));" + eol
+                + t + t + "Page<" + useCase.getDataEntity().getName() + "> page = " + "this.repository" + eol
+                + this.getFindAllParameters(useCase, t + t + t + t) + eol
                 + t + t + "List<" + gridListFruitDomainEntity.getName() + "> list = page" + eol
                 + t + t + t + t + ".get()" + eol
                 + t + t + t + t + ".map(entity -> this.map" + gridListFruitDomainEntity.getName() + "(entity, plant.getLocale()))" + eol
@@ -303,6 +306,32 @@ public class GenerateListUseCaseServiceJavaFile {
                 + imports
                 + eol
                 + serviceContent;
+    }
+
+    private String getFindAllParameters(UseCase useCase, String offset) throws GetPlantException {
+        UseCaseData plant = useCaseService.getPlant(useCase);
+        List<UseCaseDataAttribute> attributes = plant.getUseCaseDataAttributes();
+        String content = "";
+        content += offset + ".findAll(" + eol;
+        for (UseCaseDataAttribute attribute: attributes) {
+            if (attribute.isPrimitive()) {
+                if (attribute.getPrimitiveAttributeType().equals(PrimitiveAttributeTypeEnum.JavaDate)) {
+                    content += offset + t + t + "CalendarUtility.getDate(plant.getPlant().get" + attribute.getName() + "())," + eol;
+                } else {
+                    content += offset + t + t + "plant.getPlant().get" + attribute.getName() + "()," + eol;
+                }
+            }
+            if (attribute.isSelectEnum()) {
+                content += offset + t + t + "plant.getPlant().get" + attribute.getName() + "Enum().getValue()," + eol;
+            }
+            if (attribute.isSelectEntity()) {
+                content += offset + t + t + "plant.getPlant().get" + attribute.getName() + "().getValue()," + eol;
+            }
+        }
+        content += offset + t + t + "PageRequest.of(plant.getPlant().getPaginationCommand().getPageIndex(), plant.getPlant().getPaginationCommand().getPageSize())" + eol;
+        content += offset + ");" + eol;
+
+        return content;
     }
 
     private String getPrepare(UseCase useCase) throws GetPlantException {
@@ -398,6 +427,7 @@ public class GenerateListUseCaseServiceJavaFile {
     }
 
     private String getConstructor(UseCase useCase) throws GetPlantException {
+        String useCaseTitle = useCaseService.getUseCaseTitle(useCase);
         Set<DataEntity> dataEntities = new HashSet<>();
         dataEntities.add(useCase.getDataEntity());
         List<UseCaseDataAttribute> attributes = this.useCaseService.getFruitSeeds(useCase).getUseCaseDataAttributes();
@@ -413,11 +443,13 @@ public class GenerateListUseCaseServiceJavaFile {
             content += dataEntity.getName() + "SpringJpaRepository " + StringUtility.firstLowerCase(dataEntity.getName()) + "SpringJpaRepository";
             content += (i < dataEntities.size() - 1) ? ", " : "";
         }
+        content += ", " + useCaseTitle + "RepositoryImpl repository";
         content += "){" + eol;
         for (int i = 0; i < dataEntitiesArray.size(); i++) {
             DataEntity dataEntity = dataEntitiesArray.get(i);
             content += t + t + "this." + StringUtility.firstLowerCase(dataEntity.getName()) + "SpringJpaRepository = " + StringUtility.firstLowerCase(dataEntity.getName()) + "SpringJpaRepository;" + eol;
         }
+        content += t + t + "this.repository = repository;" + eol;
         content += t + "}" + eol;
         return content;
     }

@@ -1,12 +1,13 @@
 package ir.afarinesh.realhope.modules.sample.features.sample_b.application;
 
+import ir.afarinesh.realhope.modules.sample.features.sample_b.adapter.repositories.GridListSampleBByProjectManagerRepositoryImpl;
 import ir.afarinesh.realhope.core.annotations.FeatureApplication;
 import ir.afarinesh.realhope.core.domain.SelectEnum;
 import ir.afarinesh.realhope.core.domain.SelectEntity;
 import ir.afarinesh.realhope.core.usecase.*;
-import ir.afarinesh.realhope.modules.sample.features.sample_b.adapter.repositories.GridListSampleBByProjectManagerRepositoryImpl;
 import ir.afarinesh.realhope.shares.repositories.SampleBSpringJpaRepository;
 import ir.afarinesh.realhope.entities.sample.SampleB;
+import ir.afarinesh.realhope.modules.sample.features.sample_b.application.ports.in.GridListSampleBByProjectManagerUseCase;
 import ir.afarinesh.realhope.modules.sample.features.sample_b.application.ports.in.GridListSampleBByProjectManagerUseCase.*;
 import ir.afarinesh.realhope.modules.sample.features.sample_b.domain.*;
 import ir.afarinesh.realhope.shares.utilities.CalendarUtility;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Page;
 import ir.afarinesh.realhope.entities.sample.enums.SampleStatusEnum;
 
 import ir.afarinesh.realhope.shares.repositories.SampleASpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.SampleBSpringJpaRepository;
 
 import java.util.stream.Collectors;
 import java.util.List;
@@ -27,15 +29,13 @@ import java.util.List;
 public class GridListSampleBByProjectManagerService {
 
     // jpa repositories
-    final SampleBSpringJpaRepository sampleBSpringJpaRepository;
     final SampleASpringJpaRepository sampleASpringJpaRepository;
+    final SampleBSpringJpaRepository sampleBSpringJpaRepository;
     final GridListSampleBByProjectManagerRepositoryImpl repository;
 
-    public GridListSampleBByProjectManagerService(SampleBSpringJpaRepository sampleBSpringJpaRepository,
-                                                  SampleASpringJpaRepository sampleASpringJpaRepository,
-                                                  GridListSampleBByProjectManagerRepositoryImpl repository){
-        this.sampleBSpringJpaRepository = sampleBSpringJpaRepository;
+    public GridListSampleBByProjectManagerService(SampleASpringJpaRepository sampleASpringJpaRepository, SampleBSpringJpaRepository sampleBSpringJpaRepository, GridListSampleBByProjectManagerRepositoryImpl repository){
         this.sampleASpringJpaRepository = sampleASpringJpaRepository;
+        this.sampleBSpringJpaRepository = sampleBSpringJpaRepository;
         this.repository = repository;
     }
 
@@ -53,6 +53,7 @@ public class GridListSampleBByProjectManagerService {
                         plant.getPlant().getSampleA().getValue(),
                         PageRequest.of(plant.getPlant().getPaginationCommand().getPageIndex(), plant.getPlant().getPaginationCommand().getPageSize())
                 );
+
         List<SampleB4ProjectManager> list = page
                 .get()
                 .map(entity -> this.mapSampleB4ProjectManager(entity, plant.getLocale()))
