@@ -402,7 +402,7 @@ public class GenerateUpdateUseCaseServiceJavaFile {
                         + ".findByName(plant.getPlant().get" + attribute.getName() + "Enum().getValue()));" + eol;
             }
             if (attribute.isSelectEntity()) {
-                content += offset + "entity.setSampleA(plant.getPlant().get" + attribute.getName() + "().getValue() != null ? "
+                content += offset + "entity.set" + attribute.getName() + "(plant.getPlant().get" + attribute.getName() + "().getValue() != null ? "
                         + StringUtility.firstLowerCase(dataEntityAttribute.getDataEntityAttributeType().getName()) + "SpringJpaRepository.findById(plant.getPlant().get" + attribute.getName() + "().getValue()).orElseThrow() : null);" + eol;
             }
         }

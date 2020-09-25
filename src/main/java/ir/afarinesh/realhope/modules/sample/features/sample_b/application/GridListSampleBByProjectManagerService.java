@@ -17,8 +17,8 @@ import org.springframework.data.domain.Page;
 
 import ir.afarinesh.realhope.entities.sample.enums.SampleStatusEnum;
 
-import ir.afarinesh.realhope.shares.repositories.SampleASpringJpaRepository;
 import ir.afarinesh.realhope.shares.repositories.SampleBSpringJpaRepository;
+import ir.afarinesh.realhope.shares.repositories.SampleASpringJpaRepository;
 
 import java.util.stream.Collectors;
 import java.util.List;
@@ -29,13 +29,13 @@ import java.util.List;
 public class GridListSampleBByProjectManagerService {
 
     // jpa repositories
-    final SampleASpringJpaRepository sampleASpringJpaRepository;
     final SampleBSpringJpaRepository sampleBSpringJpaRepository;
+    final SampleASpringJpaRepository sampleASpringJpaRepository;
     final GridListSampleBByProjectManagerRepositoryImpl repository;
 
-    public GridListSampleBByProjectManagerService(SampleASpringJpaRepository sampleASpringJpaRepository, SampleBSpringJpaRepository sampleBSpringJpaRepository, GridListSampleBByProjectManagerRepositoryImpl repository){
-        this.sampleASpringJpaRepository = sampleASpringJpaRepository;
+    public GridListSampleBByProjectManagerService(SampleBSpringJpaRepository sampleBSpringJpaRepository, SampleASpringJpaRepository sampleASpringJpaRepository, GridListSampleBByProjectManagerRepositoryImpl repository){
         this.sampleBSpringJpaRepository = sampleBSpringJpaRepository;
+        this.sampleASpringJpaRepository = sampleASpringJpaRepository;
         this.repository = repository;
     }
 

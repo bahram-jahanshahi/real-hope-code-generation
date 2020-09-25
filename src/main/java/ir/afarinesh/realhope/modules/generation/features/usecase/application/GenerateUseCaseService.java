@@ -72,10 +72,12 @@ public class GenerateUseCaseService implements GenerateUseCase {
     public UseCaseFruit<Fruit> cultivate(UseCasePlant<Plant> plant) throws CultivateException {
         List<UseCase> useCaseList = useCaseSpringJpaRepository.findAll();
         List<DomainEntity> domainEntityList = domainEntitySpringJpaRepository.findAll();
+        long count = 0;
         for (UseCase useCase : useCaseList) {
-            if (useCase.getSoftwareFeature().getSoftwareModule().getSoftware().getId() == 2L) {
+            if (useCase.getSoftwareFeature().getSoftwareModule().getSoftware().getId() == 1L) {
                 if (useCase.getGenerationEnable()) {
-                    System.out.println("Try to generate use case: " + useCase.getName());
+                    count++;
+                    System.out.println(count + ") Generate use case: " + useCase.getName());
                     try {
                         // generate use case interface java
                         this.generateUseCaseInterfaceJavaFile.generate(useCase);
