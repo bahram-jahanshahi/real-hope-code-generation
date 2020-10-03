@@ -44,6 +44,9 @@ public class CrudCodeGeneration extends AbstractDataEntity {
     @ManyToOne
     private SoftwareApplicationPanel softwareApplicationPanel;
 
+    @Column(nullable = false)
+    private Boolean generationEnable;
+
     @Override
     public String title(String locale) {
         return getTitle();

@@ -69,42 +69,49 @@ public class GenerateCrudByProjectManagerService implements GenerateCrudByProjec
         CrudCodeGeneration crudCodeGeneration = crudCodeGenerationSpringJpaRepository
                 .findById(plant.getPlant().getCrudId())
                 .orElseThrow(() -> new CultivateException("GenerateCrudByProjectManagerService: cannot find crud by id = " + plant.getPlant().getCrudId()));
+        if (crudCodeGeneration.getGenerationEnable()) {
+            // Find the data entity attributes
+            List<DataEntityAttribute> dataEntityAttributes = this.dataEntityAttributeSpringJpaRepository.findByDataEntity_Id(crudCodeGeneration.getDataEntity().getId());
+            // Delete use case, use case data, use case data attributes, and use case relation by crud id
+            this.useCaseRelationSpringJpaRepository.deleteByCrudCodeGeneration_Id(crudCodeGeneration.getId());
+            this.useCaseDataAttributeSpringJpaRepository.deleteByUseCaseData_UseCase_CrudCodeGeneration_Id(crudCodeGeneration.getId());
+            this.useCaseDataSpringJpaRepository.deleteByUseCase_CrudCodeGeneration_Id(crudCodeGeneration.getId());
+            this.useCaseSpringJpaRepository.deleteByCrudCodeGeneration_Id(crudCodeGeneration.getId());
+            // create domain entity
+            DomainEntity domainEntity = this.createDomainEntity(crudCodeGeneration, dataEntityAttributes);
 
-        // Find the data entity attributes
-        List<DataEntityAttribute> dataEntityAttributes = this.dataEntityAttributeSpringJpaRepository.findByDataEntity_Id(crudCodeGeneration.getDataEntity().getId());
-        // Delete use case, use case data, use case data attributes, and use case relation by crud id
-        this.useCaseRelationSpringJpaRepository.deleteByCrudCodeGeneration_Id(crudCodeGeneration.getId());
-        this.useCaseDataAttributeSpringJpaRepository.deleteByUseCaseData_UseCase_CrudCodeGeneration_Id(crudCodeGeneration.getId());
-        this.useCaseDataSpringJpaRepository.deleteByUseCase_CrudCodeGeneration_Id(crudCodeGeneration.getId());
-        this.useCaseSpringJpaRepository.deleteByCrudCodeGeneration_Id(crudCodeGeneration.getId());
-        // create domain entity
-        DomainEntity domainEntity = this.createDomainEntity(crudCodeGeneration, dataEntityAttributes);
+            // Use case: GridList
+            UseCase gridListUseCase = this.createGridListUseCase(crudCodeGeneration, domainEntity, plant.getLocale(), dataEntityAttributes);
+            // Use case: View
+            UseCase viewUseCase = this.createViewUseCase(crudCodeGeneration, domainEntity, plant.getLocale());
+            // Use case: Update
+            UseCase updateUseCase = this.createUpdateUseCase(crudCodeGeneration, domainEntity, plant.getLocale(), dataEntityAttributes);
+            // Use case: AddNew
+            UseCase addNewUseCase = this.createAddNewUseCase(crudCodeGeneration, domainEntity, plant.getLocale(), dataEntityAttributes);
+            // Use case: Delete
+            UseCase deleteUseCase = this.createDeleteUseCase(crudCodeGeneration, domainEntity, plant.getLocale());
 
-        // Use case: GridList
-        UseCase gridListUseCase = this.createGridListUseCase(crudCodeGeneration, domainEntity, plant.getLocale(), dataEntityAttributes);
-        // Use case: View
-        UseCase viewUseCase = this.createViewUseCase(crudCodeGeneration, domainEntity, plant.getLocale());
-        // Use case: Update
-        UseCase updateUseCase = this.createUpdateUseCase(crudCodeGeneration, domainEntity, plant.getLocale(), dataEntityAttributes);
-        // Use case: AddNew
-        UseCase addNewUseCase = this.createAddNewUseCase(crudCodeGeneration, domainEntity, plant.getLocale(), dataEntityAttributes);
-        // Use case: Delete
-        UseCase deleteUseCase = this.createDeleteUseCase(crudCodeGeneration, domainEntity, plant.getLocale());
-
-        // Relation: grid to view
-        this.createRelation(crudCodeGeneration, gridListUseCase, viewUseCase, "View", "نمایش");
-        // Relation: grid to add new
-        this.createRelation(crudCodeGeneration, gridListUseCase, addNewUseCase, "AddNew", "افزودن");
-        // Relation: view to update
-        this.createRelation(crudCodeGeneration, viewUseCase, updateUseCase, "Update", "ویرایش");
-        // Relation: view to delete
-        this.createRelation(crudCodeGeneration, viewUseCase, deleteUseCase, "Delete", "حذف");
-
-        return new UseCaseFruit<>(
-                new Fruit(true),
-                true,
-                ""
-        );
+            // Relation: grid to view
+            this.createRelation(crudCodeGeneration, gridListUseCase, viewUseCase, "View", "نمایش");
+            // Relation: grid to add new
+            this.createRelation(crudCodeGeneration, gridListUseCase, addNewUseCase, "AddNew", "افزودن");
+            // Relation: view to update
+            this.createRelation(crudCodeGeneration, viewUseCase, updateUseCase, "Update", "ویرایش");
+            // Relation: view to delete
+            this.createRelation(crudCodeGeneration, viewUseCase, deleteUseCase, "Delete", "حذف");
+            // Return
+            return new UseCaseFruit<>(
+                    new Fruit(true),
+                    true,
+                    ""
+            );
+        } else {
+            return new UseCaseFruit<>(
+                    new Fruit(false),
+                    true,
+                    "Generation is disable"
+            );
+        }
     }
 
     @Override
